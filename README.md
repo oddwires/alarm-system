@@ -3,8 +3,10 @@
 Home alarm and automation system - evaluation software.
  
 <ul>
-<li>Should install and run on any Debian system, but developed to run on Raspberry Pi.</li>
-<li>(If using the HomeKit Bridge, you will need a Raspberry Pi 2 Model B)</li>
+<li>Should install and run on any Debian system, but developed to run on 
+<a href="https://www.raspberrypi.org/products/model-b">Raspberry Pi 1 model B</a>.</li>
+<li>(If using the HomeKit Bridge, you will need a <a href="https://www.raspberrypi.org/products/raspberry-pi-2-model-b/">Raspberry Pi 2 model B</a></li>
+Raspberry Pi 2 Model B)</li>
 <li>Uses jQT JavaScript plugin to provide an iPhone interface.</li>
 <li>Full system requires custom circuit board connected to Raspberry Pi, but software
 designed to run even if circuit board is missing.</li>
@@ -13,11 +15,11 @@ designed to run even if circuit board is missing.</li>
 <b>Hardware support:-</b><br>
 <ul>
 <li>Control of Radio Control transmitter over I2C interface.</li>
-<li>Number of Radio Control channels increase from 5 to 160.</li>
-<li>Number of Alarm circuits increased from 8 to 12.</li>
+<li>Up to 160 Radio Control channels.</li>
+<li>Up to 12 Alarm circuits.</li>
 </ul>
  
-<b>Version 4.00 code provides...</b><br>
+<b>Updates in Version 4.00...</b><br>
 <ul>
 <li>HomeKit Bridge - Voice control through Siri.</li>
 </ul>
