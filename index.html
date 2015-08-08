@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<!--<![-->                                                           <!-- Disable data compression on O2 3G  -->
+    <head>
+        <meta charset="UTF-8" />
+		<title>Oddwires</title>
+        <link rel="stylesheet" href="jQTouch/themes/css/jqtouch.css" data-jqt-theme>
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+        <link rel="apple-touch-startup-image" href="startup.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+		
+        <!-- Either, (1) Zepto:  Un-comment these 2 lines (order matters)  -->
+        <script src="jQTouch/lib/zepto/zepto.js" type="text/javascript" charset="utf-8"></script>
+        <script src="jQTouch/src/jqt.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="jQTouch/extensions/jqt.themeswitcher.js" type="application/x-javascript" charset="utf-8"></script>
+        <script src="jQTouch/extensions/jqt.actionsheet.js" type="application/x-javascript" charset="utf-8"></script>
+        <script src="jQTouch/extensions/jqt.menusheet.js" type="application/x-javascript" charset="utf-8"></script>
+
+        <!--    Code required to provide the oddwires alarm web page  -->
+        <script src="alarm.js" type="text/javascript" charset="utf-8"></script>
+
+        <script type="text/javascript" charset="utf-8">
+            var jQT = new $.jQT({
+                icon: 'apple-touch-icon.png',
+                addGlossToIcon: false,
+                statusBar: 'black-translucent',
+                preloadImages: []
+            });
+            // Function to load the jQT theme from cookies stored on the phone
+            $(function () {
+                var theme = getCookie('theme');
+                var stylesheet = getCookie('stylesheet');
+                if ((theme != "") && (stylesheet != "")) {
+                    jQT.switchStyleSheet(theme, stylesheet);                // cookies found, so overwrite the default
+                }
+            });
+            // Function to detect if the 'remember me' button should be left checked.
+            // ( if it should, there will be a One Time Access Code on the phone )
+            $(function () {
+                var otac = getCookie('otac');
+                var username = getCookie('username');
+                if (otac != "") {
+                    $("#rememberme").prop("checked", true);             // This is just cosmetic and makes it look like credentials 
+                    $("#username").val(username);                       // have been remembered. In reality, no credentials are stored 
+                    $("#pword").val("************");                    // on the RasPi or iPhone.
+                } else { $("#rememberme").prop("checked", false); }
+            });
+        </script>
+        <style type="text/css" media="screen">
+            #jqt.fullscreen #home .info {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+
+    <div id="jqt" class="">
+        <div id="Home" class="current">
+            <form id="login" action="dologin.php" method="POST" class="form">
+            <div class="toolbar">
+               <h1>Logon</h1>
+               <a class="button flipright" href="dostatus.php">Status</a></a>
+            </div>
+             </br>
+			 
+			 <!-- Using most of the info class, but overwriting a few key variables...    -->
+			  <fieldset class=info style="border-radius: 25px; -webkit-margin-start: 8px; -webkit-margin-end: 8px; border: 3px solid; text-align: left; padding:0px">
+			 
+             <table border="0" style="margin: 0px auto; width: 100%;">
+			 <tr><td><ul class="rounded">
+                <li><input type="text" id="username" name="username" placeholder="Username"/></li>
+                <li><input type="password" id="pword" name="password" placeholder="Password"/></li>
+            </ul></td><td>
+			   <a style="color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Logon</a>
+			&nbsp&nbsp&nbsp&nbsp<input type="checkbox" id="rememberme" name="rememberme">&nbsp&nbspKeep me</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsplogged on
+			</td></tr></table>
+			
+			</fieldset></br>
+            <div class="info">
+            This is a monitored system.<br>
+            Do not attempt to log on<br>
+            unless authorised to do so.
+            </div>
+            </form>
+        </div>                    <!-- Logon screen                            -->
+        <div id="about" class="selectable">
+           <div class="toolbar"><h1>About</h1>
+               <a class="back2div menu" onclick="ResetMenu()" href="#menusheet">Menu</a>
+               <a class="button flipleft" href="#credits">Credits</a>
+           </div>
+          <div style="text-align:center">
+             <h2>Integrated Home Alarm<br>and Automation System</h2>
+             <p><img alt ="logo" src="about.png"><br><br>
+               <em>Monitor your home, mess with your lights.<br>
+                      Ring your alarm bells & wake your neighbours.<br>
+                      All from hundreds of miles away.</em><br><br>
+                <a target="_blank" href="http://www.oddwires.co.uk">© 2013-15 ODDWIRES.CO.UK</a>
+              </p>
+              <p>&nbsp</p>
+              <p>&nbsp</p>
+           </div>
+        </div>                <!-- About screen                            -->
+        <div id="credits" class="selectable">
+           <div class="toolbar"><h1>Credits</h1>
+               <a class="button flipleft" href="#about">About</a>
+           </div>
+          <div class="scroll">
+           <br>
+            <h2 style="text-align:center"><a target="_blank" href="https://github.com/senchalabs/jQTouch">JQT - Sencha Labs</a></h2>
+            <p style="text-align:center">
+            <em>A JavaScript plugin which works with<br>
+                either Zepto.js or jQuery, and comes<br>
+                 with smooth animations, navigation<br>
+                and themes for mobile<br>
+                WebKit browsers .</em>
+          </div>
+        </div>              <!-- Credits screen                          -->
+        <div id="alarm" class="selectable"></div>                   <!-- Alarm screen                            -->
+        <div id="auto" class="selectable"></div>                    <!-- Automation screen                       -->
+        <div id="tasklist" class="selectable"></div>                <!-- Task list screen                        -->
+        <div id="setup" class="selectable"></div>                   <!-- Setup Control screen                    -->
+        <div id="status" class="selectable"></div>                  <!-- List of zone status                     -->
+        <div id="logs" class="selectable"></div>                    <!-- Log file screen                         -->
+        <div id="userlist" class="selectable"></div>                <!-- User list                               -->
+        <div id="themes">
+               <div class="toolbar">
+                    <h1>Themes</h1>
+                    <a href="#settings" class="back">Back</a>
+                </div>
+                    <ul class="rounded">
+                      <li><a data-stylesheet-title="jqtouch" id="theme_1" data-switch-stylesheet="jQTouch/themes/css/jqtouch.css" href="#">jQTouch</a></li>
+                      <li><a data-stylesheet-title="innsbruck" id="theme_2" data-switch-stylesheet="jQTouch/themes/css/innsbruck.css" href="#">Innsbruck</a></li>
+                      <li><a data-stylesheet-title="vanilla" id="theme_3" data-switch-stylesheet="jQTouch/themes/css/vanilla.css" href="#">Vanilla</a></li>
+                      <li><a data-stylesheet-title="apple" id="theme_4" data-switch-stylesheet="jQTouch/themes/css/apple.css" href="#">Apple</a></li>
+                      <li><a data-stylesheet-title="khaki" id="theme_5" data-switch-stylesheet="jQTouch/themes/css/khaki.css" href="#">Khaki</a></li>
+                      <li><a data-stylesheet-title="slate" id="theme_6" data-switch-stylesheet="jQTouch/themes/css/slate.css" href="#">Slate</a></li>
+                  </ul>
+        </div>
+		<div id="homekit">
+               <div class="toolbar">
+                    <h1>HomeKit</h1>
+                     <a class="back2div menu" onclick="ResetMenu()" href="#menusheet">Menu</a>
+                </div>
+				<br>
+     			<br>
+				<br>
+				<div class="info">
+				HomeKit info<br>
+				Accessory code = 031-45-154
+				</div>
+				<br>
+				<div class="info">
+				Settings | Privacy | HomeKit | Reset HomeKit Configuration<br>
+				</div>
+				<br>
+				<br>
+				<br>
+                <!-- Export button is contained in a table -->
+                <table border="0" style="margin: 0px auto; align: center;">
+                   <tr><td style="width: 30%;"> </td>
+				       <td><a style="color:rgba(0,0,0,.9)" href="#hkexport" class="action whiteButton">Export</a></td>
+                       <td style="width: 30%;"> </td></tr>
+				</table>
+        </div>
+        <div id="menusheet" class="menusheet">
+                <ul class="edgetoedge scroll">
+                    <li class="sep">Menu...</li>
+                    <li><a id="menu1" href="alarm.php" class="dissolve">Alarm</a></li>
+                    <li><a id="menu2" href="auto.php" class="dissolve">Automation</a></li>
+                    <li><a id="menu3" href="task.php" class="dissolve">Tasks</a></li>
+                    <li><a id="menu4" href="user.php" class="dissolve">Users</a></li>
+                    <li><a id="menu5" href="setup.php" class="dissolve">Setup</a></li>
+                    <li><a id="menu6" href="logs.php" class="dissolve">Logs</a></li>
+                    <li><a id="menu7" href="#homekit" class="dissolve">HomeKit</a></li>
+                    <li><a id="menu8" href="#about" class="dissolve">About</a></li>
+                </ul>
+         </div>
+        <div id="password" class="selectable">
+               <div class="toolbar">
+                  <h1>Set password</h1> 
+                  <a href="#" onclick="Password();"class="back2div">Back</a>
+               </div>
+               <p>&nbsp</p>
+               <ul class="rounded">
+                     <li><input type="password" id="Pwd1" placeholder="New password:" /></li>
+                     <li><input type="password" id="Pwd2" placeholder="Confirm password:" /></li>
+               </ul>
+        </div>
+        <div id="alarmconfig" class="selectable"></div>             <!-- Alarm zone configuration                -->
+
+<!-- Various actionsheets - putting them here prevents them being re-loaded everytime there is an AJAX post      -->
+
+        <div id="setup1" class="actionsheet">
+                <div class="actionchoices">
+                    <a href="#" class="dismiss greenButton" onclick="Defaults('load user defaults')">Load user defaults</a>
+                    <a href="#" class="dismiss greenButton" onclick="Defaults('load factory defaults')">Load factory defaults</a>
+                    <a href="#" class="dismiss blueButton" onclick="Defaults('save user defaults')">Save user defaults</a>
+                    <a href="#" class="redButton dismiss">Cancel</a>
+                </div>
+        </div>
+        <div id="set" class="actionsheet">
+            <div class="actionchoices">
+                    <a href="#alarm" class="dismiss whiteButton" onclick="AlarmMode('mode:Day mode')">Day mode</a>
+                    <a href="#alarm" class="dismiss whiteButton" onclick="AlarmMode('mode:Night mode')">Night mode</a>
+                    <a href="#alarm" class="dismiss whiteButton" onclick="AlarmMode('mode:Standby')">Standby</a>
+                    <a href="#alarm" class="dismiss greenButton" onclick="AlarmMode('reset')">Reset</a>
+                    <a href="#alarm" class="redButton dismiss">Cancel</a>
+                </div>
+        </div>
+        <div id="test" class="actionsheet">
+                <div class="actionchoices">
+                    <a href="#" class="dismiss whiteButton" onclick="AlarmMode('test bell')">External siren</a>
+                    <a href="#" class="dismiss whiteButton" onclick="AlarmMode('test strobe')">External strobe</a>
+                    <a href="#" class="dismiss whiteButton" onclick="AlarmMode('test sounder')">Internal sounder</a>
+                    <a href="#" class="redButton dismiss">Cancel</a>
+                </div>
+        </div>
+       <div id="hkexport" class="actionsheet">
+                <div class="actionchoices">
+                    <a href="#" class="dismiss whiteButton" onclick="HomeKit()">Export accessories</a>
+                    <a href="#" class="redButton dismiss">Cancel</a>
+                </div>
+        </div>
+<!-- Hidden variable used to transfer data back to server  -->
+
+    <input type="hidden" id="retval" value="tbd">
+    </div>
+
+    </body>
+</html>

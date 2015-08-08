@@ -1,0 +1,16 @@
+cd /home/pi/Downloads/HAP-NodeJS
+case "$1" in
+  start)
+        echo "Starting HAP-NodeJS"
+        sudo forever start Core.js ;;
+  stop)
+        echo "Stopping HAP-NodeJS"
+        sudo forever stop 0 ;;
+  restart)
+        echo "Restarting HAP-NodeJS"
+        sudo forever stop 0
+        sudo forever start Core.js ;;
+  *)
+        echo "Usage: homekit {start|stop|restart}"
+        exit 3 ;;
+esac

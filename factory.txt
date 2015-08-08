@@ -1,0 +1,42 @@
+alarm:status:Set
+alarm:mode:Standby
+alarm:duration:5 secs
+setup:location:Development system
+setup:routerIP:?
+setup:localIP:?
+setup:diskused:?
+setup:disk%:?
+setup:disktotal:?
+setup:memory:?
+setup:hardware:?
+email:server:
+email:port:
+email:sender:
+email:password:
+zcon:alarm:Zone #1:on:on:on:1:false:0:0
+zcon:alarm:Zone #2:on:on:on:2:false:0:0
+zcon:alarm:Zone #3:on:on:on:3:false:0:0
+zcon:alarm:Zone #4:on:on:on:4:false:0:0
+zcon:alarm:Zone #5:on:on:on:5:false:0:0
+zcon:alarm:Zone #6:on:on:on:6:false:0:0
+zcon:alarm:Zone #7:on:on:on:7:false:0:0
+zcon:alarm:Zone #8:on:on:on:8:false:0:0
+zcon:alarm:Zone #9:on:on:on:9:false:0:0
+zcon:alarm:Zone #10:on:on:on:10:false:0:0
+zcon:alarm:Zone #11:on:on:on:11:false:1:1
+zcon:alarm:Zone #12:on:on:on:12:false:1:1
+rcon:Blue:0:1:none:off
+rcon:Green:0:2:none:off
+rcon:Yellow:0:3:none:off
+rcon:Channel #1:7:1:none:off
+rcon:Channel #2:7:2:none:off
+rcon:Channel #3:7:3:none:off
+rcon:Channel #4:7:4:none:off
+rcon:Channel #5:7:5:none:off
+rcon:Channel #6:8:1:none:off
+rcon:Channel #7:8:2:none:off
+cron:01:12:*:*:0:1
+cron:02:12:*:*:0:1
+cron:03:12:*:*:0:1
+cron:04:12:*:*:0:1
+user:admin:
