@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 1                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 1                              *"
 echo "*       Install Debian updates.                                                *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -20,7 +20,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 2                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
 echo "*       Install Debian upgrades.                                               *"
 echo "*  ( this can take a long time to run )                                        *"
 echo "*                                                                              *"
@@ -40,7 +40,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 3                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
 echo "*       Install Mail Transfer Agent.                                           *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -59,7 +59,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 4                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
 echo "*       Install I2C Tools.                                                     *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -87,7 +87,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 5                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
 echo "*       Install Apache and PHP.                                                *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -106,8 +106,8 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 6                                    *"
-echo "*  ( Optional ) Install Samba.                                                 *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 6                              *"
+echo "*       Install Samba.                                                         *"
 echo "*                                                                              *"
 echo "*  Samba provides file services that allow Windows devices to connect to       *"
 echo "*  the alarm system over a LAN. This is useful for viewing and editing the     *"
@@ -176,7 +176,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 7                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
 echo "*       Install alarm web page.                                                *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -235,7 +235,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 8                                    *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
 echo "*       Install alarm daemon.                                                  *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -267,9 +267,9 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 9                                    *"
-echo "*  ( Optional ) Create Self Signed Certificate and configure                   *"
-echo "*        Apache secure data transfers (TLS encryption).                        *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
+echo "*       Create Self Signed Certificate and configure                           *"
+echo "*       Apache secure data transfers (TLS encryption).                         *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -318,8 +318,8 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 10                                   *"
-echo "*  ( Optional ) Install and configure Fail2Ban                                 *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
+echo "*       Install and configure Fail2Ban                                         *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -359,8 +359,8 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 11                                   *"
-echo "*  ( Optional ) Install and configure HomeKit Bridge                           *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 11                             *"
+echo "*       Install and configure HomeKit Bridge                                   *"
 echo "*                                                                              *"
 echo "* This uses HAP-NodeJS, a Node.js implementation of Apples HomeKit Accessory   *"
 echo "* Server. This allows the Radio Control switches to be controlled verbally     *"
@@ -404,7 +404,7 @@ echo " "
 
 clear
 echo "********************************************************************************"
-echo "*  Oddwires Alarm System installer: Stage 12                                   *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 12                             *"
 echo "*       The alarm system has been installed.                                   *"
 echo "*                                                                              *"
 echo "*  The I2C bus has been reconfigured to operate at 32KHz, but requires a       *"
