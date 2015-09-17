@@ -392,6 +392,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo npm install mdns
   sudo npm install ed25519
   sudo npm install curve25519
+  sudo npm install debug
   sudo npm -g install forever
   cd ..
 #  sudo cp alarm-system/ConfigFiles/types.js HAP-NodeJS/accessories/
