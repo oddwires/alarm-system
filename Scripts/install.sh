@@ -376,10 +376,14 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   install various pre requisites...
-  apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
-  # Specific Node.JS install fro Raspberry pi...
-  wget http://node-arm.herokuapp.com/node_latest_armhf.deb
-  dpkg -i node_latest_armhf.deb
+  sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
+  # Specific Node.JS install fro Raspberry Pi 2...
+  sudo curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
+  sudo apt-get install -y nodejs
+# Looks like original Node.JS install is bust on the Raspberry Pi 2
+# I've left the original code left here for reference... 
+#  sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
+#  sudo dpkg -i node_latest_armhf.deb
   # Download the HomeKit Bridge...
   git clone https://github.com/oddwires/HAP-NodeJS.git
   cd HAP-NodeJS/
