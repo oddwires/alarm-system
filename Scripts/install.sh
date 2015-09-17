@@ -381,7 +381,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   wget http://node-arm.herokuapp.com/node_latest_armhf.deb
   dpkg -i node_latest_armhf.deb
   # Download the HomeKit Bridge...
-  git clone https://github.com/KhaosT/HAP-NodeJS.git
+  git clone https://github.com/oddwires/HAP-NodeJS.git
   cd HAP-NodeJS/
   sudo npm install node-persist
   sudo npm install srp
