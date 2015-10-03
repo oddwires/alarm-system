@@ -131,8 +131,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # need to find the name of the current user...
   curdir=$(pwd)                                                      # remember where we are
 
-  # Configure for Windows 7 clients...
-
+  # Configure Samaba for Windows 7 clients...
   filename='/etc/samba/smb.conf'
   sudo cp ./alarm-system/ConfigFiles/smb.conf $filename
 
@@ -256,7 +255,6 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 
       # create the new daemon...
       sudo mv /var/www/Scripts/alarm /etc/init.d/
-#      sudo chmod 755 /etc/init.d/alarm
       chgrp root /etc/init.d/alarm
 
       # make daemon autostart...
@@ -395,7 +393,6 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo npm install debug
   sudo npm -g install forever
   cd ..
-#  sudo cp alarm-system/ConfigFiles/types.js HAP-NodeJS/accessories/
   sudo rm -f node_latest_armhf*
   
   # create the new daemon...

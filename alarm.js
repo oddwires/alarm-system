@@ -8,7 +8,8 @@
                 tmp = "HK export:";
                 $('#retval').val(tmp);
                 ajaxrequest('writedata.php','');                                  // doesn't matter where we send the data as long as
-		        tmp = "Clear the HomeKit database on your phone !"                 // it goes through 'readvars' to make it go
+				                                                                  // it goes through 'readvars' to make it go
+		        tmp = "You will also need to clear the HomeKit database on your phone !"
                 alert (tmp);
 			}	
 
@@ -169,12 +170,25 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // auto.php and autoscroll.php hyper-links redirect here, so we can get a bit jiggy with the titles and parameters
-            function RconJmp(number) {
+            function Rconedit(number) {
                 $('#RconfHead').text("Edit channel " + number);                  // update the title
                 $('#RconName').val($('#hyplnk' + number).text());                // scrape current channel name and pass to config screen
                 $('#RconAddr').val($('#RconAddr' + number).val());
                 $('#RconChan').val($('#RconChan' + number).val());
-                $('#RconMode').val($('#RconMode' + number).val());
+//                $('#RconAlarmAction').text($('#RconMode' + number).val());
+				tmp = $('#RconMode' + number).val().toLowerCase();;
+				switch (tmp){
+					   case "on":
+                        $('#RconAlarmAction').text("Switch on");
+                        break;
+					   case "off":
+                        $('#RconAlarmAction').text("Switch off");
+                        break;
+					   case "none":
+                        $('#RconAlarmAction').text("None");
+                        break;					
+				}
+                $('#RconHK').text($('#RconHK' + number).val());
                 tmp=$('#hyplnk' + number).text();
                 $('#retval').val(number);                                         // pass channel number to config screen
                 jQT.goTo('#autocfg', 'slideleft')                                 // ...and go to config screen
@@ -197,12 +211,17 @@
                 tmp += $('#RconName').val() + ':';
                 tmp += $('#RconAddr').val() + ':';
                 tmp += $('#RconChan').val() + ':';
-                tmp += $('#RconMode').val();
-                tmp = tmp.replace(/\ #/g,' \\#');                                 // ' #' (space hash) characters needs to be delimited before sending
-                                                                                  // change any ' #' to ' \#'
+				// have to use an else if as the word 'none' also includes the word 'on' - and we only want one match
+                if ($('#RconAlarmAction').text().toLowerCase().indexOf("none") >= 0) { tmp += "None::"; }
+                else if ($('#RconAlarmAction').text().toLowerCase().indexOf("on") >= 0) { tmp += "On::"; }
+                if ($('#RconAlarmAction').text().toLowerCase().indexOf("off") >= 0) { tmp += "Off::"; }
+				tmp += $('#RconHK').text();
+                tmp = tmp.replace(/\ #/g,' \\#');                                 // ' #' (space hash) characters needs to be delimited 
+				                                                                  // change any ' #' to ' \#'
+				tmp = tmp.trim()                                                  // ...and get rid of any sneaky white space characters
                 $('#retval').val(tmp);
                 ajaxrequest('autoscroll.php','auto');                             // synchronous send
-                return false;
+	            jQT.goTo('#auto', 'slideright');                                  // ...and go to auto edit screen
             }
 
             function RconDel() {
@@ -213,6 +232,19 @@
                 jQT.goTo('#auto', 'slideright');                                  // ...and go to task edit screen
                 return false;
             }
+
+			function HKret(type,value,string) {
+                // returns string values from days, months and tasks
+                switch (type) {
+                    case "accessory":
+                        $('#RconHK').text(string);                               // update visible string
+                        break;
+                    case "action":
+                        $('#RconAlarmAction').text(string);                             // update visible string
+                        break;
+                    }
+                jQT.goTo('#autocfg', 'slideright');			
+			}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Task functions...
@@ -301,6 +333,7 @@
                 ajaxrequest('taskscroll.php','tasklist');                         // synchronous send
                 jQT.goTo('#tasklist', 'slideright');                              // ...and go to task edit screen
             }
+			
             function TaskDel() {
                 var tasknum = ($('#TaskConfHead').text().substring(10)-1);        // retrieve the task number from the header
                 var tmp = 'delete task:' + (tasknum);

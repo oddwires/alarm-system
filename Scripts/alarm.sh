@@ -33,15 +33,13 @@ set -f                                                         # Globbing off - 
 
 # Default password is a BlowFish hash. The actual password is qwerty
 DefaultPassword='$2y$07$2c0bfALZ4WxenSybt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G'
-# Defaults for HomeKit exports...
-Generic_File="/home/pi/Downloads/alarm-system/ConfigFiles/Generic_accessory.js"
-Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
 
 # Define dynamic data arrays. These will hold the data that ultimately gets displayed on the web page
 # NOTE: Multi dimensional arrays aren't available in BASH, so arrays use chunks of multiple elements to simulate multi dimensional arrays.
 
 # Array to store Remote Control data.
-declare -a rcon=()                                              # 5 x elements per record: Name, Address, Channel, Action, Status
+declare -a rcon=()                                              # 6 x elements per record: Name, Address, Channel,
+                                                                #      Action, Status, HomeKit type
 
 # Array to store Alarm zone configuration.                      9 elements per record defined as follows....
 Type=0                                                          # Tamper / Alarm
@@ -64,7 +62,6 @@ declare -a zcon=()                                              # array to store
 # Define look up tables...
 # Tasks are passed back as an index number. This array expands the number into a string to use in the cron job.
  declare -a cmnd=()
-
  declare -a AllPorts=('4' '18' '17' '23' '9' '25' '10' '11' '8' '7')          # All Broadcom GPIO port numbers
 
 # List of anodes used by the 12 input circuits. There is no logic behind these - its just the way the PCB is constructed.
@@ -93,43 +90,47 @@ HomeKit_Export()
 # Function to export all automation ( switch ) configuration as accessories to be used by the HomeKit Bridge.                   #
 #                                                                                                                               #
 #################################################################################################################################
-{  Count=0
+{  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
+   Count=0
    # hardware cannot support 256 switches, so it is safe to create a unique MAC address by only incrementing last octet
    StartMAC="1A:2B:3C:4D:5E:"                                                              # base MAC address
    set +f                                                                                  # going to need Globbing back on to
    sudo rm -r "/home/pi/Downloads/HAP-NodeJS/accessories"/*.js                             # allow us to clear out the old data   
    sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                     # remove existing accessory pairing
    set -f                                                                                  # Globbing back off
-   cp $Types_File /home/pi/Downloads/HAP-NodeJS/accessories/types.js                       # .. except for this file.
-
-   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
+   
+   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                         # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
-#     printf "rcon:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}"
+    printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
       FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rcon[$i]}"_accessory.js"
-      cp "$Generic_File" "$FileName"
-	  # customise the new accessory file...
-      oldstring='Parm1'                                                          # need to replace this string...
-      newstring="${rcon[$i]}"' Light'                                            # ... with the accessory name  + 'Light'
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                          # do it.
-	  oldstring='Parm2'                                                          # need to replace this string...
-      newstring=$StartMAC$(printf '%02x\n' $Count)                               # ... with the MAC address
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                          # do it.
-	  oldstring='Parm3'                                                          # need to replace this string...
-      newstring="${rcon[$i]}"                                                    # ... with the accessory name
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                          # do it.
-      # Function strings to pass to alarm service
-	  FuncOn='/var/www/data/input.txt", ":192.168.1.7:rcon swtch:'$Count':on\\n'
-	  oldstring='Parm4'                                                          # need to replace this string...
-      newstring=$FuncOn                                                          # ... with the function string
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                          # do it.
-	  FuncOff='/var/www/data/input.txt", ":192.168.1.7:rcon swtch:'$Count':off\\n'
-      oldstring='Parm5'                                                          # need to replace the function string
-      newstring=$FuncOff                                                         # ... with the accessory name
-      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                          # do it.
-
+	  case "${rcon[$i+5]}" in                                                        # Create default accessory file
+          "Light")
+	         cp "/var/www/ConfigFiles/Generic_Light.js" "$FileName";;
+          "Outlet")
+	         cp "/var/www/ConfigFiles/Generic_Outlet.js" "$FileName";;
+          "Fan")
+	         cp "/var/www/ConfigFiles/Generic_Fan.js" "$FileName";;
+	  esac
+	  if [ "${rcon[$i+5]}" != "None" ]; then
+    	  # if we have copied a file we need to customise it...
+          # Function strings to pass to alarm service
+          oldstring='Parm1'                                                              # need to replace this string...
+          newstring="${rcon[$i]}"                                                        # ... with the accessory name
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
+	      oldstring='Parm2'                                                              # need to replace this string...
+          newstring=$StartMAC$(printf '%02x\n' $Count)                                   # ... with the MAC address
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
+	      oldstring='Parm3'                                                              # need to replace this string...
+          newstring='/var/www/data/input.txt", "Siri:iPhone:rcon swtch:'$Count':on\\n'   # command to switch accessory on
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
+	      oldstring='Parm4'                                                              # need to replace this string...
+          newstring='/var/www/data/input.txt", "Siri:iPhone:rcon swtch:'$Count':off\\n'  # command to switch accessory off
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
+      fi
       Count=$(( Count + 1 ))        
-      i=$(( i + 5 )) 
+      i=$(( i + 6 )) 
    done
+   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
    sudo service homekit restart                                                  # restart HomeKit to pick up new accessories
 }
 
@@ -250,7 +251,8 @@ CheckIP()
 #   available memory, available disk etc. )                                                                                     #
 #                                                                                                                               #
 #################################################################################################################################
-{ Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
+{ 
+  Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
   if [[ $Current_routerIP != $SETUP_routerIP ]] ; then
     title="Alarm system: Router IP change"
     eMail "$title"
@@ -400,7 +402,8 @@ load_status_file()
                 rcon[${rconindex}]=${info_array[2]} ; (( rconindex++ ))
                 rcon[${rconindex}]=${info_array[3]} ; (( rconindex++ ))
                 rcon[${rconindex}]=${info_array[4]} ; (( rconindex++ ))
-                rcon[${rconindex}]=${info_array[5]} ; (( rconindex++ )) ;;
+                rcon[${rconindex}]=${info_array[5]} ; (( rconindex++ ))
+                rcon[${rconindex}]=${info_array[6]} ; (( rconindex++ )) ;;
           "zcon")                                                            # Load zone data...
                 zcon[${zconindex}]=${info_array[1]} ; (( zconindex++ ))      # Type
                 zcon[${zconindex}]=${info_array[2]} ; (( zconindex++ ))      # Name
@@ -482,8 +485,9 @@ write_status_file()
    # Write the Radio Control configuration...
    maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
-      printf "rcon:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" >>/var/www/temp1.txt
-      i=$(( i + 5 )) 
+      printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" \
+                                 	  "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}" >>/var/www/temp1.txt
+      i=$(( i + 6 )) 
    done
 
    # Write the CRON jobs configuration...
@@ -533,13 +537,13 @@ alm_on()
    while [ $i -le "$maxval" ]; do                                                        # convert to upper case
        if [[ ${rcon[$i+3]^^} == "ON" ]]; then
           # if channel is configured to switch on during an alarm...
-          echo '(alarm):(RasPi):rcon swtch:'$(( $i/5 ))':on' >> /var/www/data/input.txt
+          echo '(alarm):(RasPi):rcon swtch:'$(( $i/6 ))':on' >> /var/www/data/input.txt
        fi
        if [[ ${rcon[$i+3]^^} == "OFF" ]]; then
           # if channel is configured to switch off during an alarm...
-          echo '(alarm):(RasPi):rcon swtch:'$(( $i/5 ))':off' >> /var/www/data/input.txt
+          echo '(alarm):(RasPi):rcon swtch:'$(( $i/6 ))':off' >> /var/www/data/input.txt
        fi
-       i=$(( i + 5 ))
+       i=$(( i + 6 ))
    done
 }
 
@@ -679,14 +683,19 @@ rcon_diag()
 #                                                                                                                               #
 #################################################################################################################################
 {     clear
-      printf "Array\tName\t\tAddress\tChannel\tAction\tStatus\n"
+      printf %s"------|----------------|---------|---------|--------|--------|--------------|\n"
+      printf   "Array | Name           | Address | Channel | Action | Status | HomeKit type |\n"
+      printf %s"------|----------------|---------|---------|--------|--------|--------------|\n"
+
       maxval=${#rcon[@]}                                                                  # number of defined Radio Control circuits
       (( maxval-- ))                                                                      # bump down because the array starts at zero
       i=0                                                                                 # array index 
       while [ $i -le "$maxval" ]; do                                                      # print all configured Radio Control circuits
-          printf "%s\t%s\t\t%s\t%s\t%s\t%s\n" "$i" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}"
-          i=$(( i + 5 )) 
+          printf "%-6s|%-16s|    %-5s|    %-5s|  %-6s|  %-6s| %-13s|\n" "$i" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" \
+                                                        "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
+          i=$(( i + 6 )) 
       done
+      printf %s"------|----------------|---------|---------|--------|--------|--------------|\n"
       sleep 0.5s
 }
 
@@ -699,7 +708,7 @@ user_diag()
 #    This routine slows down the scan of the alarm inputs, so should never be left running on a live system.                    #
 #                                                                                                                               #
 #################################################################################################################################
-{     clear
+{   clear
     printf %s"----|----------|--------------------------------------------------------------|------------|------------------------------------------\n"
       printf "Num | Name     | Password hash                                                | email      | OTAC\n"
     printf %s"----|----------|--------------------------------------------------------------|------------|------------------------------------------\n"
@@ -746,13 +755,6 @@ tmp=$(cat /proc/cpuinfo | grep Revision | awk '{print $3}')
 tmp=${CURRTIME}",(alarm),(RasPi),GPIO ports initialised for "${hardware}
 echo $tmp >> $LOGFILE                                       # log the event
 echo $tmp                                                   # tell the user
-
-#if [ -f /home/pi/Downloads/HAP-NodeJS/Core.js ]; then       # is Node.js and the HomeKit Bridge installed ?
-#  sudo forever start /home/pi/Downloads/HAP-NodeJS/Core.js
-#  tmp=${CURRTIME}",(alarm),(RasPi),Starting HomeKit Bridge."
-#  echo $tmp >> $LOGFILE                                     # log the event
-#  echo $tmp                                                 # tell the user
-#fi
 
 if [ -f /var/www/user.txt ]; then                           # if we have any users defined, load them to memory
   load_user_file
@@ -818,7 +820,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                IFS=":"                                                     # split the command on ':' - spaces are allowed
                PARAMS=( $info )
                IFS="$OLD_IFS"
-#              declare -p PARAMS                                           # DIAGNOSTIC - echo parameters being passed from web pages
+ #             declare -p PARAMS                                           # DIAGNOSTIC - echo parameters being passed from web pages
                case "${PARAMS[2]}" in
 			     "BannedIP")
 				   tmp=${CURRTIME}",(Fail2Ban),(RasPi),Banned IP:,"${PARAMS[3]}
@@ -842,10 +844,10 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp;;                                             # tell the user
                  "HK export")
-				   HomeKit_Export
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeKit export"
                    echo $tmp >> $LOGFILE                                   # log the event
-                   echo $tmp;;                                             # tell the user				   
+                   echo $tmp                                               # tell the user				   
+				   HomeKit_Export;;
                  "mode")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
@@ -861,7 +863,6 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                        eMail "$title"
                    else
                    # falls through here if the alarm is already in the selected mode.
-                   #  i.e. we have already set the alarm, so we want an early night and don't want to be disturbed by emails...
                        tmp='Alarm system already in '${PARAMS[3]}' - email suppressed.'
                        echo $tmp >> $LOGFILE                                   # log the event
                        echo $tmp                                               # tell the user
@@ -1025,20 +1026,20 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #
 #################################################################################################################################
                  "rcon swtch")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rcon[${PARAMS[3]}*5]}","${PARAMS[4]}
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rcon[${PARAMS[3]}*6]}","${PARAMS[4]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
-                   rcon[${PARAMS[3]}*5+4]="${PARAMS[4]}"                   # set array element to new string value
+                   rcon[${PARAMS[3]}*6+4]="${PARAMS[4]}"                   # set array element to new string value
                    if [ "${PARAMS[4]}" == "on" ]; then
                        # format the command string for 'on'...
-                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X1 \n' ${rcon[${PARAMS[3]}*5+1]} ${rcon[${PARAMS[3]}*5+2]}
+                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X1 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
                    else
                        # format the command string for 'off'...
-                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X0 \n' ${rcon[${PARAMS[3]}*5+1]} ${rcon[${PARAMS[3]}*5+2]}
+                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X0 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
                    fi
 #                  echo $tmp                                               # DEBUG - view the I2C command
                    if [ ${running_on_RasPi} == "true" ]; then
-                   # Only send I2C commandsif we are on a pi. This prevents non pi platforms from flooding the console with errors.
+                   # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
                        sleep 0.3s                                          # give the PIC time to complete the transmition
                    fi;;
@@ -1046,16 +1047,17 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
-                   rcon=("${rcon[@]:0:$((${PARAMS[3]}*5))}" "${rcon[@]:$(($((${PARAMS[3]}*5)) + 5))}")
+                   rcon=("${rcon[@]:0:$((${PARAMS[3]}*6))}" "${rcon[@]:$(($((${PARAMS[3]}*6)) + 6))}")
                    CreateTaskList;;                                        # assemble the list of all the task strings
                  "rcon cfg")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",remote config,"${PARAMS[3]}","${PARAMS[4]}","${PARAMS[5]}","${PARAMS[6]}","${PARAMS[7]}
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",remote config,"${PARAMS[3]}","${PARAMS[4]}","${PARAMS[5]}","${PARAMS[6]}","${PARAMS[7]}","${PARAMS[9]}
                    echo $tmp >> $LOGFILE                                        # log the event
                    echo $tmp                                                    # tell the user
-                   rcon[${PARAMS[3]}*5]="${PARAMS[4]}"                          # set array element to new string value
-                   rcon[${PARAMS[3]}*5+1]="${PARAMS[5]}"                        # set array element to new string value
-                   rcon[${PARAMS[3]}*5+2]="${PARAMS[6]}"                        # set array element to new string value
-                   rcon[${PARAMS[3]}*5+3]="${PARAMS[7]}"
+                   rcon[${PARAMS[3]}*6]="${PARAMS[4]}"                          # set array element to new string value
+                   rcon[${PARAMS[3]}*6+1]="${PARAMS[5]}"                        # set array element to new string value
+                   rcon[${PARAMS[3]}*6+2]="${PARAMS[6]}"                        # set array element to new string value
+                   rcon[${PARAMS[3]}*6+3]="${PARAMS[7]}"
+                   rcon[${PARAMS[3]}*6+5]="${PARAMS[9]}"
                    CreateTaskList;;                                              # assemble the list of all the task strings
                  "zcon cfg")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
