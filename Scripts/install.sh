@@ -373,33 +373,33 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-  install various pre requisites...
+# install various pre requisites...
   sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
-  # Specific Node.JS install fro Raspberry Pi 2...
-  sudo curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-  sudo apt-get install -y nodejs
-# Looks like original Node.JS install is bust on the Raspberry Pi 2
-# I've left the original code left here for reference... 
-#  sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
-#  sudo dpkg -i node_latest_armhf.deb
-  # Download the HomeKit Bridge...
-  git clone https://github.com/oddwires/HAP-NodeJS.git
-  cd HAP-NodeJS/
-  sudo npm install node-persist
-  sudo npm install srp
-  sudo npm install mdns
-  sudo npm install ed25519
-  sudo npm install curve25519
-  sudo npm install debug
-  sudo npm -g install forever
+
+  sudo apt-get install -y gcc-4.8 g++-4.8
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 20
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
+  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+
+  wget https://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-armv6l.tar.gz 
+  tar -xvf node-v4.2.1-linux-armv6l.tar.gz 
+  cd node-v4.2.1-linux-armv6l
+  sudo cp -R * /usr/local/
   cd ..
-  sudo rm -f node_latest_armhf*
+
+  git clone https://github.com/nfarina/homebridge.git
+  sudo mv alarm-system/ConfigFiles/package.json homebridge/package.json
+  cd homebridge
+  npm install
+  cd ..
+  sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
   
   # create the new daemon...
-  sudo mv /var/www/Scripts/homekit /etc/init.d/
-  chgrp root /etc/init.d/homekit
+  sudo mv /var/www/Scripts/homebridge /etc/init.d/
+  chgrp root /etc/init.d/homebridge
   # make daemon autostart...
-  sudo update-rc.d homekit defaults
+  sudo update-rc.d homebridge defaults
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "

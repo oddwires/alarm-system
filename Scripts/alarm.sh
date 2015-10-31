@@ -22,7 +22,7 @@
 #     Blowfish hashed passwords                                                                                                 #
 #     'Remember Me' - quick login by means of one time access code                                                              #
 #     Fail2Ban - detects multiple failed logons and modify firewall rules to block offending IP address                         #
-#     HomeKit Bridge - allowing Siri voice control.                                                                             #
+#     Homebridge - Siri voice control.                                                                                          #
 #                                                                                                                               #
 #################################################################################################################################
 
@@ -39,7 +39,7 @@ DefaultPassword='$2y$07$2c0bfALZ4WxenSybt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G'
 
 # Array to store Remote Control data.
 declare -a rcon=()                                              # 6 x elements per record: Name, Address, Channel,
-                                                                #      Action, Status, HomeKit type
+                                                                #      Action, Status, Homebridge type
 
 # Array to store Alarm zone configuration.                      9 elements per record defined as follows....
 Type=0                                                          # Tamper / Alarm
@@ -84,26 +84,42 @@ changed=""                                   # flag to indicate either the state
                                              # zone has changed. Either can cause an alarm zone to trigger and the alarm to activate.
 # start defining functions ...
 
-HomeKit_Export()
+Homebridge_Export()
 #################################################################################################################################
 #                                                                                                                               #
-# Function to export all automation ( switch ) configuration as accessories to be used by the HomeKit Bridge.                   #
+# Function to export all automation ( switch ) configuration as accessories to be used by the Homebridge.                       #
 #                                                                                                                               #
 #################################################################################################################################
 {  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
    Count=0
-   # hardware cannot support 256 switches, so it is safe to create a unique MAC address by only incrementing last octet
-   StartMAC="1A:2B:3C:4D:5E:"                                                              # base MAC address
-   set +f                                                                                  # going to need Globbing back on to
-   sudo rm -r "/home/pi/Downloads/HAP-NodeJS/accessories"/*.js                             # allow us to clear out the old data   
-   sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                     # remove existing accessory pairing
-   set -f                                                                                  # Globbing back off
-   
-   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                         # bump down because the array starts at zero
+
+   set +f                                                                                   # going to need Globbing back on to
+   sudo rm -r "/home/pi/Downloads/homebridge/accessories"/*.js                              # allow us to clear out the old data   
+   sudo rm -rf /home/pi/Downloads/homebridge/persist/*                                      # remove existing accessory pairing
+   sudo rm -f /home/pi/Downloads/homebridge/config.json                                     # remove existing list of accessories
+   set -f                                                                                   # Globbing back off
+
+# Create the new config.json file...
+   outfile="/home/pi/Downloads/homebridge/config.json"
+   cp "/var/www/ConfigFiles/config.json" "$outfile"                                         # first section
+   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
-    printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
-      FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rcon[$i]}"_accessory.js"
-	  case "${rcon[$i+5]}" in                                                        # Create default accessory file
+	   if [ "${rcon[$i+5]}" != "None" ]; then
+	   # if the accessory type is set to 'none', then we don't want to export it.
+           printf "\n{ \"accessory\": \"%s\"," "${rcon[$i]}" >> $outfile
+           printf "\n   \"name\": \"%s\" }," "${rcon[$i]}" >> $outfile
+	   fi
+       i=$(( i + 6 )) 
+   done
+   sed -ie '$s/,$//' $outfile                                                               # remove last comma from file
+   printf "\n]\n}\n" >> $outfile                                                            # terminate the file
+
+# create an accessory file for each device and customise the parameters...   
+   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
+   while [ $i -le "$maxval" ]; do
+#     printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
+      FileName="/home/pi/Downloads/homebridge/accessories/"${rcon[$i]}".js"
+	  case "${rcon[$i+5]}" in                                                               # Create default accessory file
           "Light")
 	         cp "/var/www/ConfigFiles/Generic_Light.js" "$FileName";;
           "Outlet")
@@ -114,24 +130,24 @@ HomeKit_Export()
 	  if [ "${rcon[$i+5]}" != "None" ]; then
     	  # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
-          oldstring='Parm1'                                                              # need to replace this string...
-          newstring="${rcon[$i]}"                                                        # ... with the accessory name
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
-	      oldstring='Parm2'                                                              # need to replace this string...
-          newstring=$StartMAC$(printf '%02x\n' $Count)                                   # ... with the MAC address
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
-	      oldstring='Parm3'                                                              # need to replace this string...
-          newstring='/var/www/data/input.txt", "Siri:iPhone:rcon swtch:'$Count':on\\n'   # command to switch accessory on
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
-	      oldstring='Parm4'                                                              # need to replace this string...
-          newstring='/var/www/data/input.txt", "Siri:iPhone:rcon swtch:'$Count':off\\n'  # command to switch accessory off
-          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                              # do it.
+          oldstring='Parm1'                                                                # need to replace this string...
+          newstring="${rcon[$i]}"                                                          # ... with the accessory name
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm2'                                                                # need to replace this string...
+          newstring='Siri:iPhone:rcon swtch:'$Count':on\\n'                                # command to switch accessory on
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm3'                                                                # need to replace this string...
+          newstring='Siri:iPhone:rcon swtch:'$Count':off\\n'                               # command to switch accessory off
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm4'                                                                # need to replace this string...
+          newstring=$(printf 'Handset %02d, Button %01d\n' "${rcon[i+1]}" "${rcon[$i+2]}") # configuration details
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
       fi
       Count=$(( Count + 1 ))        
       i=$(( i + 6 )) 
    done
-   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
-   sudo service homekit restart                                                  # restart HomeKit to pick up new accessories
+   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/homebridge/accessories/types.js"
+   sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
 }
 
 CreateTaskList()
@@ -683,9 +699,9 @@ rcon_diag()
 #                                                                                                                               #
 #################################################################################################################################
 {     clear
-      printf %s"------|----------------|---------|---------|--------|--------|--------------|\n"
-      printf   "Array | Name           | Address | Channel | Action | Status | HomeKit type |\n"
-      printf %s"------|----------------|---------|---------|--------|--------|--------------|\n"
+      printf %s"------|----------------|---------|---------|--------|--------|----------------|\n"
+      printf   "Array | Name           | Address | Channel | Action | Status | Homebridge type |\n"
+      printf %s"------|----------------|---------|---------|--------|--------|----------------|\n"
 
       maxval=${#rcon[@]}                                                                  # number of defined Radio Control circuits
       (( maxval-- ))                                                                      # bump down because the array starts at zero
@@ -844,10 +860,10 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp;;                                             # tell the user
                  "HK export")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeKit export"
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",Homebridge export"
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user				   
-				   HomeKit_Export;;
+				   Homebridge_Export;;
                  "mode")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
