@@ -7,7 +7,7 @@ include("readvars.php");                         // common code to read variable
 
      <div class="toolbar"><h1>Automation</h1>
           <a class="back2div menu" onclick="ResetMenu()" href="#menusheet">Menu</a>
-         <a class="button slide" onclick="RconJmp(<?php echo $RCnum ?>)" href="#">Add...</a>
+         <a class="button slide" onclick="Rconedit(<?php echo $RCnum ?>)" href="#">Add...</a>
       </div>
       <div id="AutoScroll" class="scroll">
       <!-- need to put a copy of autoscroll.php in here to handle the screen initialisation -->

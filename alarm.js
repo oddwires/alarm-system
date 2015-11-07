@@ -175,8 +175,12 @@
                 $('#RconName').val($('#hyplnk' + number).text());                // scrape current channel name and pass to config screen
                 $('#RconAddr').val($('#RconAddr' + number).val());
                 $('#RconChan').val($('#RconChan' + number).val());
-//                $('#RconAlarmAction').text($('#RconMode' + number).val());
-				tmp = $('#RconMode' + number).val().toLowerCase();;
+				// need to check if this element exists
+				// existing switches already have a value
+                // new switches wont have a value, so need to create default value manually...
+                if ($('#RconMode' + number).length >0 ) {
+                    tmp = $('#RconMode' + number).val().toLowerCase();;
+				} else { tmp = "none" }
 				switch (tmp){
 					   case "on":
                         $('#RconAlarmAction').text("Switch on");
