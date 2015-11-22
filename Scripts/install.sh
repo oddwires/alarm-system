@@ -389,7 +389,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   cd ..
 
   git clone https://github.com/nfarina/homebridge.git
-  sudo mv alarm-system/ConfigFiles/package.json homebridge/package.json
+  sudo cp alarm-system/ConfigFiles/package.json homebridge/package.json
   cd homebridge
   npm install
   cd ..
