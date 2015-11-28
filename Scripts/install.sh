@@ -388,6 +388,20 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo cp -R * /usr/local/
   cd ..
 
+  git clone https://github.com/oddwires/HAP-NodeJS.git
+  cd HAP-NodeJS/
+  sudo npm install node-persist
+  sudo npm install srp
+  sudo npm install mdns
+  sudo npm install ed25519
+  sudo npm install curve25519
+  sudo npm install debug
+  sudo npm -g install forever
+  cd ..
+  sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
+  
+  read -n1 -r -p "Press any key to continue..." key
+  
   git clone https://github.com/nfarina/homebridge.git
   sudo cp alarm-system/ConfigFiles/package.json homebridge/package.json
   cd homebridge
