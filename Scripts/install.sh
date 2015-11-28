@@ -72,7 +72,7 @@ echo "*  oddwires.co.uk Alarm System installer: Stage 4                         
 echo "*                                                                              *"
 echo "*  Install I2C Tools.                                                          *"
 echo "*                                                                              *"
-echo "*  This is allows the alarm system to use the I2C bus to communicate with the  *"
+echo "*  This allows the alarm system to use the I2C bus to communicate with the     *"
 echo "*  custom circuit board. Commands are sent through this interface when using   *"
 echo "*  the radio control power outlets.                                            *"
 echo "*                                                                              *"
@@ -418,7 +418,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-# install various pre requisites...
+  # install various pre requisites...
   sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
 
   sudo apt-get install -y gcc-4.8 g++-4.8
@@ -427,12 +427,14 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 
+  # install Node.JS
   wget https://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-armv6l.tar.gz 
   tar -xvf node-v4.2.1-linux-armv6l.tar.gz 
   cd node-v4.2.1-linux-armv6l
   sudo cp -R * /usr/local/
   cd ..
 
+  # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
   cd HAP-NodeJS/
   sudo npm install node-persist
@@ -448,10 +450,13 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # create the new daemon...
   sudo mv /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
   sudo chgrp root /etc/init.d/homebridge
+  sudo chown root /etc/init.d/homebridge
+  sudo chmod +x /etc/init.d/homebridge
+
   # make daemon autostart...
   sudo update-rc.d homebridge defaults
 fi
-read -n1 -r -p "Press any key to continue..." key
+#read -n1 -r -p "Press any key to continue..." key
 echo " "
 
 clear
