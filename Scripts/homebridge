@@ -1,17 +1,17 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          Homebridge
+# Provides:          HAP-NodeJS
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start Homebridge daemon at boot time
-# Description:       Enable Homebridge
+# Short-Description: Start HAP-NodeJS daemon at boot time
+# Description:       Enable Homekit
 ### END INIT INFO
 
-dir="/home/pi/Downloads/homebridge"
-#cmd="DEBUG=* node app.js"
-cmd="node app.js"
+dir="/home/pi/Downloads/HAP-NodeJS"
+#cmd="DEBUG=* node BridedCore.js"
+cmd="sudo node BridgedCore.js"
 user="root"
 
 name=`basename $0`

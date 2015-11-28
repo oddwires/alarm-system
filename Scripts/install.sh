@@ -4,7 +4,7 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 1                              *"
 echo "*                                                                              *"
-echo "*       Install Debian updates.                                                *"
+echo "*  Install Debian updates.                                                     *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -25,7 +25,7 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
 echo "*                                                                              *"
-echo "*       Install Debian upgrades.                                               *"
+echo "*  Install Debian upgrades.                                                    *"
 echo "*  ( this can take a long time to run )                                        *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
@@ -47,7 +47,9 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
 echo "*                                                                              *"
-echo "*       Install Mail Transfer Agent.                                           *"
+echo "*  Install Mail Transfer Agent.                                                *"
+echo "*                                                                              *"
+echo "*  This allows the alarm system to send email alerts for any alarm events.     *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -68,7 +70,11 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
 echo "*                                                                              *"
-echo "*       Install I2C Tools.                                                     *"
+echo "*  Install I2C Tools.                                                          *"
+echo "*                                                                              *"
+echo "*  This is allows the alarm system to use the I2C bus to communicate with the  *"
+echo "*  custom circuit board. Commands are sent through this interface when using   *"
+echo "*  the radio control power outlets.                                            *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -98,7 +104,9 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
 echo "*                                                                              *"
-echo "*       Install Apache and PHP.                                                *"
+echo "*  Install Apache and PHP.                                                     *"
+echo "*                                                                              *"
+echo "*  This installs a web server to host the alarm system web app.                *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -121,7 +129,7 @@ echo "*  oddwires.co.uk Alarm System installer: Stage 6                         
 echo "*                                                                              *"
 echo "*  Install Samba.                                                              *"
 echo "*                                                                              *"
-echo "*  Samba provides file services that allow Windows devices to connect to       *"
+echo "*  Samba provides  file services  that allow Windows devices to connect to     *"
 echo "*  the alarm system over a LAN. This is useful for viewing and editing the     *"
 echo "*  source code on a desktop or laptop.                                         *"
 echo "*                                                                              *"
@@ -190,7 +198,10 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
 echo "*                                                                              *"
-echo "*       Install alarm web page.                                                *"
+echo "*  Install alarm web page.                                                     *"
+echo "*                                                                              *"
+echo "*  This is the collection of web pages, PHP scripts and data files that        *"
+echo "*  provide the alarm system web app interface.                                 *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -251,7 +262,10 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
 echo "*                                                                              *"
-echo "*       Install alarm daemon.                                                  *"
+echo "*  Install alarm daemon.                                                       *"
+echo "*                                                                              *"
+echo "*  This is the background process that interfaces between the web app          *"
+echo "*  interface and the custom circuit board.                                     *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -261,13 +275,13 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-      # Check for previous alarm daemon...
-      if [ "$(ls -A /etc/init.d/alarm)" ]; then
-         echo "Previous alarm daemon found."
-         echo "Removing previous alarm daemon."
-         sudo update-rc.d -f alarm remove
-         echo "Previous daemon removed"
-      fi
+#      # Check for previous alarm daemon...
+#      if [ "$(ls -A /etc/init.d/alarm)" ]; then
+#         echo "Previous alarm daemon found."
+#         echo "Removing previous alarm daemon."
+#         sudo update-rc.d -f alarm remove
+#         echo "Previous daemon removed"
+#     fi
 
       # create the new daemon...
       sudo mv /var/www/Scripts/alarm /etc/init.d/
@@ -284,8 +298,9 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
 echo "*                                                                              *"
-echo "*       Create Self Signed Certificate and configure                           *"
-echo "*       Apache secure data transfers (TLS encryption).                         *"
+echo "*  Create Self Signed Certificate and configure Apache secure data transfers   *"
+echo "*  using TLS encryption. This encrypts all data transferred to and from the    *"
+echo "*  web app, which allows safe operation over non-secured networks.             *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -336,7 +351,16 @@ clear
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
-echo "*       Install and configure Fail2Ban                                         *"
+echo "*                                                                              *"
+echo "*  Install and configure Fail2Ban                                              *"
+echo "*                                                                              *"
+echo "*  Fail2Ban monitors the Apache event logs for unauthorised access attempts.   *"
+echo "*  If 3 failed logon attempts occur within 5 minutes, a firewall rule is       *"
+echo "*  created to block the IP address of the intruder.                            *"
+echo "*  The alarm system process this as an alarm event, and will send an email     *"
+echo "*  alert with the IP details of the intruder.                                  *"
+echo "*  Then, just for fun, the web interface throws up a skull and crossbones      *"
+echo "*  graphic on the intruder device before blocking it.                          *"
 echo "*                                                                              *"
 echo "*  Press 'I'      to Install                                                   *"
 echo "*        'S'      to Skip                                                      *"
@@ -378,7 +402,8 @@ clear
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 11                             *"
-echo "*       Install and configure HomeKit Bridge                                   *"
+echo "*                                                                              *"
+echo "*  Install and configure HomeKit Bridge                                        *"
 echo "*                                                                              *"
 echo "* This uses HAP-NodeJS, a Node.js implementation of Apples HomeKit Accessory   *"
 echo "* Server. This allows voice control of the RC power switches using Siri.       *"
@@ -420,28 +445,21 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   cd ..
   sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
   
-  read -n1 -r -p "Press any key to continue..." key
-  
-  git clone https://github.com/nfarina/homebridge.git
-  sudo cp alarm-system/ConfigFiles/package.json homebridge/package.json
-  cd homebridge
-  npm install
-  cd ..
-  sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
-  
   # create the new daemon...
-  sudo mv /var/www/Scripts/homebridge /etc/init.d/
-  chgrp root /etc/init.d/homebridge
+  sudo mv /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
+  sudo chgrp root /etc/init.d/homebridge
   # make daemon autostart...
   sudo update-rc.d homebridge defaults
 fi
-#read -n1 -r -p "Press any key to continue..." key
+read -n1 -r -p "Press any key to continue..." key
 echo " "
 
 clear
 echo "********************************************************************************"
+echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 12                             *"
-echo "*       The alarm system has been installed.                                   *"
+echo "*                                                                              *"
+echo "*  The alarm system has been installed.                                   *"
 echo "*                                                                              *"
 echo "*  The I2C bus has been reconfigured to operate at 32KHz, but requires a       *"
 echo "*  reboot to take effect.                                                      *"
