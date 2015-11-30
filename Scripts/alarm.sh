@@ -94,31 +94,15 @@ Homebridge_Export()
    Count=0
 
    set +f                                                                                   # going to need Globbing back on to
-   sudo rm -r "/home/pi/Downloads/homebridge/accessories"/*.js                              # allow us to clear out the old data   
-   sudo rm -rf /home/pi/Downloads/homebridge/persist/*                                      # remove existing accessory pairing
-   sudo rm -f /home/pi/Downloads/homebridge/config.json                                     # remove existing list of accessories
+   sudo rm -r /home/pi/Downloads/HAP-NodeJS/accessories/*.js                                # allow us to clear out the old data
+   sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                      # remove existing accessory pairing
    set -f                                                                                   # Globbing back off
-
-# Create the new config.json file...
-   outfile="/home/pi/Downloads/homebridge/config.json"
-   cp "/var/www/ConfigFiles/config.json" "$outfile"                                         # first section
-   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
-   while [ $i -le "$maxval" ]; do
-	   if [ "${rcon[$i+5]}" != "None" ]; then
-	   # if the accessory type is set to 'none', then we don't want to export it.
-           printf "\n{ \"accessory\": \"%s\"," "${rcon[$i]}" >> $outfile
-           printf "\n   \"name\": \"%s\" }," "${rcon[$i]}" >> $outfile
-	   fi
-       i=$(( i + 6 )) 
-   done
-   sed -ie '$s/,$//' $outfile                                                               # remove last comma from file
-   printf "\n]\n}\n" >> $outfile                                                            # terminate the file
 
 # create an accessory file for each device and customise the parameters...   
    maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
 #     printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
-      FileName="/home/pi/Downloads/homebridge/accessories/"${rcon[$i]}".js"
+	  FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rcon[$i]}"_accessory.js"
 	  case "${rcon[$i+5]}" in                                                               # Create default accessory file
           "Light")
 	         cp "/var/www/ConfigFiles/Generic_Light.js" "$FileName";;
@@ -134,7 +118,7 @@ Homebridge_Export()
           newstring="${rcon[$i]}"                                                          # ... with the accessory name
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	      oldstring='Parm2'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rcon swtch:'$Count':on\\n'                                # command to switch accessory on
+          newstring='Siri:iPhone:rcon swtch:'$Count':on\\n'                                # command to switch accessory on		  
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	      oldstring='Parm3'                                                                # need to replace this string...
           newstring='Siri:iPhone:rcon swtch:'$Count':off\\n'                               # command to switch accessory off
@@ -146,7 +130,8 @@ Homebridge_Export()
       Count=$(( Count + 1 ))        
       i=$(( i + 6 )) 
    done
-   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/homebridge/accessories/types.js"
+   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
+   printf "Export complete - restarting HAP-NodeJS\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
 }
 
