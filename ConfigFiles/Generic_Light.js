@@ -13,16 +13,16 @@ var fs = require('fs');
 var FAKE_LIGHT = {
   powerOn: false,
   setPowerOn: function(on) { 
-    console.log("Turning the Parm1 light %s", on ? "on" : "off");
+    console.log("Turning the Parm1 light %s...", on ? "on" : "off");
  	if (on) {
        fs.appendFile("/var/www/data/input.txt", "Parm2", function(err) {		
           if(err) { return console.log(err); }
-          console.log("Parm1 light on.");
+          console.log("...Parm1 light is now on.");
        }); 
     } else {
        fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {
           if(err) { return console.log(err); }
-          console.log("Parm1 light off.");
+          console.log("...Parm1 light is now off.");
    	   });
 	}
   },
@@ -52,7 +52,7 @@ var FAKE_LIGHT = {
 var lightUUID = uuid.generate('hap-nodejs:accessories:Parm1');
 
 // This is the Accessory that we'll return to HAP-NodeJS that represents our fake light.
-var light = exports.accessory = new Accessory('Light', lightUUID);
+var light = exports.accessory = new Accessory('Parm1', lightUUID);
 
 // Add properties for publishing (in case we're using Core.js and not BridgedCore.js)
 light.username = "1A:2B:3C:4D:5E:FF";
@@ -90,7 +90,7 @@ light
     // this event is emitted when you ask Siri directly whether your light is on or not. you might query
     // the light hardware itself to find this out, then call the callback. But if you take longer than a
     // few seconds to respond, Siri will give up.
-    console.log("Checking the Parm1 light status.");	
+    console.log("Checking the Parm1 light status...");	
     var err = null;                         // in case there were any problems
     fs.readFile("/var/www/data/status.txt", 'utf8', function(err, data) {
         if(err) { return console.log(err); }
@@ -100,11 +100,11 @@ light
                 var svalues = lines[i].split(':');
 				if (svalues[5].toString().trim() === 'on') {
 					FAKE_LIGHT.powerOn = true;
-				    console.log("Parm1 light is on");
+				    console.log("...Parm1 light is on");
 					callback(null, FAKE_LIGHT.powerOn);
                 } else {
 					FAKE_LIGHT.powerOn = false;
-				    console.log("Parm1 light is off");
+				    console.log("...Parm1 light is off");
 					callback(null, FAKE_LIGHT.powerOn);
                 }
 			}
