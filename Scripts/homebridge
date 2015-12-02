@@ -10,7 +10,6 @@
 ### END INIT INFO
 
 dir="/home/pi/Downloads/HAP-NodeJS"
-#cmd="DEBUG=* node BridedCore.js"
 cmd="sudo node BridgedCore.js"
 user="root"
 
