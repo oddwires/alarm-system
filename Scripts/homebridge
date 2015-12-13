@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start HAP-NodeJS daemon at boot time
-# Description:       Enable Homekit
+# Description:       Enable HomeBridge
 ### END INIT INFO
 
 dir="/home/pi/Downloads/HAP-NodeJS"
@@ -31,7 +31,7 @@ case "$1" in
     if is_running; then
         echo "Already started"
     else
-        echo "Starting $name"
+        echo  "Starting $name"
         cd "$dir"
         if [ -z "$user" ]; then
            sudo $cmd >> "$stdout_log" 2>> "$stderr_log" &
@@ -39,6 +39,7 @@ case "$1" in
            sudo -u "$user" $cmd >> "$stdout_log" 2>> "$stderr_log" &
         fi
         echo $! > "$pid_file"
+        echo "Started"
         if ! is_running; then
             echo "Unable to start, see $stdout_log and $stderr_log"
             exit 1
@@ -81,6 +82,19 @@ case "$1" in
     fi
     $0 start
     ;;
+
+    re-pair)
+    $0 stop
+    if is_running; then
+        echo "Unable to stop, will not attempt to re-pair"
+        exit 1
+    fi
+    cd "$dir"
+    echo "Clearing existing device pairing information."
+    sudo rm -f persist/* >> "$stdout_log" 2>> "$stderr_log" &
+    $0 start
+    ;;
+
     status)
     if is_running; then
         echo "Running"
@@ -90,7 +104,7 @@ case "$1" in
     fi
     ;;
     *)
-    echo "Usage: $0 {start|stop|restart|status}"
+    echo "Usage: $0 {start|stop|restart|re-pair|status}"
     exit 1
     ;;
 esac

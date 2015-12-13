@@ -4,12 +4,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // logs.php hyperlinks redirect here...
-            function HomeKit() {
-                tmp = "HK export:";
+            function HomeKit(parameter) {
+                tmp = "HomeKit:" + parameter;
                 $('#retval').val(tmp);
                 ajaxrequest('writedata.php','');                                  // doesn't matter where we send the data as long as
 				                                                                  // it goes through 'readvars' to make it go
-		        tmp = "You will also need to clear the HomeKit database on your phone !"
+		        tmp = "You also need to clear the HomeKit database on your iPhone !"
                 alert (tmp);
 			}	
 

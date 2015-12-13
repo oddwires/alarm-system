@@ -95,6 +95,7 @@ Homebridge_Export()
 
    set +f                                                                                   # going to need Globbing back on to
    sudo rm -r /home/pi/Downloads/HAP-NodeJS/accessories/*.js                                # allow us to clear out the old data
+   printf "Removing existing device pairing.\n"
    sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                      # remove existing accessory pairing
    set -f                                                                                   # Globbing back off
 
@@ -112,6 +113,7 @@ Homebridge_Export()
 	         cp "/var/www/ConfigFiles/Generic_Fan.js" "$FileName";;
 	  esac
 	  if [ "${rcon[$i+5]}" != "None" ]; then
+	      printf "Creating accessory: %s_accessory.js\n" "${rcon[$i]}"                     # visual progress indicator
     	  # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
           oldstring='Parm1'                                                                # need to replace this string...
@@ -131,7 +133,7 @@ Homebridge_Export()
       i=$(( i + 6 )) 
    done
    cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
-   printf "Export complete - restarting HAP-NodeJS\n"
+   printf "Export complete\nRestarting HAP-NodeJS\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
 }
 
@@ -821,7 +823,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                IFS=":"                                                     # split the command on ':' - spaces are allowed
                PARAMS=( $info )
                IFS="$OLD_IFS"
- #             declare -p PARAMS                                           # DIAGNOSTIC - echo parameters being passed from web pages
+#              declare -p PARAMS                                           # DIAGNOSTIC - echo parameters being passed from web pages
                case "${PARAMS[2]}" in
 			     "BannedIP")
 				   tmp=${CURRTIME}",(Fail2Ban),(RasPi),Banned IP:,"${PARAMS[3]}
@@ -844,15 +846,24 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp;;                                             # tell the user
-                 "HK export")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",Homebridge export"
-                   echo $tmp >> $LOGFILE                                   # log the event
-                   echo $tmp                                               # tell the user				   
-				   Homebridge_Export;;
+                 "HomeKit")
+				 # handles all the HomeBridge options
+				   if [ "${PARAMS[3]}" == "export" ]; then 
+                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge export"
+                      echo $tmp >> $LOGFILE                                   # log the event
+                      echo $tmp                                               # tell the user				   
+				      Homebridge_Export
+				   fi
+				   if [ "${PARAMS[3]}" == "re-pair" ]; then 
+                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge re-pair"
+                      echo $tmp >> $LOGFILE                                   # log the event
+                      echo $tmp                                               # tell the user				   
+				      sudo service homebridge re-pair
+				   fi;;
                  "mode")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
-                   echo $tmp >> $LOGFILE                                   # log the event
-                   echo $tmp                                               # tell the user
+                   echo $tmp >> $LOGFILE                                      # log the event
+                   echo $tmp                                                  # tell the user
                    if [[ $mode != ${PARAMS[3]} ]]; then
                    # falls through here if we need to change the alarm mode...
                        mode=${PARAMS[3]}                                       # set new mode
@@ -898,13 +909,13 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    EMAIL_server=${PARAMS[3]}
                    EMAIL_port=${PARAMS[4]}
                    EMAIL_sender=${PARAMS[5]}
-                   if [ "${PARAMS[6]}" != "dummy123" ]; then              # has the password feild been ovewritten....
+                   if [ "${PARAMS[6]}" != "dummy123" ]; then               # has the password field been overwritten....
                       tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}",password changed"
                       echo $tmp >> $LOGFILE                                # log the event
                       echo $tmp                                            # tell the user
                       EMAIL_password=${PARAMS[6]}                          # ...update password
                    fi
-                   EMAIL_recipient=${PARAMS[7]};;                          # (is this still neede ?)
+                   EMAIL_recipient=${PARAMS[7]};;                          # (is this still needed ?)
                  "save user defaults")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event

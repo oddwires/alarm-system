@@ -3,7 +3,7 @@
 <!--<![-->                                                           <!-- Disable data compression over O2 -->
     <head>
         <meta charset="UTF-8" />
-		<title>Oddwires</title>
+		<title>Oddwires.co.uk</title>
         <link rel="stylesheet" href="jQTouch/themes/css/jqtouch.css" data-jqt-theme>
 
         <meta name="viewport" content="width=device-width,initial-scale=1.01,minimal-ui">		
@@ -123,7 +123,26 @@
             <em>Zepto is a minimalist JavaScript <br>
 			    library for modern browsers with a<br>
 				largely jQuery-compatible API.</em>
+				
+		 <h2 style="text-align:center"><a target="_blank" href="http://heirloom.sourceforge.net/mailx.html">Heirloom mailx</a></h2>
+	     <p style="text-align:center">
+		 <em>(formerly known as "nail")<br>
+             Provides the functionality of the POSIX<br>
+			 mailx command with additional support<br>
+			 for MIME messages, IMAP, POP3, SMTP,<br>
+			 S/MIME, message threading/sorting,<br>
+			 scoring, and filtering.</em>
 
+          <h2 style="text-align:center"><a target="_blank" href="https://github.com/samba-team/samba">Samba - Andrew Tridgell</a></h2>
+            <p style="text-align:center">
+            <em>Samba is the standard Windows<br>
+                interoperability suite of programs<br>
+				for Linux and Unix. Providing<br>
+				An ftp-like SMB client allowing <br>
+				access to Linux resources (disks and
+                printers) from the Windows<br>
+				operating systems</em>
+				
          <h2 style="text-align:center"><a target="_blank" href="https://www.schneier.com/blowfish.html">Blowfish - Bruce Schneier</a></h2>
             <p style="text-align:center">
             <em>Blowfish is a symmetric block cipher<br>
@@ -152,14 +171,6 @@
 				Accessories on Raspberry Pi,<br>
 				Intel Edison or any other platform<br>
 				that can run Node.js.</em>
-
-         <h2 style="text-align:center"><a target="_blank" href="https://github.com/cflurin/homebridge">HomeBridge - Nick Farina</a></h2>
-            <p style="text-align:center">
-            <em>Provides a set of "shims"<br>
-				forming a basic bridge from<br>
-				HomeKit to various 3rd-party APIs<br>
-				provided by manufacturers<br>
-				of "smart home" devices.</em>
 
           </div><br><br>
 		  
@@ -191,25 +202,27 @@
                      <a class="back2div menu" onclick="ResetMenu()" href="#menusheet">Menu</a>
                 </div>
 				<br>
-     			<br>
-				<br>
 				<div class="info">
-				HomeKit info<br>
-				Accessory code = 031-45-154
-				</div>
-				<br>
-				<div class="info">
-				Settings | Privacy | HomeKit | Reset HomeKit Configuration<br>
-				</div>
-				<br>
-				<br>
+				Use 'Export accessories' to create a Homekit accessories
+				for all pre-defined devices in your Automation screen.<br><br>
+				Use 'Re-Pair device' to reset Homekit device
+				pairing on your Raspberry Pi. Following this, you<br>
+				will also need to reset	the Homekit database<br>
+				on your iPhone.
 				<br>
                 <!-- Export button is contained in a table -->
                 <table border="0" style="margin: 0px auto; align: center;">
                    <tr><td style="width: 30%;"> </td>
-				       <td><a style="color:rgba(0,0,0,.9)" href="#hkexport" class="action whiteButton">Export</a></td>
+				       <td><a style="color:rgba(0,0,0,.9)" href="#hkexport" class="action whiteButton">Options</a></td>
                        <td style="width: 30%;"> </td></tr>
 				</table>
+				Use HomeBridge Accessory code 031 45 154
+				</div>
+				<br>
+				<div class="info">
+				To reset HomeKit database on your iPhone go to<br><br>
+				Settings | Privacy | HomeKit | Reset HomeKit Configuration<br>
+				</div>
         </div>
         <div id="menusheet" class="menusheet">
                 <ul class="edgetoedge scroll">
@@ -266,7 +279,8 @@
         </div>
        <div id="hkexport" class="actionsheet">
                 <div class="actionchoices">
-                    <a href="#" class="dismiss whiteButton" onclick="HomeKit()">Export accessories</a>
+                    <a href="#" class="dismiss whiteButton" onclick="HomeKit('export')">Export accessories</a>
+                    <a href="#" class="dismiss whiteButton" onclick="HomeKit('re-pair')">Re-Pair device</a>
                     <a href="#" class="redButton dismiss">Cancel</a>
                 </div>
         </div>
