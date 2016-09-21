@@ -118,6 +118,11 @@ echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Apache install...
   sudo apt-get install -y apache2 php5 libapache2-mod-php5
+  # edit the Apache2 default web page...
+  Filename='/etc/apache2/sites-enabled/default-ssl.conf'       # File to be edited
+  oldstring='DocumentRoot /var/www/html'                       # need to replace this string...
+  newstring='DocumentRoot /var/www'                            # ... with this one
+ sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
