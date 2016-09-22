@@ -119,10 +119,10 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Apache install...
   sudo apt-get install -y apache2 php5 libapache2-mod-php5
   # edit the Apache2 default web page...
-  Filename='/etc/apache2/sites-enabled/default-ssl.conf'       # File to be edited
+  filename='/etc/apache2/sites-enabled/default-ssl.conf'       # File to be edited
   oldstring='DocumentRoot /var/www/html'                       # need to replace this string...
   newstring='DocumentRoot /var/www'                            # ... with this one
- sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
+  sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -280,14 +280,6 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-#      # Check for previous alarm daemon...
-#      if [ "$(ls -A /etc/init.d/alarm)" ]; then
-#         echo "Previous alarm daemon found."
-#         echo "Removing previous alarm daemon."
-#         sudo update-rc.d -f alarm remove
-#         echo "Previous daemon removed"
-#     fi
-
       # create the new daemon...
       sudo mv /var/www/Scripts/alarm /etc/init.d/
       chgrp root /etc/init.d/alarm
@@ -332,20 +324,20 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    filename='/etc/apache2/ports.conf'                                         # File to be edited
    oldstring='NameVirtualHost'                                                # need to replace this string...
    newstring='#NameVirtualHost'                                               # ... with this one
-   sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
    oldstring='Listen 80'                                                      # and need to replace this string...
    newstring='#Listen 80'           # ... with this one
-   sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
    
    # edit the virtual site file...
    filename='/etc/apache2/sites-enabled/default-ssl'
    oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
    newstring='SSLCertificateFile    /etc/apache2/ssl/server.crt'              # ... with this one
-   sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
  	
    oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
    newstring='SSLCertificateKeyFile /etc/apache2/ssl/server.key'              # ... with this one
-   sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
    
    sudo service apache2 restart
 fi
