@@ -118,11 +118,6 @@ echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Apache install...
   sudo apt-get install -y apache2 php5 libapache2-mod-php5
-  # edit the Apache2 default web page...
-  filename='/etc/apache2/sites-enabled/default-ssl.conf'       # File to be edited
-  oldstring='DocumentRoot /var/www/html'                       # need to replace this string...
-  newstring='DocumentRoot /var/www'                            # ... with this one
-  sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -324,21 +319,27 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    filename='/etc/apache2/ports.conf'                                         # File to be edited
    oldstring='NameVirtualHost'                                                # need to replace this string...
    newstring='#NameVirtualHost'                                               # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
    oldstring='Listen 80'                                                      # and need to replace this string...
    newstring='#Listen 80'           # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
    
    # edit the virtual site file...
    filename='/etc/apache2/sites-enabled/default-ssl'
    oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
    newstring='SSLCertificateFile    /etc/apache2/ssl/server.crt'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
  	
    oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
    newstring='SSLCertificateKeyFile /etc/apache2/ssl/server.key'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                          # do it.
-   
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+
+   # edit the Apache2 default web page...
+   filename='/etc/apache2/sites-enabled/default-ssl.conf'                     # File to be edited
+   oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
+   newstring='DocumentRoot /var/www'                                          # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+
    sudo service apache2 restart
 fi
 #read -n1 -r -p "Press any key to continue..." key
