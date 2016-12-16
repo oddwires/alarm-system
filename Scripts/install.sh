@@ -4,27 +4,6 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 1                              *"
 echo "*                                                                              *"
-echo "*  Install Debian updates.                                                     *"
-echo "*                                                                              *"
-echo "*  Press 'I'      to Install                                                   *"
-echo "*        'S'      to Skip                                                      *"
-echo "*        'Ctrl+C' to Quit the installer                                        *"
-echo "*                                                                              *"
-echo "********************************************************************************"
-read -n1 -r key
-echo
-if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-  # Updates...
-  sudo apt-get -y update
-fi
-#read -n1 -r -p "Press any key to continue..." key
-echo " "
-
-clear
-echo "********************************************************************************"
-echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
-echo "*                                                                              *"
 echo "*  Install Debian upgrades.                                                    *"
 echo "*  ( this can take a long time to run )                                        *"
 echo "*                                                                              *"
@@ -45,7 +24,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
 echo "*                                                                              *"
 echo "*  Install Mail Transfer Agent.                                                *"
 echo "*                                                                              *"
@@ -68,7 +47,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
 echo "*                                                                              *"
 echo "*  Install I2C Tools.                                                          *"
 echo "*                                                                              *"
@@ -102,7 +81,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
 echo "*                                                                              *"
 echo "*  Install Apache and PHP.                                                     *"
 echo "*                                                                              *"
@@ -125,7 +104,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 6                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
 echo "*                                                                              *"
 echo "*  Install Samba.                                                              *"
 echo "*                                                                              *"
@@ -196,7 +175,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 6                              *"
 echo "*                                                                              *"
 echo "*  Install alarm web page.                                                     *"
 echo "*                                                                              *"
@@ -260,7 +239,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
 echo "*                                                                              *"
 echo "*  Install alarm daemon.                                                       *"
 echo "*                                                                              *"
@@ -279,8 +258,12 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
       sudo mv /var/www/Scripts/alarm /etc/init.d/
       chgrp root /etc/init.d/alarm
 
+	  # make alarm executable...
+	  sudo chmod +x /var/www/Scripts/alarm.sh
+
       # make daemon autostart...
       sudo update-rc.d alarm defaults
+	  
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -288,7 +271,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
 echo "*                                                                              *"
 echo "*  Create Self Signed Certificate and configure Apache secure data transfers   *"
 echo "*  using TLS encryption. This encrypts all data transferred to and from the    *"
@@ -326,13 +309,13 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    
    # edit the virtual site file...
    filename='/etc/apache2/sites-enabled/default-ssl'
-   oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
-   newstring='SSLCertificateFile    /etc/apache2/ssl/server.crt'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+#   oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
+#   newstring='SSLCertificateFile    /etc/apache2/ssl/server.crt'              # ... with this one
+#   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
  	
-   oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
-   newstring='SSLCertificateKeyFile /etc/apache2/ssl/server.key'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+#   oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
+#   newstring='SSLCertificateKeyFile /etc/apache2/ssl/server.key'              # ... with this one
+#   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
 
    # edit the Apache2 default web page...
    filename='/etc/apache2/sites-enabled/default-ssl.conf'                     # File to be edited
@@ -348,7 +331,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
 echo "*                                                                              *"
 echo "*  Install and configure Fail2Ban                                              *"
 echo "*                                                                              *"
@@ -399,7 +382,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 11                             *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
 echo "*                                                                              *"
 echo "*  Install and configure HomeKit Bridge                                        *"
 echo "*                                                                              *"
@@ -417,33 +400,49 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # install various pre requisites...
-  sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
+# sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
+  sudo apt-get install libavahi-compat-libdnssd-dev -y
 
-  sudo apt-get install -y gcc-4.8 g++-4.8
-  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 20
-  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
-  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
-  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+#  sudo apt-get install -y gcc-4.8 g++-4.8
+#  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 20
+#  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+#  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
+#  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 
-  # install Node.JS
-  wget https://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-armv6l.tar.gz 
-  tar -xvf node-v4.2.1-linux-armv6l.tar.gz 
-  cd node-v4.2.1-linux-armv6l
-  sudo cp -R * /usr/local/
-  cd ..
-
+#  # install Node.JS v4
+#  wget https://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-armv6l.tar.gz 
+#  tar -xvf node-v4.2.1-linux-armv6l.tar.gz 
+#  cd node-v4.2.1-linux-armv6l
+#  sudo cp -R * /usr/local/
+wget -qO- https://deb.nodesource.com/setup_4.x | sudo bash -
+sudo apt-get -y install nodejs
+  
+#  wget http://node-arm.herokuapp.com/node_0.10.36_armhf.deb 
+#  dpkg -i node_0.10.36_armhf.deb 
+#  cd ..
+ 
   # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
   cd HAP-NodeJS/
-  sudo npm install node-persist
-  sudo npm install srp
-  sudo npm install mdns
-  sudo npm install ed25519
-  sudo npm install curve25519
-  sudo npm install debug
+  npm rebuild
+# sudo npm install node-persist
+# sudo npm install srp
+# sudo npm install mdns
+# sudo npm install ed25519
+# sudo npm install curve25519
+# sudo npm install debug
+  sudo npm install buffer-shims --unsafe-perm
+  sudo npm install curve25519-n --unsafe-perm
+  sudo npm install debug --unsafe-perm
+  sudo npm install ed25519 --unsafe-perm
+  sudo npm install fast-srp-hap --unsafe-perm
+  sudo npm install ip --unsafe-perm
+  sudo npm install mdns --unsafe-perm
+  sudo npm install node-persist --unsafe-perm
+  
   sudo npm -g install forever
   cd ..
-  sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
+ #sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
   
   # create the new daemon...
   sudo mv /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
@@ -460,7 +459,7 @@ echo " "
 clear
 echo "********************************************************************************"
 echo "*                                                                              *"
-echo "*  oddwires.co.uk Alarm System installer: Stage 12                             *"
+echo "*  oddwires.co.uk Alarm System installer: Stage 11                             *"
 echo "*                                                                              *"
 echo "*  The alarm system has been installed.                                        *"
 echo "*                                                                              *"

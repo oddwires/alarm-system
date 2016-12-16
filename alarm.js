@@ -171,7 +171,7 @@
 
 // auto.php and autoscroll.php hyper-links redirect here, so we can get a bit jiggy with the titles and parameters
             function Rconedit(number) {
-                $('#RconfHead').text("Edit channel " + number);                  // update the title
+			$('#RconfHead').text("Edit channel " + number);                  // update the title
                 $('#RconName').val($('#hyplnk' + number).text());                // scrape current channel name and pass to config screen
                 $('#RconAddr').val($('#RconAddr' + number).val());
                 $('#RconChan').val($('#RconChan' + number).val());
@@ -249,6 +249,60 @@
                     }
                 jQT.goTo('#autocfg', 'slideright');			
 			}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Radiator functions...
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Radiator On/Off switch has changed, so populate the retval field...
+            function RdtrSwitch(number) {
+                tmp = "rdtr swtch:" + number + ":"
+                if ($('#RDTR' + number).is(":checked")) { tmp += "on"; }
+                else { tmp += "off"; }
+                $('#retval').val(tmp);
+                ajaxrequest('writedata.php','');                                  // doesn't matter where we send the data as long as
+                                                                                  // it goes through 'readvars' to make it go
+            }
+            function RDTREdit(number) {
+                $('#RdtrHead').text("Edit Radiator " + (number+1));               // update the title (bump count to skip 0)
+                if ($('#RDTRName' + (number)).length) {                           // do we have info on this radiator ?
+                    $('#RdtrNameCfg').val($('#RDTRName' + number).val());         // scrape current channel name and pass to config screen
+                    $('#RdtrAddrCfg').val($('#RDTRAddr' + number).val());
+                    $('#RdtrHiCfg').val($('#RDTRHi' + number).val());
+                    $('#RdtrLoCfg').val($('#RDTRLo' + number).val());
+			    } else {
+                    $('#RdtrNameCfg').val("Default radiator");
+                    $('#RdtrAddrCfg').val("15");
+                    $('#RdtrHiCfg').val("28");
+                    $('#RdtrLoCfg').val("5");
+			    }
+                jQT.goTo('#RdtrCfg', 'slideleft');                                  // ...and go to config screen
+                return false;                                                       // returning false cancels the original hyper-link
+            }
+// Radiator configuration has changed, so populate the retval field...
+            function RdtrSend() {
+                var num = ($('#RdtrHead').text().substring(14));                  // retrieve the task number from the header
+                var tmp = 'rdtr cfg:' + (num-1) + ':';
+                tmp += $('#RdtrNameCfg').val() + ':';
+                tmp += $('#RdtrAddrCfg').val() + ':';
+                tmp += $('#RdtrHiCfg').val() + ':';
+                tmp += $('#RdtrLoCfg').val();
+                tmp = tmp.replace(/\ #/g,' \\#');                                 // ' #' (space hash) characters needs to be delimited 
+				                                                                  // change any ' #' to ' \#'
+				tmp = tmp.trim()                                                  // ...and get rid of any sneaky white space characters
+                $('#retval').val(tmp);
+                ajaxrequest('heatingscroll.php','heating');                       // synchronous send
+	            jQT.goTo('#heating', 'slideright');                               // ...and go to auto edit screen
+            }
+            function RdtrDel() {
+                var num = ($('#RdtrHead').text().substring(14));                  // retrieve the task number from the header
+                var tmp = 'rdtr del:' + (num-1);
+                $('#retval').val(tmp);
+                ajaxrequest('heatingscroll.php','heating');                        // synchronous send
+                jQT.goTo('#heating', 'slideright');                               // ...and go to task edit screen
+                return false;
+            }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Task functions...
@@ -567,5 +621,6 @@ function ResetMenu(){
     $('#menu6').removeClass("active");
     $('#menu7').removeClass("active");
     $('#menu8').removeClass("active");
+    $('#menu9').removeClass("active");
     return false;
     }

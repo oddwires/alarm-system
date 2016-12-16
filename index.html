@@ -177,6 +177,7 @@
         </div>              <!-- Credits screen                          -->
         <div id="alarm" class="selectable"></div>                   <!-- Alarm screen                            -->
         <div id="auto" class="selectable"></div>                    <!-- Automation screen                       -->
+        <div id="heating" class="selectable"></div>                 <!-- Radiators screen                        -->
         <div id="tasklist" class="selectable"></div>                <!-- Task list screen                        -->
         <div id="setup" class="selectable"></div>                   <!-- Setup Control screen                    -->
         <div id="status" class="selectable"></div>                  <!-- List of zone status                     -->
@@ -228,14 +229,15 @@
         <div id="menusheet" class="menusheet">
                 <ul class="edgetoedge scroll">
                     <li class="sep">Menu...</li>
-                    <li><a id="menu1" href="alarm.php" class="dissolve">Alarm</a></li>
-                    <li><a id="menu2" href="auto.php" class="dissolve">Automation</a></li>
-                    <li><a id="menu3" href="task.php" class="dissolve">Tasks</a></li>
-                    <li><a id="menu4" href="user.php" class="dissolve">Users</a></li>
-                    <li><a id="menu5" href="setup.php" class="dissolve">Setup</a></li>
-                    <li><a id="menu6" href="logs.php" class="dissolve">Logs</a></li>
-                    <li><a id="menu7" href="#homekit" class="dissolve">HomeKit</a></li>
-                    <li><a id="menu8" href="#about" class="dissolve">About</a></li>
+                    <li><a id="menu1" href="alarm.php" class="dissolve">Security</a></li>
+                    <li><a id="menu2" href="auto.php" class="dissolve">Power</a></li>
+                    <li><a id="menu3" href="heating.php" class="dissolve">Heating</a></li>
+                    <li><a id="menu4" href="task.php" class="dissolve">Schedule</a></li>
+                    <li><a id="menu5" href="user.php" class="dissolve">Access</a></li>
+                    <li><a id="menu6" href="setup.php" class="dissolve">Setup</a></li>
+                    <li><a id="menu7" href="logs.php" class="dissolve">Logs</a></li>
+                    <li><a id="menu8" href="#homekit" class="dissolve">HomeKit</a></li>
+                    <li><a id="menu9" href="#about" class="dissolve">About</a></li>
                 </ul>
          </div>
         <div id="password" class="selectable">
@@ -251,7 +253,7 @@
         </div>
         <div id="alarmconfig" class="selectable"></div>             <!-- Alarm zone configuration                -->
 
-<!-- Various actionsheets - putting them here prevents them being re-loaded everytime there is an AJAX post      -->
+<!-- Various actionsheets - putting them here prevents them being re-loaded every time there is an AJAX post      -->
 
         <div id="setup1" class="actionsheet">
                 <div class="actionchoices">

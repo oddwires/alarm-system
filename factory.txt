@@ -30,13 +30,26 @@ rcon:Green:0:2:None:off:Light
 rcon:Yellow:0:3:None:off:Light
 rcon:Outlet #1:7:1:None:off:Outlet
 rcon:Outlet #2:7:2:None:off:Outlet
-rcon:Fan:7:3:None:off:Fan
-rcon:Channel #1:7:4:None:off:None
-rcon:Channel #2:7:5:None:off:None
-rcon:Channel #3:8:1:None:off:None
-rcon:Channel #4:8:2:None:off:None
+rcon:Outlet #3:7:2:None:off:Outlet
+rcon:Outlet #4:7:3:None:off:Outlet
+rcon:Outlet #5:7:4:None:off:Outlet
+rcon:Outlet #6:7:5:None:off:Outlet
+rcon:Outlet #7:8:1:None:off:Outlet
+rcon:Outlet #8:8:2:None:off:Outlet
+rcon:Outlet #9:8:3:None:off:Outlet
+rcon:Outlet #10:8:4:None:off:Outlet
 cron:01:12:*:*:0:1
 cron:02:12:*:*:0:1
 cron:03:12:*:*:0:1
 cron:04:12:*:*:0:1
+rdtr:Radiator #1:0:on:5:28
+rdtr:Radiator #2:1:on:5:28
+rdtr:Radiator #3:2:on:5:28
+rdtr:Radiator #4:3:on:5:28
+rdtr:Radiator #5:4:on:5:28
+rdtr:Radiator #6:5:on:5:28
+rdtr:Radiator #7:6:on:5:28
+rdtr:Radiator #8:7:on:5:28
+rdtr:Radiator #9:8:on:5:28
+rdtr:Radiator #10:9:on:5:28
 user:admin:

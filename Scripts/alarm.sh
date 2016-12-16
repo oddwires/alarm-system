@@ -56,8 +56,11 @@ declare -a zcon=()                                              # array to store
 # Array to store user data.                                     # 4 x elements per record: Name, Password, email, One Time Access Code ( OTAC )
  declare -a user=()
 
-# Array to store CRON Job data.                                 # 6 x elements per record minutes, hours, day of month, month, weekday, task
+# Array to store CRON Job data.                                 # 6 x elements per record: minutes, hours, day of month, month, weekday, task
  declare -a cron=()
+
+# Array to store Radiator valve data.                           # 5 x elements per record: Name, Status, Address, Hi value, Lo value
+ declare -a rdtr=()
 
 # Define look up tables...
 # Tasks are passed back as an index number. This array expands the number into a string to use in the cron job.
@@ -91,7 +94,7 @@ Homebridge_Export()
 #                                                                                                                               #
 #################################################################################################################################
 {  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
-   Count=0
+   i=0 ; MAC_Count=0
 
    set +f                                                                                   # going to need Globbing back on to
    sudo rm -r /home/pi/Downloads/HAP-NodeJS/accessories/*.js                                # allow us to clear out the old data
@@ -99,12 +102,34 @@ Homebridge_Export()
    sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                      # remove existing accessory pairing
    set -f                                                                                   # Globbing back off
 
+   # create a Contact switch file for all defined alarm zones...   
+   maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
+   while [ $i -le "$maxval" ]; do
+      ZoneName="${zcon[$i+1]}"
+	  MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
+#     echo $MAC_address                                                                # Diagnostic
+      FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${ZoneName}"_accessory.js"
+	  printf "Creating Homekit Contact sensor: %s\n" "${ZoneName}"
+      cp "/var/www/ConfigFiles/Generic_ContactSensor.js" "${FileName}"
+      oldstring='Parm1'                                                                # need to replace this string...
+      newstring=${ZoneName}                                                            # ... with the zone name
+      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	  oldstring='Parm2'                                                                # need to replace this string...
+      newstring=${MAC_address}
+      sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	  
+#      Count=$(( Count + 1 ))
+	  (( MAC_Count++ ))                                       # Bump the loop and MAC counters
+      i=$(( i + 9 )) 
+   done
+  
 # create an accessory file for each device and customise the parameters...   
-   maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
+   maxval=${#rcon[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
 #     printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
 	  FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rcon[$i]}"_accessory.js"
-	  case "${rcon[$i+5]}" in                                                               # Create default accessory file
+	  MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
+	  case "${rcon[$i+5]}" in                                                              # Create default accessory file
           "Light")
 	         cp "/var/www/ConfigFiles/Generic_Light.js" "$FileName";;
           "Outlet")
@@ -113,23 +138,27 @@ Homebridge_Export()
 	         cp "/var/www/ConfigFiles/Generic_Fan.js" "$FileName";;
 	  esac
 	  if [ "${rcon[$i+5]}" != "None" ]; then
-	      printf "Creating accessory: %s_accessory.js\n" "${rcon[$i]}"                     # visual progress indicator
+	      printf "Creating Homekit accessory: %s_accessory.js\n" "${rcon[$i]}"             # visual progress indicator
     	  # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
           oldstring='Parm1'                                                                # need to replace this string...
           newstring="${rcon[$i]}"                                                          # ... with the accessory name
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	      oldstring='Parm2'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rcon swtch:'$Count':on\\n'                                # command to switch accessory on		  
+          newstring=${MAC_address}
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	      oldstring='Parm3'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rcon swtch:'$Count':off\\n'                               # command to switch accessory off
+          newstring='Siri:iPhone:rcon swtch:'$Count':on\\n'                                # command to switch accessory on		  
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	      oldstring='Parm4'                                                                # need to replace this string...
+          newstring='Siri:iPhone:rcon swtch:'$Count':off\\n'                               # command to switch accessory off
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm5'                                                                # need to replace this string...
           newstring=$(printf 'Handset %02d, Button %01d\n' "${rcon[i+1]}" "${rcon[$i+2]}") # configuration details
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
       fi
       Count=$(( Count + 1 ))        
+ 	  (( MAC_Count++ ))                                       # Bump the loop and MAC counters
       i=$(( i + 6 )) 
    done
    cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
@@ -195,15 +224,15 @@ WriteCronJobs()
                  "${cron[$i]}" "${cron[$i+1]}" "${cron[$i+2]}" "${cron[$i+3]}" "${cron[$i+4]}" \
                  "${cmnd[${cron[$i+5]}]}" >>/var/www/cron.txt
        else
-       # Dynamic job format - kind of hard to explain, but converts the task number sent from the web page into the correct command
-       # to trigger the Radio Control channel. The mapping goes like...
-       #     web page --> RC channel
-       #            4 --> 0 on
-       #            5 --> 0 off
-       #            6 --> 1 on
-       #            7 --> 1 off
-       #            8 --> 2 on
-       #            9 --> 2 off etc ( depending on the number of Radio Control channels currently defined )
+# Dynamic job format - kind of hard to explain, but converts the task number sent from the web page into the correct command
+# to trigger the Radio Control channel. The mapping goes like...
+#     web page --> RC channel
+#            4 --> 0 on
+#            5 --> 0 off
+#            6 --> 1 on
+#            7 --> 1 off
+#            8 --> 2 on
+#            9 --> 2 off etc ( depending on the number of Radio Control channels currently defined )
 
            if [ $(( cron[$i+5] % 2 )) -eq 0 ]; then                                                  # even values = switch on
              printf "%s %s %s %s %s echo \"(task):(RasPi):rcon swtch:%s:on\" >>/var/www/data/input.txt\n" \
@@ -214,6 +243,9 @@ WriteCronJobs()
                  "${cron[$i]}" "${cron[$i+1]}" "${cron[$i+2]}" "${cron[$i+3]}" "${cron[$i+4]}" \
                  "$(( (( cron[$i+5] -4 )) /2 ))" >>/var/www/cron.txt
            fi
+###############################################
+# TBD - need to handle radiator schedule tasks		   
+###############################################
        fi
        i=$(( i + 6 )) 
     done
@@ -257,15 +289,15 @@ CheckIP()
 { 
   Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
   if [[ $Current_routerIP != $SETUP_routerIP ]] ; then
-    title="Alarm system: Router IP change"
-    eMail "$title"
-    SETUP_routerIP=${Current_routerIP}                                            # Update variable
-    tmp=${CURRTIME}",(task),(RasPi),New router IP = "${SETUP_routerIP}            # string for log
-  else
-    tmp=${CURRTIME}",(task),(RasPi),Check router IP - no change"                  # string for log
-  fi
-  echo $tmp >> $LOGFILE                                                           # log the event
-  echo $tmp                                                                       # copy to console
+     title="Alarm system: Router IP change"
+     eMail "$title"
+     SETUP_routerIP=${Current_routerIP}                                            # Update variable
+     tmp=${CURRTIME}",(task),(RasPi),New router IP = "${SETUP_routerIP}            # string for log
+   else
+     tmp=${CURRTIME}",(task),(RasPi),Check router IP - no change"                  # string for log
+   fi
+   echo $tmp >> $LOGFILE                                                           # log the event
+   echo $tmp                                                                       # copy to console
 
 # Update the remaining system info...
   SETUP_localIP=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
@@ -387,17 +419,18 @@ load_status_file()
 #################################################################################################################################
 #                                                                                                                               #
 # Routine to load configuration file to memory.                                                                                 #
-# Handles up to 16 RC channel names                                                                                             #
 #                                                                                                                               #
 #################################################################################################################################
 { unset rcon[@] ; rconindex=0                                              # reset data arrays and pointers
   unset cron[@] ; cronindex=0
   unset zcon[@] ; zconindex=0
+  unset rdtr[@] ; rdtrindex=0
   while read info; do
-#    echo "info1 - "$info                                                   # DIAGNOSTIC
+#       echo "info1 - "$info                                                   # DIAGNOSTIC
         OLD_IFS="$IFS"                                                      # split the line
         IFS=:
         info_array=( $info )
+#       declare -p info_array                                           # DIAGNOSTIC
         IFS="$OLD_IFS"
         case "${info_array[0]}" in                                          # Just looking at the first string
           "rcon")                                                           # Load Remote Control channel data
@@ -424,6 +457,12 @@ load_status_file()
                 cron[${cronindex}]=${info_array[4]} ; (( cronindex++ ))
                 cron[${cronindex}]=${info_array[5]} ; (( cronindex++ ))
                 cron[${cronindex}]=${info_array[6]} ; (( cronindex++ )) ;;
+          "rdtr")
+                rdtr[${rdtrindex}]=${info_array[1]} ; (( rdtrindex++ ))
+                rdtr[${rdtrindex}]=${info_array[2]} ; (( rdtrindex++ ))
+                rdtr[${rdtrindex}]=${info_array[3]} ; (( rdtrindex++ ))
+                rdtr[${rdtrindex}]=${info_array[4]} ; (( rdtrindex++ ))
+                rdtr[${rdtrindex}]=${info_array[5]} ; (( rdtrindex++ )) ;;
           "alarm")
             if [[ ${info_array[1]} = "duration" ]]; then
                 SETUP_duration=${info_array[2]}
@@ -500,6 +539,13 @@ write_status_file()
       i=$(( i + 6 )) 
    done
 
+   # Write the radiator configuration...
+   maxval=${#rdtr[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
+   while [ $i -le "$maxval" ]; do
+      printf "rdtr:%s:%s:%s:%s:%s\n" "${rdtr[$i]}" "${rdtr[$i+1]}" "${rdtr[$i+2]}" "${rdtr[$i+3]}" "${rdtr[$i+4]}" >>/var/www/temp1.txt
+      i=$(( i + 5 )) 
+   done
+
    # Write the User configuration...
    maxval=${#user[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
@@ -520,7 +566,7 @@ alm_on()
   echo $tmp >> $LOGFILE                                                                  # log the event
   echo $tmp                                                                              # tell the user (like he needs to know!)
 
-  tmp="5"                                                                                # default durtion in seconds
+  tmp="5"                                                                                # default duration in seconds
   if [[ ${SETUP_duration} == "9 mins" ]]; then
      tmp=$((9 * 60))                                                                     # 9 minutes in seconds
   fi
@@ -726,6 +772,30 @@ user_diag()
       sleep 0.5s
 }
 
+radiator_diag()
+#################################################################################################################################
+#                                                                                                                               #
+# Radiator diagnostic routine. Prints user data array to console.                                                               #
+#                                                                                                                               #
+#     ** Development use only **                                                                                                #
+#    This routine slows down the scan of the alarm inputs, so should never be left running on a live system.                    #
+#                                                                                                                               #
+#################################################################################################################################
+{   clear
+    printf %s"----|------------|---------|--------|----------|----------\n"
+      printf "Num | Name       | Address | Status | Hi value | Lo value\n"
+    printf %s"----|------------|---------|--------|----------|----------\n"
+    maxval=${#rdtr[@]}                                                                  # number of defined Radiators
+    (( maxval-- ))                                                                      # bump down because the array starts at zero
+    i=0                                                                                 # array index 
+    while [ $i -le "$maxval" ]; do                                                      # print all array data
+        printf "%3s | %10s | %7s | %6s | %8s | %8s \n" $((i/5)) "${rdtr[$i]}" "${rdtr[$i+1]}" "${rdtr[$i+2]}" "${rdtr[$i+3]}" "${rdtr[$i+4]}"
+        i=$(( i + 5 )) 
+    done
+    printf %s"----|------------|---------|--------|----------|----------\n"
+    sleep 0.5s
+}
+
 # ...end of function definitions.
 
 #################################################################################################################################
@@ -793,7 +863,7 @@ else
                                                             # but we don't have any existing email server details either, so will cause a  # warning.
 fi
 CreateTaskList                                              # assemble the list of all the task strings
-WriteCronJobs                                               # syncronise cron jobs array with system CRONTAB file
+WriteCronJobs                                               # synchronise cron jobs array with system CRONTAB file
 
 write_status_file /var/www/data/status.txt                  # This shouldn't be needed in normal operation, but during dev work,
                                                             # a system crash will leave the system without a status file, which in
@@ -1044,10 +1114,12 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    rcon[${PARAMS[3]}*6+4]="${PARAMS[4]}"                   # set array element to new string value
                    if [ "${PARAMS[4]}" == "on" ]; then
                        # format the command string for 'on'...
-                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X1 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
+#                      printf -v tmp ' -y 1 0x08 0x%02X 0x%X1 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
+                       printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
                    else
                        # format the command string for 'off'...
-                       printf -v tmp ' -y 1 0x08 0x%02X 0x%X0 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
+#                      printf -v tmp ' -y 1 0x08 0x%02X 0x%X0 \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
+                       printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*6+1]} ${rcon[${PARAMS[3]}*6+2]}
                    fi
 #                  echo $tmp                                               # DEBUG - view the I2C command
                    if [ ${running_on_RasPi} == "true" ]; then
@@ -1085,7 +1157,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    zcon[${PARAMS[3]}*9+$Triggered]="false"                                    # create triggered element
                    zcon[${PARAMS[3]}*9+$PreviousValue]="0"                                    # create previous value element (0=open)
 
-                   # We are going to read the cirucit state and check the resulting status of the zone NOW !
+                   # We are going to read the circuit state and check the resulting status of the zone NOW !
                    # This means if the zone has entered a triggered state, the web page will be updated accordingly.
 
                    zcon[${PARAMS[3]}*9+$PreviousValue]=${zcon[${PARAMS[3]}*9+$CurrentValue]}  # record previous state
@@ -1105,6 +1177,50 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                  "Check ip")
                    CheckIP;;                                               # pass to subroutine to sort out
 
+#################################################################################################################################
+#
+# Handle commands passed from the Radiator web page.
+#
+#################################################################################################################################
+                 "rdtr swtch")
+#                  tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${rdtr[${PARAMS[3]}*5]}", \
+#			           "${rdtr[${PARAMS[3]}*5+1]}","${PARAMS[4]}
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rdtr[${PARAMS[3]}*5]}", \
+				           "radiator","${PARAMS[4]}
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   rdtr[${PARAMS[3]}*5+2]="${PARAMS[4]}"                   # set array element to new string value
+                   if [ "${PARAMS[4]}" == "on" ]; then
+                       # format the command string for 'on'...
+                       printf -v tmp ' -y 1 0x08 0x02 0x%02X 0x00 0x01 i \n' ${rdtr[${PARAMS[3]}*5+1]}
+                   else
+                       # format the command string for 'off'...
+                       printf -v tmp ' -y 1 0x08 0x02 0x%02X 0x00 0x00 i \n' ${rdtr[${PARAMS[3]}*5+1]}
+                   fi
+#                  echo $tmp                                               # DEBUG - view the I2C command
+                   if [ ${running_on_RasPi} == "true" ]; then
+                   # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
+                       i2cset $tmp                                         # send I2C command to PIC chip
+                       sleep 0.3s                                          # give the PIC time to complete the transmition
+                   fi;;
+                "rdtr cfg")                                               # Edits existing, or adds new users...
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
+                   tmp=$tmp${PARAMS[4]}","${PARAMS[5]}
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   rdtr[${PARAMS[3]}*5]=${PARAMS[4]}                       # Update name
+                   rdtr[${PARAMS[3]}*5+1]=${PARAMS[5]}                     # Update address
+				   rdtr[${PARAMS[3]}*5+2]="off"                            # Initialise status
+                   rdtr[${PARAMS[3]}*5+3]=${PARAMS[5]}                     # Update high value
+                   rdtr[${PARAMS[3]}*5+4]=${PARAMS[6]}                     # Update low value
+                   CreateTaskList;;                                        # assemble the list of all the task strings
+                  "rdtr del")
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   rdtr=("${rdtr[@]:0:$((${PARAMS[3]}*5))}" "${rdtr[@]:$(($((${PARAMS[3]}*5)) + 5))}")
+                   ;;
+					   
 #################################################################################################################################
 #
 # Handle commands passed from the Tasks web page.
@@ -1196,5 +1312,6 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #     crontab_diag                                                                    # DIAGNOSTIC - always comment this line out on a live system
 #     rcon_diag                                                                       # DIAGNOSTIC - always comment this line out on a live system
 #     user_diag                                                                       # DIAGNOSTIC - always comment this line out on a live system
+#     radiator_diag                                                                   # DIAGNOSTIC - always comment this line out on a live system
 
 done

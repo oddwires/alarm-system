@@ -8,7 +8,7 @@ if (isset($_POST['retval']))
 {     exec("rm -f /var/www/data/status.txt");                                // remove old data
       $tmp = $_COOKIE['username'].":".$_SERVER['REMOTE_ADDR'].":";
       if (substr($_POST['retval'],0,8) != "user pwd") { 
-         // most of the time we just pass the data to the BASH shell cript as clear text...    
+         // most of the time we just pass the data to the BASH shell script as clear text...    
          $tmp = $tmp.$_POST['retval'];
          } else {
          // but if we are sending a password...
@@ -21,7 +21,7 @@ if (isset($_POST['retval']))
          // Original PHP code by Chirp Internet: www.chirp.com.au
          // Please acknowledge use of this code by including this header.
 
-         // Sorry Chirp, I've really mangled your code to make it work with mine...
+         // Sorry Chirp, but I've had to really mangle your code to make it work with mine...
          $rounds = 7;
          // Create a random 22 character salt...
          $salt = "";
@@ -39,7 +39,7 @@ if (isset($_POST['retval']))
 $loggedin=(isset($_COOKIE['loggedin']) && $_COOKIE['loggedin']=='true')?true:false;
 $username=$_COOKIE["username"];
 $user_ip=$_SERVER['REMOTE_ADDR'];
-$RCnum=0; $ZnNum=0; $CRnum=0; $USRNum=0;
+$RCnum=0; $ZnNum=0; $CRnum=0; $USRNum=0; $RDTRnum=0;
 $time = 4;                                                                   // time in seconds to wait for the status file to be created.
 $found = false; $filename = '/var/www/data/status.txt';
 
@@ -85,6 +85,11 @@ for($i=0; $i<$time; $i++)
                    $taskname[] = $rcon[$RCnum][1]." on";                     // add additional task to switch RC channel on
                    $taskname[] = $rcon[$RCnum][1]." off";                    // add additional task to switch RC channel off
                    $RCnum++; }
+              if (substr($data,0,5) == "rdtr:") {
+                   $rdtr[$RDTRnum]=(explode(':',$data));
+                   $taskname[] = $rdtr[$RDTRnum][1]." radiator on";                   // add additional task to switch radiator on
+                   $taskname[] = $rdtr[$RDTRnum][1]." radiator off";                  // add additional task to switch radiator off
+                   $RDTRnum++; }
               if (substr($data,0,5) == "cron:") {
                    $tmp=strlen($data)-1;
                    $data=substr($data,0,$tmp);                               // loose white space at end of line
