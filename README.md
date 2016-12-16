@@ -6,7 +6,7 @@ Home alarm and automation system - evaluation software.
 <li>Should install and run on any Debian system, but developed to run on 
 <li>a <a href="https://www.raspberrypi.org/products/raspberry-pi-2-model-b/">Raspberry Pi 2 model B</a></li>
 <li>Uses jQT JavaScript plugin to provide an iPhone interface.</li>
-<li>Uses <a href="https://github.com/KhaosT/HAP-NodeJS">HAP-NodeJS to interface to HomeKit.</a></li>
+<li>Uses <a href="https://github.com/KhaosT/HAP-NodeJS">HAP-NodeJS</a> to interface to HomeKit.</li>
 <li>Full system requires custom circuit board connected to Raspberry Pi, but software
 designed to run even if circuit board is missing.</li>
 </ul>
@@ -15,7 +15,7 @@ designed to run even if circuit board is missing.</li>
 <ul>
 <li>Control of Radio Control transmitter through I2C interface.</li>
 <li>Up to 160 Radio Control channels.</li>
-<li>Control of <a href="http://www.smartwares.eu/en-us/wireless-radiator-valve-shs-53000?returnurl=%2fen-us%2fsearch%3fq%3dradiator%2520valve">Smartwares Radiator valves through I2C interface.</a></li>
+<li>Control of <a href="http://www.smartwares.eu/en-us/wireless-radiator-valve-shs-53000?returnurl=%2fen-us%2fsearch%3fq%3dradiator%2520valve">Smartwares Radiator valves</a> through I2C interface.</li>
 <li>Up to 16 Radiator valve channels.</li>
 <li>Control of domestic Security system through industry standard 12volt (wired) contact sensors.</li>
 <li>Up to 12 contact sensor circuits.</li>
