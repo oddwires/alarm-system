@@ -31,8 +31,8 @@ designed to run even if circuit board is missing.</li>
   <li>12 configurable alarm zones (cabled)</li>
   <li>3 alarm modes: Standby, Night mode, Day mode</li>
   <li>Up to 160 Remote control mains socket</li>
-  <li>Up to16 Radiator valves.</li>  
-  <li>Industry standard 12 volt interface to alarm sensors, bell boxes and strobe</li>
+  <li>Up to16 Radiator valves.</li>
+  <li>Industry standard 12 volt interface to alarm sensors, bell boxes and strobe</li>
   <li>Full (internet) remote control using custom iPhone interface</li>
   <li>email alerts for alarm events</li>
   <li>Automatically detect and report changes to router IP address</li>
