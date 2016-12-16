@@ -12,9 +12,9 @@ designed to run even if circuit board is missing.</li>
   
 <b>Hardware support:-</b><br>
 <ul>
-<li>Control of Radio Control transmitter through I2C interface.</li>
-<li>Up to 160 Radio Control channels.</li>
-<li>Control of <a href="http://www.smartwares.eu/en-us/wireless-radiator-valve-shs-53000?returnurl=%2fen-us%2fsearch%3fq%3dradiator%2520valve">Smartwares Radiator valves</a> through I2C interface.</li>
+<li>Control of Remote control mains sockets using PIC chip with I2C interface.</li>
+<li>Supports up to 160 Remote control mains sockets.</li>
+<li>Control of <a href="http://www.smartwares.eu/en-us/wireless-radiator-valve-shs-53000?returnurl=%2fen-us%2fsearch%3fq%3dradiator%2520valve">Smartwares Radiator valves</a> using PIC chip with I2C interface.</li>
 <li>Up to 16 Radiator valve channels.</li>
 <li>Control of domestic Security system through industry standard 12volt (wired) contact sensors.</li>
 <li>Up to 12 contact sensor circuits.</li>
