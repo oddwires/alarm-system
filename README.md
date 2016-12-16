@@ -5,7 +5,7 @@ Home alarm and automation system - evaluation software.
 <ul>
 <li>Should install and run on any Debian system, but developed to run on 
 <li>a <a href="https://www.raspberrypi.org/products/raspberry-pi-2-model-b/">Raspberry Pi 2 model B</a></li>
-<li>Uses jQT JavaScript plugin to provide an iPhone interface.</li>
+<li>Uses <a href="https://github.com/senchalabs/jQTouch">jQT</a> JavaScript plugin to provide an iPhone interface.</li>
 <li>Uses <a href="https://github.com/KhaosT/HAP-NodeJS">HAP-NodeJS</a> to interface to HomeKit.</li>
 <li>Full system requires custom circuit board connected to Raspberry Pi, but software
 designed to run even if circuit board is missing.</li>
