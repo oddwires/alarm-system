@@ -8,20 +8,21 @@
 #################################################################################################################################
 #                                                                                                                               #
 # Features:                                                                                                                     #
-#     RasPi platform - compatible with Rev 1.0 and Rev 2.0 hardware                                                             #
-#     12 configurable alarm zones (cabled)                                                                                      #
-#     3 alarm modes: Standby, Night mode, Day mode                                                                              #
-#     Up to 160 configurable automation channels (radio controlled)                                                             #
-#     Industry standard 12 volt interface to alarm sensors, bell boxes and strobe                                               #
-#     Internet remote control using iPhone 4s web app interface                                                                 #
+#     RasPi platform - compatible with Rev 1.0 and Rev 2.0 hardware.                                                            #
+#     12 configurable alarm zones (cabled).                                                                                     #
+#     3 alarm modes: Standby, Night mode, Day mode.                                                                             #
+#     Up to 160 configurable automation channels (radio controlled).                                                            #
+#     Up to 3 configurable thermostatic radiator valves (radio controlled).                                                     #
+#     Industry standard 12 volt interface to alarm sensors, bell boxes and strobe.                                              #
+#     Internet remote control using iPhone 4s web app interface.                                                                #
 #     Animated page transitions and user controls - look and feel of a native app.                                              #
-#     eMail alerts for alarm events                                                                                             #
-#     Automatically detect changes to router IP address                                                                         #
-#     Scheduled tasks                                                                                                           #
-#     Security logs                                                                                                             #
-#     Blowfish hashed passwords                                                                                                 #
-#     'Remember Me' - quick login by means of one time access code                                                              #
-#     Fail2Ban - detects multiple failed logons and modify firewall rules to block offending IP address                         #
+#     eMail alerts for alarm events.                                                                                            #
+#     Automatically detect changes to router IP address.                                                                        #
+#     Scheduled tasks.                                                                                                          #
+#     Security logs.                                                                                                            #
+#     Blowfish hashed passwords.                                                                                                #
+#     'Remember Me' - quick login by means of one time access code.                                                             #
+#     Fail2Ban - detects multiple failed logons and modify firewall rules to block offending IP address.                        #
 #     Homebridge - Siri voice control.                                                                                          #
 #                                                                                                                               #
 #################################################################################################################################
@@ -59,7 +60,7 @@ declare -a zcon=()                                              # array to store
 # Array to store CRON Job data.                                 # 6 x elements per record: minutes, hours, day of month, month, weekday, task
  declare -a cron=()
 
-# Array to store Radiator valve data.                           # 5 x elements per record: Name, Status, Address, Hi value, Lo value
+# Array to store Radiator valve data.                           # 5 x elements per record: Name, Status, Address, Hi temp, Lo temp
  declare -a rdtr=()
 
 # Define look up tables...
@@ -71,7 +72,7 @@ declare -a zcon=()                                              # array to store
  declare -a anode=('4' '18' '17' '23' '4' '18' '17' '23' '4' '18' '17' '23')
 
 # List of cathodes used by the 12 input circuits. There is no logic behind these - its just the way the PCB is constructed.
-# ONLY THEY'RE NOT REALLY CATHODES - THEY ARE GPIO INPUTS, SO I PROBABLY NEED TO RENAME THIS VARIABLE
+# ONLY THEY'RE NOT REALLY CATHODES ANy MORE - THEY ARE GPIO INPUTS, SO I PROBABLY NEED TO RENAME THIS VARIABLE
  declare -a cathode=('9' '9' '9' '9' '25' '25' '25' '25' '10' '10' '10' '10')
 
 # GLOBAL variables used by Setup...
@@ -93,7 +94,8 @@ Homebridge_Export()
 # Function to export all automation ( switch ) configuration as accessories to be used by the Homebridge.                       #
 #                                                                                                                               #
 #################################################################################################################################
-{  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
+{  
+#  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
    i=0 ; MAC_Count=0
 
    set +f                                                                                   # going to need Globbing back on to
@@ -102,7 +104,7 @@ Homebridge_Export()
    sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                      # remove existing accessory pairing
    set -f                                                                                   # Globbing back off
 
-   # create a Contact switch file for all defined alarm zones...   
+# create an accessory file and customise the parameters for all defined alarm zones...   
    maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
       ZoneName="${zcon[$i+1]}"
@@ -119,11 +121,11 @@ Homebridge_Export()
       sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
 	  
 #      Count=$(( Count + 1 ))
-	  (( MAC_Count++ ))                                       # Bump the loop and MAC counters
+	  (( MAC_Count++ ))                                                                # Bump the loop and MAC counters
       i=$(( i + 9 )) 
    done
   
-# create an accessory file for each device and customise the parameters...   
+# create an accessory file and customise the parameters for all defined power outlets...   
    maxval=${#rcon[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
 #     printf "rcon:%s:%s:%s:%s:%s:%s\n" "${rcon[$i]}" "${rcon[$i+1]}" "${rcon[$i+2]}" "${rcon[$i+3]}" "${rcon[$i+4]}" "${rcon[$i+5]}"
@@ -138,7 +140,7 @@ Homebridge_Export()
 	         cp "/var/www/ConfigFiles/Generic_Fan.js" "$FileName";;
 	  esac
 	  if [ "${rcon[$i+5]}" != "None" ]; then
-	      printf "Creating Homekit accessory: %s_accessory.js\n" "${rcon[$i]}"             # visual progress indicator
+	      printf "Creating Homekit power outlet: %s_accessory.js\n" "${rcon[$i]}"             # visual progress indicator
     	  # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
           oldstring='Parm1'                                                                # need to replace this string...
@@ -158,10 +160,47 @@ Homebridge_Export()
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
       fi
       Count=$(( Count + 1 ))        
- 	  (( MAC_Count++ ))                                       # Bump the loop and MAC counters
+ 	  (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
       i=$(( i + 6 )) 
    done
+
+# create an accessory file and customise the parameters for all defined radiator...   
+   maxval=${#rdtr[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
+   while [ $i -le "$maxval" ]; do
+#     printf "rdtr:%s:%s:%s:%s:%s\n" "${rdtr[$i]}" "${rdtr[$i+1]}" "${rdtr[$i+2]}" "${rdtr[$i+3]}" "${rdtr[$i+4]}"
+	  FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rdtr[$i]}" radiator_accessory.js"
+      cp "/var/www/ConfigFiles/Generic_Radiator.js" "$FileName"
+	  MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
+	  if [ "${rdtr[$i+4]}" != "None" ]; then
+	      printf "Creating Homekit radiator: %s radiator_accessory.js\n" "${rdtr[$i]}"     # visual progress indicator
+    	  # if we have copied a file we need to customise it...
+          # Function strings to pass to alarm service
+          oldstring='Parm1'                                                                # need to replace this string...
+          newstring="${rdtr[$i]}"                                                          # ... with the accessory name
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm2'                                                                # need to replace this string...
+          newstring=${MAC_address}
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm3'                                                                # need to replace this string...
+          newstring='Siri:iPhone:rdtr swtch:'$Count':on\\n'                                # command to switch accessory on		  
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm4'                                                                # need to replace this string...
+          newstring='Siri:iPhone:rdtr swtch:'$Count':off\\n'                               # command to switch accessory off
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm5'                                                                # need to replace Max temp...
+          newstring="${rdtr[$i+3]}"                                                        # configuration details
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+	      oldstring='Parm6'                                                                # need to replace Min temp...
+          newstring="${rdtr[$i+4]}"                                                        # configuration details
+          sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
+      fi
+      Count=$(( Count + 1 ))        
+ 	  (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
+      i=$(( i + 5 )) 
+   done
+
    cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
+   sudo killall node                                                                       # ensure we get a clean start...
    printf "Export complete\nRestarting HAP-NodeJS\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
 }
@@ -170,9 +209,9 @@ CreateTaskList()
 #################################################################################################################################
 #                                                                                                                               #
 # Function to create a list of tasks currently defined on the device.                                                           #
-# This is required to provide acurate descriptions on events in the log files and on the console.                               #
+# This is required to provide accurate descriptions on events in the log files and on the console.                               #
 # The first four tasks are static as they allow the status of the alarm to be controlled.                                       #
-# The remaining tasks are variable bassed on the Remote Control chennels currentlt defined.                                     #
+# The remaining tasks are variable based on the Remote Control channels currently defined.                                     #
 # Each Remote Control channel requires an 'on' task and an 'off' task associated with it.                                       #
 #                                                                                                                               #
 #################################################################################################################################
@@ -287,17 +326,17 @@ CheckIP()
 #                                                                                                                               #
 #################################################################################################################################
 { 
-  Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
-  if [[ $Current_routerIP != $SETUP_routerIP ]] ; then
-     title="Alarm system: Router IP change"
-     eMail "$title"
-     SETUP_routerIP=${Current_routerIP}                                            # Update variable
-     tmp=${CURRTIME}",(task),(RasPi),New router IP = "${SETUP_routerIP}            # string for log
-   else
-     tmp=${CURRTIME}",(task),(RasPi),Check router IP - no change"                  # string for log
-   fi
-   echo $tmp >> $LOGFILE                                                           # log the event
-   echo $tmp                                                                       # copy to console
+#  Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
+#  if [[ $Current_routerIP != $SETUP_routerIP ]] ; then
+#     title="Alarm system: Router IP change"
+#     eMail "$title"
+#     SETUP_routerIP=${Current_routerIP}                                            # Update variable
+#     tmp=${CURRTIME}",(task),(RasPi),New router IP = "${SETUP_routerIP}            # string for log
+#   else
+#     tmp=${CURRTIME}",(task),(RasPi),Check router IP - no change"                  # string for log
+#   fi
+#   echo $tmp >> $LOGFILE                                                           # log the event
+#   echo $tmp                                                                       # copy to console
 
 # Update the remaining system info...
   SETUP_localIP=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
@@ -927,7 +966,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 				   if [ "${PARAMS[3]}" == "re-pair" ]; then 
                       tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge re-pair"
                       echo $tmp >> $LOGFILE                                   # log the event
-                      echo $tmp                                               # tell the user				   
+                      echo $tmp                                               # tell the user
 				      sudo service homebridge re-pair
 				   fi;;
                  "mode")
@@ -1211,8 +1250,8 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    rdtr[${PARAMS[3]}*5]=${PARAMS[4]}                       # Update name
                    rdtr[${PARAMS[3]}*5+1]=${PARAMS[5]}                     # Update address
 				   rdtr[${PARAMS[3]}*5+2]="off"                            # Initialise status
-                   rdtr[${PARAMS[3]}*5+3]=${PARAMS[5]}                     # Update high value
-                   rdtr[${PARAMS[3]}*5+4]=${PARAMS[6]}                     # Update low value
+                   rdtr[${PARAMS[3]}*5+3]=${PARAMS[6]}                     # Update high value
+                   rdtr[${PARAMS[3]}*5+4]=${PARAMS[7]}                     # Update low value
                    CreateTaskList;;                                        # assemble the list of all the task strings
                   "rdtr del")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
