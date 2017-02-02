@@ -97,6 +97,7 @@ echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    # Apache install...
    sudo apt-get install -y apache2 php5 libapache2-mod-php5
+
    # edit the Apache2 default http web page...
    filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
    oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
@@ -290,38 +291,30 @@ echo "*                                                                         
 echo "********************************************************************************"
 read -n1 -r key
 echo
+#
+# Install updated to work with Apache/2.4.10 (Raspbian)
+#
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-  # Create Self Signed Certificate...
-   sudo a2ensite default-ssl
-   sudo a2enmod ssl
-
    if [ "$(ls -A /etc/apache2/ssl)" ]; then
-       sudo rm -f /etc/apache2/ssl/*                                         # previous directory found, so remove any old certificates
+       sudo rm -f /etc/apache2/ssl/*                                          # previous directory found, so remove any old certificates
    else
       sudo mkdir /etc/apache2/ssl
    fi
+   sudo a2enmod ssl
 
-   sudo openssl req -x509 -nodes -days 1095 -newkey rsa:2048 -out /etc/apache2/ssl/server.crt -keyout /etc/apache2/ssl/server.key
-   sudo chmod 600 /etc/apache2/ssl/server.key
-   
-   # edit the port configuration...
-   filename='/etc/apache2/ports.conf'                                         # File to be edited
-   oldstring='NameVirtualHost'                                                # need to replace this string...
-   newstring='#NameVirtualHost'                                               # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-   oldstring='Listen 80'                                                      # and need to replace this string...
-   newstring='#Listen 80'           # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-   
+   # Create Self Signed Certificate...
+   sudo openssl req -new -x509 -days 365 -nodes -out /etc/apache2/ssl/apache.pem -keyout /etc/apache2/ssl/apache.key
+   sudo chmod 600 /etc/apache2/ssl/apache*
+      
    # edit the virtual site file...
    filename='/etc/apache2/sites-enabled/default-ssl'
-#   oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
-#   newstring='SSLCertificateFile    /etc/apache2/ssl/server.crt'              # ... with this one
-#   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+   oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
+   newstring='SSLCertificateFile    /etc/apache2/ssl/apache.pem'              # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
  	
-#   oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
-#   newstring='SSLCertificateKeyFile /etc/apache2/ssl/server.key'              # ... with this one
-#   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
+   oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
+   newstring='SSLCertificateKeyFile /etc/apache2/ssl/apache.key'              # ... with this one
+   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
 
    # edit the Apache2 default web page...
    filename='/etc/apache2/sites-enabled/default-ssl.conf'                     # File to be edited
@@ -329,7 +322,8 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    newstring='DocumentRoot /var/www'                                          # ... with this one
    sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
 
-   sudo service apache2 restart
+   sudo a2ensite default-ssl.conf                                             # enable web site
+   sudo service apache2 reload
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
