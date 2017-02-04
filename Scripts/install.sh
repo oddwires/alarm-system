@@ -317,7 +317,6 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
 
    # edit the Apache2 default web page...
-   filename='/etc/apache2/sites-enabled/default-ssl.conf'                     # File to be edited
    oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
    newstring='DocumentRoot /var/www'                                          # ... with this one
    sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
