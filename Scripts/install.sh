@@ -265,12 +265,12 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
       sudo mv /var/www/Scripts/alarm /etc/init.d/
       chgrp root /etc/init.d/alarm
 
-	  # make alarm executable...
-	  sudo chmod +x /var/www/Scripts/alarm.sh
+      # make alarm executable...
+      sudo chmod +x /var/www/Scripts/alarm.sh
 
       # make daemon autostart...
       sudo update-rc.d alarm defaults
-	  
+  
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -305,22 +305,10 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    # Create Self Signed Certificate...
    sudo openssl req -new -x509 -days 365 -nodes -out /etc/apache2/ssl/apache.pem -keyout /etc/apache2/ssl/apache.key
    sudo chmod 600 /etc/apache2/ssl/apache*
-      
-   # edit the virtual site file...
-   filename='/etc/apache2/sites-enabled/default-ssl'
-   oldstring='SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem'     # need to replace this string...
-   newstring='SSLCertificateFile    /etc/apache2/ssl/apache.pem'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
- 	
-   oldstring='SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key'   # need to replace this string...
-   newstring='SSLCertificateKeyFile /etc/apache2/ssl/apache.key'              # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-
-   # edit the Apache2 default web page...
-   oldstring='DocumentRoot /var/www/html'                                     # need to replace this string...
-   newstring='DocumentRoot /var/www'                                          # ... with this one
-   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"                     # do it.
-
+   sudo cp /etc/apache2/ssl/apache.pem /var/www/logs/                        # copy the certificate to location that can be accessed over the network
+   
+   # create the virtual site...
+   sudo cp ./alarm-system/ConfigFiles/default-ssl.conf /etc/apache2/sites-available/
    sudo a2ensite default-ssl.conf                                             # enable web site
    sudo service apache2 reload
 fi
@@ -399,37 +387,15 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # install various pre requisites...
-# sudo apt-get install libnss-mdns libavahi-compat-libdnssd-dev -y
   sudo apt-get install libavahi-compat-libdnssd-dev -y
 
-#  sudo apt-get install -y gcc-4.8 g++-4.8
-#  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 20
-#  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
-#  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
-#  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-
-#  # install Node.JS v4
-#  wget https://nodejs.org/dist/v4.2.1/node-v4.2.1-linux-armv6l.tar.gz 
-#  tar -xvf node-v4.2.1-linux-armv6l.tar.gz 
-#  cd node-v4.2.1-linux-armv6l
-#  sudo cp -R * /usr/local/
 wget -qO- https://deb.nodesource.com/setup_4.x | sudo bash -
 sudo apt-get -y install nodejs
-  
-#  wget http://node-arm.herokuapp.com/node_0.10.36_armhf.deb 
-#  dpkg -i node_0.10.36_armhf.deb 
-#  cd ..
- 
+
   # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
   cd HAP-NodeJS/
   npm rebuild
-# sudo npm install node-persist
-# sudo npm install srp
-# sudo npm install mdns
-# sudo npm install ed25519
-# sudo npm install curve25519
-# sudo npm install debug
   sudo npm install buffer-shims --unsafe-perm
   sudo npm install curve25519-n --unsafe-perm
   sudo npm install debug --unsafe-perm
@@ -441,7 +407,6 @@ sudo apt-get -y install nodejs
   
   sudo npm -g install forever
   cd ..
- #sudo rm -f node-v4.2.1-linux-armv6l.tar.gz
   
   # create the new daemon...
   sudo mv /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
