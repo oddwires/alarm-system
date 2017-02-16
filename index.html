@@ -66,20 +66,20 @@
                <a class="button flipright" href="dostatus.php">Status</a></a>
             </div>
              </br>
-			 
-			 <!-- Using most of the info class, but overwriting a few key variables...    -->
-			  <fieldset class=info style="border-radius: 25px; -webkit-margin-start: 8px; -webkit-margin-end: 8px; border: 3px solid; text-align: left; padding:0px">
-			 
+
+             <!-- Using most of the info class, but overwriting a few key variables...    -->
+             <fieldset class=info style="border-radius: 25px; -webkit-margin-start: 8px; -webkit-margin-end: 8px; border: 3px solid; text-align: left; padding:0px">
+ 
              <table border="0" style="margin: 0px auto; width: 100%;">
-			 <tr><td><ul class="rounded">
+             <tr><td><ul class="rounded">
                 <li><input type="text" id="username" name="username" placeholder="Username"/></li>
                 <li><input type="password" id="pword" name="password" placeholder="Password"/></li>
             </ul></td><td>
-			   <a style="color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Logon</a>
-			&nbsp&nbsp&nbsp&nbsp<input type="checkbox" id="rememberme" name="rememberme">&nbsp&nbspKeep me</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsplogged on
-			</td></tr></table>
-			
-			</fieldset></br>
+            <a style="color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Logon</a>
+            &nbsp&nbsp&nbsp&nbsp<input type="checkbox" id="rememberme" name="rememberme">&nbsp&nbspKeep me</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsplogged on
+            </td></tr></table>
+
+            </fieldset></br>
             <div class="info">
             This is a monitored system.<br>
             Do not attempt to log on<br>
@@ -197,40 +197,26 @@
                       <li><a data-stylesheet-title="slate" id="theme_6" data-switch-stylesheet="jQTouch/themes/css/slate.css" href="#">Slate</a></li>
                   </ul>
         </div>
-		<div id="homekit">
+        <div id="homekit">
                <div class="toolbar">
                     <h1>HomeKit</h1>
                      <a class="back2div menu" onclick="ResetMenu()" href="#menusheet">Menu</a>
-                </div>
-				<div class="info" style="text-align: left";>
-				Both these functions require a Homekit reset at your iPhone...<br>
-				* Open Home and tap the Home tab<br>
-				* Tap the arrow in the top left corner of the screen<br>
-				* Scroll to the bottom and tap remove home<br>
-				* Tap delete.</div><br>
-				
-				<div class="info">
-                <table border="0"; style="text-align: left";><tr><td style="margin: 0px; width=80%">
-				Export devices to HomeBridge.</td>
-				<td><a href="#" class="dismiss whiteButton" onclick="HomeKit('export')">Export</a></td></tr></table>
-				</div><br>
-				
-				<div class="info">
-                <table border="0"; style="text-align: left";><tr><td style="margin: 0px; width=80%">
-				Reset the iPhone to HomeBridge pairing.</td>
-                <td><a href="#" class="dismiss whiteButton" onclick="HomeKit('re-pair')">Pairing</a></td></tr></table>
-				</div><br>
-				
-				<div class="info">
-				The HomeBridge accessory code is 031 45 154</td>
-				</div>
-				<br>
-<!--            <!-- Export button is contained in a table 
-                <table border="0" style="margin: 0px auto; align: center;">
-                   <tr><td style="width: 30%;"> </td>
-				       <td><a style="color:rgba(0,0,0,.9)" href="#hkexport" class="action whiteButton">Options</a></td>
-                       <td style="width: 30%;"> </td></tr>
-				</table>   -->
+                </div><br>
+
+                <div class="info" style="text-align: center";>
+                Use these options to export your devices to HomeKit and to pair your iPhone to the HomeKit bridge.<br>
+                <table border="0"; style="text-align: left";><tr>
+                <td><a href="#hkexport" class="action whiteButton" style="text-decoration: none">Export</a></td>
+                <td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td>
+                <td><a href="#hkrepair" class="action whiteButton" style="text-decoration: none">&nbsp&nbspPair&nbsp&nbsp</a></td></tr></table><br>
+                <p style="text-align: left";>
+                Both options will require a Homekit reset at your iPhone...<br><br>
+                &nbsp&nbsp&nbsp&nbsp* Open Home and tap the Home tab,<br>
+                &nbsp&nbsp&nbsp&nbsp* Tap the arrow in the top left of the screen.<br>
+                &nbsp&nbsp&nbsp&nbsp* Scroll to the bottom and tap remove home.<br>
+                &nbsp&nbsp&nbsp&nbsp* Tap delete.<br><br>
+                The HomeBridge accessory code is 031 45 154</td>
+                <br></p></div>
         </div>
         <div id="menusheet" class="menusheet">
                 <ul class="edgetoedge scroll">
@@ -286,13 +272,26 @@
                     <a href="#" class="redButton dismiss">Cancel</a>
                 </div>
         </div>
-<!--       <div id="hkexport" class="actionsheet">
+        <div id="hkexport" class="actionsheet">
                 <div class="actionchoices">
+                <div class="info">
+                This option will create a HomeKit accessory for all the devices currently defined in this web app.<br><br>
+                NOTE:- This will delete all existing HomeKit device configuration, and any scenes you have created.
+                </div><br>
                     <a href="#" class="dismiss whiteButton" onclick="HomeKit('export')">Export accessories</a>
-                    <a href="#" class="dismiss whiteButton" onclick="HomeKit('re-pair')">Re-Pair device</a>
                     <a href="#" class="redButton dismiss">Cancel</a>
                 </div>
-        </div>  -->
+        </div>
+        <div id="hkrepair" class="actionsheet">
+                <div class="actionchoices">
+                <div class="info">
+                This option will re-create the pairing between your iPhone and the HomeKit bridge.<br><br>
+                NOTE:- This will delete all existing HomeKit device configuration, and any scenes you have created.
+                </div><br>
+                    <a href="#" class="dismiss whiteButton" onclick="HomeKit('re-pair')">Pair device</a>
+                    <a href="#" class="redButton dismiss">Cancel</a>
+                </div>
+        </div>
 <!-- Hidden variable used to transfer data back to server  -->
 
     <input type="hidden" id="retval" value="tbd">
