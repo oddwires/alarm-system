@@ -64,6 +64,7 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    # Configure the I2C bus speed to 32K ( default is 100K and too fast for the PIC chip )
+   sudo fdtput --type u /boot/bcm2709-rpi-2-b.dtb /soc/i2c@7e205000 clock-frequency 32000
    # install the I2C utilities...
    sudo apt-get install -y i2c-tools
    # set start up parameters ( requires reboot to take effect ) ...
@@ -231,7 +232,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # set folder permissions...
   chmod -R 750 /var/www/logs
   chmod -R 770 /var/www/data
-  chmod -R 750 /var/www/jQTouch
+  chmod -R 750 /var/www/themes
   chmod -R 740 /var/www/Scripts
   # set file permissions...
   chmod 640 `find /var/www -type f`                                # change file permissions only
@@ -262,15 +263,14 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
       # create the new daemon...
-      sudo mv /var/www/Scripts/alarm /etc/init.d/
+      sudo cp /var/www/Scripts/alarm /etc/init.d/
       chgrp root /etc/init.d/alarm
 
       # make alarm executable...
       sudo chmod +x /var/www/Scripts/alarm.sh
 
       # make daemon autostart...
-      sudo update-rc.d alarm defaults
-  
+      sudo update-rc.d alarm defaults  
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -291,8 +291,6 @@ echo "*                                                                         
 echo "********************************************************************************"
 read -n1 -r key
 echo
-#
-# Install updated to work with Apache/2.4.10 (Raspbian)
 #
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    if [ "$(ls -A /etc/apache2/ssl)" ]; then
@@ -342,26 +340,25 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo apt-get -y install fail2ban
   
   # create the local jail file...
-  sudo mv alarm-system/ConfigFiles/jail.local /etc/fail2ban/
+  sudo cp alarm-system/ConfigFiles/jail.local /etc/fail2ban/
   sudo chown root /etc/fail2ban/jail.local
   sudo chgrp root /etc/fail2ban/jail.local
   
   # create the regex filter...
-  sudo mv alarm-system/ConfigFiles/alarm-regex.conf /etc/fail2ban/filter.d/
+  sudo cp alarm-system/ConfigFiles/alarm-regex.conf /etc/fail2ban/filter.d/
   sudo chown root /etc/fail2ban/filter.d/alarm-regex.conf
   sudo chgrp root /etc/fail2ban/filter.d/alarm-regex.conf
 
   # Define additional actions to integrate Fail2Ban with the alarm service filter...
-  sudo mv alarm-system/ConfigFiles/alarm-actions.conf /etc/fail2ban/action.d/
+  sudo cp alarm-system/ConfigFiles/alarm-actions.conf /etc/fail2ban/action.d/
   sudo chown root /etc/fail2ban/action.d/alarm-actions.conf
   sudo chgrp root /etc/fail2ban/action.d/alarm-actions.conf
 
   # create the shell script to integrate with the alarm service...
-  sudo mv alarm-system/Scripts/fail2ban_alarm.sh /etc/fail2ban/action.d/
+  sudo cp alarm-system/Scripts/fail2ban_alarm.sh /etc/fail2ban/action.d/
   sudo chown root /etc/fail2ban/action.d/fail2ban_alarm.sh
   sudo chgrp root /etc/fail2ban/action.d/fail2ban_alarm.sh
   sudo chmod +x /etc/fail2ban/action.d/fail2ban_alarm.sh
- 
 fi
 #read -n1 -r -p "Press any key to continue..." key
 echo " "
@@ -389,27 +386,25 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # install various pre requisites...
   sudo apt-get install libavahi-compat-libdnssd-dev -y
 
-wget -qO- https://deb.nodesource.com/setup_4.x | sudo bash -
-sudo apt-get -y install nodejs
+  wget -qO- https://deb.nodesource.com/setup_8.x | sudo bash -
+  sudo apt-get -y install nodejs
 
   # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
   cd HAP-NodeJS/
   npm rebuild
   sudo npm install buffer-shims --unsafe-perm
-  sudo npm install curve25519-n --unsafe-perm
+  sudo npm install curve25519-n2 --unsafe-perm
   sudo npm install debug --unsafe-perm
   sudo npm install ed25519 --unsafe-perm
   sudo npm install fast-srp-hap --unsafe-perm
   sudo npm install ip --unsafe-perm
   sudo npm install mdns --unsafe-perm
   sudo npm install node-persist --unsafe-perm
-  
-  sudo npm -g install forever
   cd ..
   
   # create the new daemon...
-  sudo mv /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
+  sudo cp /home/pi/Downloads/alarm-system/Scripts/homebridge /etc/init.d/
   sudo chgrp root /etc/init.d/homebridge
   sudo chown root /etc/init.d/homebridge
   sudo chmod +x /etc/init.d/homebridge

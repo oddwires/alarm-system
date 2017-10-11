@@ -22,19 +22,19 @@ var GENERIC_radiator = {
   heatOn: false,
   setHeatOn: function(on) { 
     console.log("Turning the Parm1 radiator %s", on ? "on" : "off");
-	if (on) {
-		TEMP_SENSOR.TargetHeatingCoolingState = 0;
-            fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {		
+    if (on) {
+        TEMP_SENSOR.TargetHeatingCoolingState = 0;
+            fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {       
                if(err) { return console.log(err); }
                console.log("Parm1 radiator on Success");
                }); 
-        	} else {
-		TEMP_SENSOR.TargetHeatingCoolingState = 1;
-            fs.appendFile("/var/www/data/input.txt", "Parm4", function(err) {		
+            } else {
+        TEMP_SENSOR.TargetHeatingCoolingState = 1;
+            fs.appendFile("/var/www/data/input.txt", "Parm4", function(err) {       
                if(err) { return console.log(err); }
                console.log("Parm1 radiator off Success");
-   			   });
-			}
+               });
+            }
   },
 }
 
@@ -53,24 +53,24 @@ var TEMP_SENSOR = {
     TEMP_SENSOR.currentTemperature = Math.round((15 + Math.random() * 10));
   },
     incTemperature: function() {
-		if (TEMP_SENSOR.currentTemperature >= 25) { step = -1; }
-		if (TEMP_SENSOR.currentTemperature <= 20) { step = 1; }
-		
+        if (TEMP_SENSOR.currentTemperature >= 25) { step = -1; }
+        if (TEMP_SENSOR.currentTemperature <= 20) { step = 1; }
+        
 //      if (TEMP_SENSOR.targetTemperature > TEMP_SENSOR.currentTemperature)
         if (TEMP_SENSOR.currentTemperature > 23)
-	        {	TEMP_SENSOR.TargetHeatingCoolingState = 1;
+            {   TEMP_SENSOR.TargetHeatingCoolingState = 1;
 //              console.log("Greater than 23.");
-		}
-	    else 
-	       {	TEMP_SENSOR.TargetHeatingCoolingState = 0;
+        }
+        else 
+           {    TEMP_SENSOR.TargetHeatingCoolingState = 0;
 //                   console.log("Less than 23.");
            }
-//		if (TEMP_SENSOR.currentTemperature >= 23 ) {
-//			GENERIC_radiator.setHeatOn(false);
-//		} else {
-//			GENERIC_radiator.setHeatOn(true);
-//		}
-//		console.log(step);
+//      if (TEMP_SENSOR.currentTemperature >= 23 ) {
+//          GENERIC_radiator.setHeatOn(false);
+//      } else {
+//          GENERIC_radiator.setHeatOn(true);
+//      }
+//      console.log(step);
     TEMP_SENSOR.currentTemperature = TEMP_SENSOR.currentTemperature + step;
   }
 }
@@ -98,11 +98,11 @@ sensor
   
 sensor
      .getService(Service.Thermostat) 
-	 .getCharacteristic(Characteristic.TargetHeatingCoolingState)
+     .getCharacteristic(Characteristic.TargetHeatingCoolingState)
          .setProps({
 //              validValues: [0, 1, 2, 3]         // Off, Heat, Cool & Auto
                 validValues: [0, 1, 3]            // Off, Heat & Auto
-		 })
+         })
      .on('set', function(value, callback) { 
     GENERIC_radiator.setHeatOn(value);
     callback();
@@ -110,15 +110,15 @@ sensor
 
 sensor
      .getService(Service.Thermostat) 
-	 .getCharacteristic(Characteristic.TargetTemperature)
-	 .setProps({
-		maxValue: 25,
-		minValue: 0              // can't seem to bring value up, will only go down :(
+     .getCharacteristic(Characteristic.TargetTemperature)
+     .setProps({
+        maxValue: 25,
+        minValue: 0              // can't seem to bring value up, will only go down :(
      })
      .on('set', function(value, callback) {
-		 console.log("Parm1 radiator target temp:",value);
-		 callback();
-		 });
+         console.log("Parm1 radiator target temp:",value);
+         callback();
+         });
 
   
 // cycle the temperature reading

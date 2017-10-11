@@ -16,20 +16,20 @@ var DOOR = {
     var err = null;                         // in case there were any problems
     fs.readFile("/var/www/data/status.txt", 'utf8', function(err, data) {
         if(err) { return console.log(err); }
-	    var lines = data.split('\n');
+        var lines = data.split('\n');
         for(var i = 0; i < lines.length; i++){
-		    if ((lines[i].indexOf("zcon") !=-1) && (lines[i].indexOf("Parm1") !=-1)) {
+            if ((lines[i].indexOf("zcon") !=-1) && (lines[i].indexOf("Parm1") !=-1)) {
                 var svalues = lines[i].split(':');
-				if (svalues[8].toString().trim() === '0') {
-					if(this.outputLogs) console.log('Parm1 open')
-					DOOR.open = true;
+                if (svalues[8].toString().trim() === '0') {
+                    if(this.outputLogs) console.log('Parm1 open')
+                    DOOR.open = true;
                 } else {
-					if(this.outputLogs) console.log('Parm1 closed')
-					DOOR.open = false;
+                    if(this.outputLogs) console.log('Parm1 closed')
+                    DOOR.open = false;
                 }
-			}
-		}
-	});
+            }
+        }
+    });
   },
   identify: function() {
      console.log("Identify the Parm1");
@@ -71,7 +71,7 @@ door
 });
 
 setInterval(function() {  
-  DOOR	.read()
+  DOOR  .read()
   
   // update the characteristic value so interested iOS devices can get notified
    door

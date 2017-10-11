@@ -1,55 +1,45 @@
 alarm:status:Set
 alarm:mode:Standby
-alarm:duration:5 secs
-setup:location:Development system
-setup:routerIP:?
-setup:localIP:?
-setup:diskused:?
-setup:disk%:?
-setup:disktotal:?
-setup:memory:?
-setup:hardware:?
-email:server:
-email:port:
+alarm:duration:15 mins
+setup:location:Name me
+setup:routerIP:
+setup:localIP:
+setup:diskused:1.9G
+setup:disk%:27%
+setup:disktotal:7.3G
+setup:memory:925 MB
+setup:hardware:Raspberry Pi 2
+setup:uptime: 20 minutes
+email:server:smtp.gmail.com
+email:port:587
 email:sender:
-email:password:
-zcon:alarm:Zone #1:on:on:on:1:false:0:0
-zcon:alarm:Zone #2:on:on:on:2:false:0:0
-zcon:alarm:Zone #3:on:on:on:3:false:0:0
-zcon:alarm:Zone #4:on:on:on:4:false:0:0
-zcon:alarm:Zone #5:on:on:on:5:false:0:0
-zcon:alarm:Zone #6:on:on:on:6:false:0:0
-zcon:alarm:Zone #7:on:on:on:7:false:0:0
-zcon:alarm:Zone #8:on:on:on:8:false:0:0
-zcon:alarm:Zone #9:on:on:on:9:false:0:0
-zcon:alarm:Zone #10:on:on:on:10:false:0:0
-zcon:alarm:Zone #11:on:on:on:11:false:1:1
-zcon:alarm:Zone #12:on:on:on:12:false:1:1
-rcon:Blue:0:1:None:off:Light
-rcon:Green:0:2:None:off:Light
-rcon:Yellow:0:3:None:off:Light
-rcon:Outlet #1:7:1:None:off:Outlet
-rcon:Outlet #2:7:2:None:off:Outlet
-rcon:Outlet #3:7:2:None:off:Outlet
-rcon:Outlet #4:7:3:None:off:Outlet
-rcon:Outlet #5:7:4:None:off:Outlet
-rcon:Outlet #6:7:5:None:off:Outlet
-rcon:Outlet #7:8:1:None:off:Outlet
-rcon:Outlet #8:8:2:None:off:Outlet
-rcon:Outlet #9:8:3:None:off:Outlet
-rcon:Outlet #10:8:4:None:off:Outlet
-cron:01:12:*:*:0:1
-cron:02:12:*:*:0:1
-cron:03:12:*:*:0:1
-cron:04:12:*:*:0:1
-rdtr:Radiator #1:0:on:5:28
-rdtr:Radiator #2:1:on:5:28
-rdtr:Radiator #3:2:on:5:28
-rdtr:Radiator #4:3:on:5:28
-rdtr:Radiator #5:4:on:5:28
-rdtr:Radiator #6:5:on:5:28
-rdtr:Radiator #7:6:on:5:28
-rdtr:Radiator #8:7:on:5:28
-rdtr:Radiator #9:8:on:5:28
-rdtr:Radiator #10:9:on:5:28
+zcon:Alarm:Front door:On:On:On:11:false:0:0
+zcon:alarm:Back door:on:on:on:5:false:0:0
+zcon:alarm:Kitchen PIR:on:off:off:9:false:0:0
+zcon:Tamper:Tamper loop:Off:Off:Off:12:false:0:0
+rcon:Office:Blue light:0:1:Off:Off:Light
+rcon:Office:Green light:0:2:Off:Off:Light
+rcon:Office:Yellow light:0:3:Off:Off:Light
+rcon:Office:Red light:0:4:Off:Off:Light
+rcon:Kitchen:PC:19:1:Off:None:Outlet
+rdtr:Downstairs:Entrance:0:On:Hi:Low
+rdtr:Downstairs:Kitchen:0:On:26:20
+rdtr:Downstairs:Living room:4:On:Hi:low
+rdtr:Upstairs:Landing:5:On:Hi:low
+rdtr:Upstairs:Main bedroom:6:On:Hi:low
+rdtr:Upstairs:Back bedroom:1:On:Hi:low
+cron:Wake up:0:8:*:*:6-7:5:On
+cron:Wake up:0:7:*:*:1-5:5:On
+cron:Wake up:0:9:*:*:*:5:Off
+cron:Night time:0:21:*:*:*:12:On
+cron:Night time:0:21:*:*:*:13:On
+cron:Night time:0:21:*:*:*:14:Off
+cron:Night time:0:21:*:*:*:15:Off
 user:admin:
+user:Pugh:
+user:Pugh:
+user:Barney:
+user:McGrew:
+user:Cuthbert:
+user:Dibble:
+user:Grubb:

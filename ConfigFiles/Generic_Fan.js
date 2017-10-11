@@ -15,17 +15,17 @@ var GENERIC_Fan01 = {
   powerOn: false,
   setPowerOn: function(on) { 
     console.log("Turning the Parm1 fan %s", on ? "on" : "off");
-	if (on) {
-            fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {		
+    if (on) {
+            fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {       
                if(err) { return console.log(err); }
                console.log("Parm1 fan on Success");
                }); 
-        	} else {
-            fs.appendFile("/var/www/data/input.txt", "Parm4", function(err) {		
+            } else {
+            fs.appendFile("/var/www/data/input.txt", "Parm4", function(err) {       
                if(err) { return console.log(err); }
                console.log("Parm1 fan off Success");
-   			   });
-			}
+               });
+            }
   },
 }
 
@@ -73,22 +73,22 @@ fan01
         if(err) { return console.log(err); }
         var lines = data.split('\n');
         for(var i = 0; i < lines.length; i++){
-		    if ((lines[i].indexOf("rcon") !=-1) && (lines[i].indexOf("Parm1") !=-1)) {
-			// falls through here when we have found the line for this device in the status file
-			// console.log(lines[i]);
-			   var values = lines[i].split(':');
-			   // read the actual status of the accessory from the file
-			   console.log(values[5]);
-			   if (values[5].indexOf("on") !=-1) { 
-			        console.log("Current status: on");
-			        GENERIC_Fan01.powerOn = true;
-					callback(err, true);
+            if ((lines[i].indexOf("rcon") !=-1) && (lines[i].indexOf("Parm1") !=-1)) {
+            // falls through here when we have found the line for this device in the status file
+            // console.log(lines[i]);
+               var values = lines[i].split(':');
+               // read the actual status of the accessory from the file
+               console.log(values[5]);
+               if (values[5].indexOf("on") !=-1) { 
+                    console.log("Current status: on");
+                    GENERIC_Fan01.powerOn = true;
+                    callback(err, true);
                 } else {
-			        console.log("Current status: off");
-					GENERIC_Fan01.powerOn = false;
-					callback(err, false);
+                    console.log("Current status: off");
+                    GENERIC_Fan01.powerOn = false;
+                    callback(err, false);
                 }
-			}
-		}
+            }
+        }
     });
  });
