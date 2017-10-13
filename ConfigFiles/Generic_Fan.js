@@ -79,7 +79,7 @@ fan01
                var values = lines[i].split(':');
                // read the actual status of the accessory from the file
                console.log(values[5]);
-               if (values[5].indexOf("on") !=-1) { 
+               if (values[5].indexOf("On") !=-1) { 
                     console.log("Current status: on");
                     GENERIC_Fan01.powerOn = true;
                     callback(err, true);
