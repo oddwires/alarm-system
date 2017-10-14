@@ -26,7 +26,7 @@ echo "**************************************************************************
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
 echo "*                                                                              *"
-echo "*  Install Mail Transfer Agent.                                                *"
+echo "*  Install Postfix Mail Transfer Agent.                                        *"
 echo "*                                                                              *"
 echo "*  This allows the alarm system to send email alerts for any alarm events.     *"
 echo "*                                                                              *"
@@ -34,14 +34,23 @@ echo "*  Press 'I'      to Install                                              
 echo "*        'S'      to Skip                                                      *"
 echo "*        'Ctrl+C' to Quit the installer                                        *"
 echo "*                                                                              *"
+echo "*  Note:                                                                       *"
+echo "*    During the installation, a popup box will display.                        *"
+echo "*    Tab down to the 'ok' button, then Select server as Internet Site.         *"
+echo "*                                                                              *"
 echo "********************************************************************************"
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Mail Transfer Agent...
-  sudo apt-get install -y heirloom-mailx
+  sudo apt-get install -y mailutils
+  # configure to use GMAIL relay server...
+  sudo cp ./alarm-system/ConfigFiles/main.cf /etc/postfix/main.cf
+  # customise the email to include the current hostname...
+  sed -i '/myhostname = */c\'"myhostname = $HOSTNAME" /etc/postfix/main.cf
+  # Note: Haven't set the 'send as' account or password - that is handled by the alarm service
 fi
-#read -n1 -r -p "Press any key to continue..." key
+read -n1 -r -p "Press any key to continue..." key
 echo " "
 
 clear
