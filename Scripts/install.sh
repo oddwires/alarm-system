@@ -36,18 +36,21 @@ echo "*        'Ctrl+C' to Quit the installer                                   
 echo "*                                                                              *"
 echo "*  Note:                                                                       *"
 echo "*    During the installation, a popup box will display.                        *"
-echo "*    Tab down to the 'ok' button, then Select server as Internet Site.         *"
+echo "*    Tab down to the 'ok' button, then on the next screen, select              *"
+echo "*      'server as Internet Site'.                                              *"
+echo "*    On the following screen, enter the HostName of your Raspberry Pi          *"
+echo "*       ( same value as you have set in raspi-config utiliy )                  *"
 echo "*                                                                              *"
 echo "********************************************************************************"
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # Mail Transfer Agent...
-  sudo apt-get install -y mailutils
+  sudo apt-get install -y postfix mailutils
   # configure to use GMAIL relay server...
   sudo cp ./alarm-system/ConfigFiles/main.cf /etc/postfix/main.cf
   # customise the email to include the current hostname...
-  sed -i '/myhostname = */c\'"myhostname = $HOSTNAME" /etc/postfix/main.cf
+  sudo sed -i '/myhostname = */c\'"myhostname = $HOSTNAME" /etc/postfix/main.cf
   # Note: Haven't set the 'send as' account or password - that is handled by the alarm service
 fi
 read -n1 -r -p "Press any key to continue..." key
