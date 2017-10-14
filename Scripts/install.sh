@@ -35,23 +35,26 @@ echo "*        'S'      to Skip                                                 
 echo "*        'Ctrl+C' to Quit the installer                                        *"
 echo "*                                                                              *"
 echo "*  Note:                                                                       *"
-echo "*    During the installation, a popup box will display.                        *"
-echo "*    Tab down to the 'ok' button, then on the next screen, select              *"
-echo "*      'server as Internet Site'.                                              *"
-echo "*    On the following screen, enter the HostName of your Raspberry Pi          *"
-echo "*       ( same value as you have set in raspi-config utiliy )                  *"
+echo "*    During the installation, a Dialog will display.                           *"
+echo "*       First screen:  Tab down to the 'ok' button, then press return.         *"
+echo "*       Second screen: Select 'server as Internet Site', then press return.    *"
+echo "*       Third screen:  Enter the Hostname of your Raspberry Pi.                 *"
+echo "*       ( Hostname is the same value as you have set in raspi-config utiliy )  *"
 echo "*                                                                              *"
 echo "********************************************************************************"
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  # Note: Haven't set the 'send as' account or password - that is handled by the alarm service
   # Mail Transfer Agent...
   sudo apt-get install -y postfix mailutils
   # configure to use GMAIL relay server...
   sudo cp ./alarm-system/ConfigFiles/main.cf /etc/postfix/main.cf
   # customise the email to include the current hostname...
   sudo sed -i '/myhostname = */c\'"myhostname = $HOSTNAME" /etc/postfix/main.cf
-  # Note: Haven't set the 'send as' account or password - that is handled by the alarm service
+  # install mail certificates...
+  cat /etc/ssl/certs/thawte_Primary_Root_CA.pem | sudo tee -a /etc/postfix/cacert.pem
+  sudo service postfix restart
 fi
 read -n1 -r -p "Press any key to continue..." key
 echo " "
