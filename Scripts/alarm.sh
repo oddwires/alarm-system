@@ -418,8 +418,8 @@ eMail()
 # Performs a few basic checks on the email credentials.                                                                         #
 # If everything seems OK, a standard format email is sent out.                                                                  #
 # $1 = Subject                                                                                                                  #
-# Note: The Mailx MTA is being used without a configuration file, so all server connection details are passed as parameters.    #
-#       This allows server details to be changed through the iPhone interface without having to get all 'Linuxy'                #
+# Note: The Postfix Mail Transfer Agent is allows emails to be sent from the alarm service.                                     #
+#       The configuration file has been hard coded to use Gmail SMTP as a relay.                                                #
 #                                                                                                                               #
 #################################################################################################################################
 {  # Build the circulation list...
@@ -432,18 +432,16 @@ eMail()
    circlist=${circlist%?}                                                                    # remove the last character - its an extra ','
 
   # Quick and dirty test for valid email configuration....
-  if [[ ${EMAIL_server} == "" ]] || [[ ${EMAIL_port} == "" ]] || \
-     [[ ${EMAIL_sender} == "" ]] || [[ ${EMAIL_password} == "" ]] || \
-     [[ ${circlist} == "" ]] ; then
-     tmp=${CURRTIME}",alarm,raspi,email not sent - bad credentials or circulation list."
+  if [[ ${circlist} == "" ]] || [ ! -f /etc/postfix/sasl_passwd.db ]; then
+     tmp=${CURRTIME}",alarm,raspi,email not sent - bad credentials or no circulation list."
      echo $tmp >> $LOGFILE                                                                   # log the event
      echo $tmp                                                                               # tell the user
   else
      # Falls through here if we have some kind of email configuration and some kind of circulation list
      # We still can't guarantee the email will go, but lets try anyway...
      # Build the message...
-       msg='From: \t\t\t'$SETUP_location
-       msg=$msg'\nEvent logged at:\t'${CURRTIME}
+       msg='From:\t\t\t'$SETUP_location
+       msg=$msg'\r\nEvent logged at:\t'${CURRTIME}
        msg=$msg'\n\nTriggered zones:\t'
        zones=''
        maxval=${#zcon[@]}; (( maxval-- )); i=0                                               # setup scan through all defined alarm zones
@@ -457,10 +455,13 @@ eMail()
       msg=$msg$zones
       msg=$msg'\nLocal IP:\t\t'https://${SETUP_localIP}
       msg=$msg'\n\nRouter IP:\t\t'https://${SETUP_routerIP}
-      # Build the mailx command string...
-      tmp='echo -e "'$msg'" | mailx -s "'$1'" -S smtp-use-starttls -S ssl-verify=ignore -S smtp-auth=login
-      -S smtp=smtp://'$EMAIL_server':'$EMAIL_port' -S from="'$EMAIL_sender'"
-      -S smtp-auth-user='$EMAIL_sender' -S smtp-auth-password='$EMAIL_password' '$circlist
+
+      # Build the Postfix command string...
+      tmp='echo -e "'$msg'" | mail -s "'$1'" $circlist'
+
+#      tmp='echo -e "'$msg'" | mailx -s "'$1'" -S smtp-use-starttls -S ssl-verify=ignore -S smtp-auth=login
+#      -S smtp=smtp://'$EMAIL_server':'$EMAIL_port' -S from="'$EMAIL_sender'"
+#      -S smtp-auth-user='$EMAIL_sender' -S smtp-auth-password='$EMAIL_password' '$circlist
       eval $tmp                                                           # send the email without echoing all the credentials to the screen
 #     echo $tmp                                                           # DIAGNOSTIC - used to check MAILX command line is ok
       tmp=${CURRTIME}",alarm,raspi,"$1" - email sent"
