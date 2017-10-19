@@ -25,7 +25,8 @@ designed to run even if circuit board is missing.</li>
 <li>Raspian Stretch Light.</li>
 <li>HomeKit Bridge - Updated to latest build ( based on Node 8.6 install ).</li>
 <li>Smartware Radiator valves.</li>
-<li>JQuery Mobile - framework to provide user interface.
+<li>JQuery Mobile - framework to provide user interface.</li>
+<li>Postfix Mail Transfer Agent.
 </ul>
  
 <b>Features:-</b><br>
