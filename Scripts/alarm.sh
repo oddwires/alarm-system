@@ -333,8 +333,13 @@ load_user_file()
          user[${userindex}]=${user_array[3]} ; (( userindex++ ))     # One Time Access Code
     done < /var/www/user.txt
     fi
-    EMAIL_password=${user[1]}
-    EMAIL_sender=${user[2]}
+    # extract email account details from the password file...
+    EMAIL_server=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $1}')    # split on ':'
+    tmp=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $1}')             # split the split in ' '
+    EMAIL_port=$(echo $tmp | awk -F' ' '{print $1}')
+    EMAIL_sender=$(echo $tmp | awk -F' ' '{print $2}')
+#   EMAIL_password=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $3}')  # split on ':'
+
 #   declare -p user                                                  # DIAGNOSTIC
 }
 
@@ -1047,21 +1052,19 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    SETUP_duration=${PARAMS[4]};;
                  "email setup")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","${PARAMS[4]}","
-                   tmp=$tmp${PARAMS[5]}",********,"${PARAMS[7]}","${PARAMS[8]}","${PARAMS[9]}
+                   tmp=$tmp${PARAMS[5]}",********"
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
-                   EMAIL_server=${PARAMS[3]}
+                   # delete any old copies of the file...
+                   [ -e /etc/postfix/sasl_passwd ] && rm /etc/postfix/sasl_passwd
+                   printf "[%s]:%s    %s:%s" "${PARAMS[3]}" "${PARAMS[4]}" "${PARAMS[5]}" "${PARAMS[6]}" >>/etc/postfix/sasl_passwd
+                   sudo chmod 400 /etc/postfix/sasl_passwd
+                   sudo postmap /etc/postfix/sasl_passwd
+#                  rm /etc/postfix/sasl_passwd                             # tidy up
+                   sudo service postfix restart &
+                   EMAIL_server=${PARAMS[3]}                               # update variables in RAM
                    EMAIL_port=${PARAMS[4]}
-                   EMAIL_sender=${PARAMS[5]}                               # update value in memory
-                   user[2]=${PARAMS[5]}                                    # update value in array
-                   if [ "${PARAMS[6]}" != "********" ]; then               # has the password field been overwritten....
-                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}",password changed"
-                      echo $tmp >> $LOGFILE                                # log the event
-                      echo $tmp                                            # tell the user
-                      EMAIL_password=${PARAMS[6]}                          # ...update password in memory
-                      user[1]=${PARAMS[6]}                                 # ...update password in array
-                   fi
-                   EMAIL_recipient=${PARAMS[7]};;                          # (is this still needed ?)
+                   EMAIL_sender=${PARAMS[5]} ;;                            # update value in memory
                  "save user defaults")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event
