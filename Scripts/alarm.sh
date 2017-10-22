@@ -315,8 +315,6 @@ load_user_file()
 #################################################################################################################################
 #                                                                                                                               #
 # Function to load user credentials from file to memory.                                                                        #
-# Note: Credentials for the email account are stored as the first entry in this array to ensure they always stay on the Pi      #
-#       and don't need to be included in the status.txt file.                                                                   #
 #                                                                                                                               #
 #################################################################################################################################
 {  unset user[@] ; userindex=0                                       # reset data arrays and pointers
@@ -335,7 +333,7 @@ load_user_file()
     fi
     # extract email account details from the password file...
     EMAIL_server=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $1}')    # split on ':'
-    tmp=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $1}')             # split the split in ' '
+    tmp=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $2}')             # split the split in ' '
     EMAIL_port=$(echo $tmp | awk -F' ' '{print $1}')
     EMAIL_sender=$(echo $tmp | awk -F' ' '{print $2}')
 #   EMAIL_password=$(sudo cat /etc/postfix/sasl_passwd | awk -F':' '{print $3}')  # split on ':'
@@ -560,7 +558,7 @@ write_status_file()
 #                                                                                                                               #
 #################################################################################################################################
 { # Update the system info...
-   SETUP_localIP=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+   SETUP_localIP=$(hostname -I)
    SETUP_diskused=$(df -h | grep root | awk '{print $3}')
    SETUP_diskperc=$(df -h | grep root | awk '{print $5}')
    SETUP_disktotal=$(df -h | grep root | awk '{print $2}')
@@ -1064,7 +1062,14 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    sudo service postfix restart &
                    EMAIL_server=${PARAMS[3]}                               # update variables in RAM
                    EMAIL_port=${PARAMS[4]}
-                   EMAIL_sender=${PARAMS[5]} ;;                            # update value in memory
+                   EMAIL_sender=${PARAMS[5]}                               # update value in memory
+                   if [ "${PARAMS[6]}" != "********" ]; then               # has the password field changed ?
+                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}",password changed"
+                      echo $tmp >> $LOGFILE                                # log the event
+                      echo $tmp                                            # tell the user
+                      EMAIL_password=${PARAMS[6]}                          # ...update password in memory
+                      user[1]=${PARAMS[6]}                                 # ...update password in array
+                   fi ;;
                  "save user defaults")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event

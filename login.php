@@ -21,11 +21,11 @@ $otac;
         $randomString .= $characters[rand(0, $charactersLength - 1)];
     }
 
-  error_log(print_r($_POST, true));                       // Debug
+//error_log(print_r($_POST, true));                       // Debug - DO NOT LEAVE ACTIVE IN LIVE CODE
 //error_log(print_r($_SESSION, true));
-  error_log('UserName: '.$_POST['username']);
-  error_log('Password: '.$_POST['password']);
-  error_log('Remember me: '.$_POST['rememberme']);
+//error_log('UserName: '.$_POST['username']);
+//error_log('Password: '.$_POST['password']);
+//error_log('Remember me: '.$_POST['rememberme']);
 
     $file1 = fopen("/var/www/user.txt",'r');
     $count = 0;
