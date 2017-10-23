@@ -211,10 +211,10 @@ Homebridge_Export()
           newstring=${MAC_address}
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
           oldstring='Parm3'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rdtr swtch:'$Count':on\\n'                                # command to switch accessory on       
+          newstring='Siri:iPhone:rdtr swtch:'$Count':On\\n'                                # command to switch accessory on       
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
           oldstring='Parm4'                                                                # need to replace this string...
-          newstring='Siri:iPhone:rdtr swtch:'$Count':off\\n'                               # command to switch accessory off
+          newstring='Siri:iPhone:rdtr swtch:'$Count':Off\\n'                               # command to switch accessory off
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
           oldstring='Parm5'                                                                # need to replace Max temp...
           newstring="${rdtr[$i+rdtr_hi]}"                                                  # configuration details
