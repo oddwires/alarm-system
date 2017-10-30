@@ -14,16 +14,14 @@ var fs = require('fs');
 var GENERIC_LIGHT01 = {
   powerOn: false,
   setPowerOn: function(on) { 
-    console.log("Turning the Parm1 light %s", on ? "on" : "off");
+    console.log("Set Parm1 light: %s", on ? "on" : "off");
     if (on) {
             fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {       
                if(err) { return console.log(err); }
-               console.log("Parm1 light on Success");
                }); 
             } else {
             fs.appendFile("/var/www/data/input.txt", "Parm4", function(err) {       
                if(err) { return console.log(err); }
-               console.log("Parm1 light off Success");
                });
             }
   },
@@ -78,13 +76,12 @@ light01
             // console.log(lines[i]);
                var values = lines[i].split(':');
                // read the actual status of the accessory from the file
-               console.log(values[5]);
                if (values[5].indexOf("On") !=-1) { 
-                    console.log("Current status: on");
+                    console.log("Get Parm1 light status: on");
                     GENERIC_LIGHT01.powerOn = true;
                     callback(err, true);
                 } else {
-                    console.log("Current status: off");
+                    console.log("Get Parm1 light status: off");
                     GENERIC_LIGHT01.powerOn = false;
                     callback(err, false);
                 }

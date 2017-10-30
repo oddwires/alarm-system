@@ -357,9 +357,9 @@ CheckIP()
      title="Alarm system: Router IP change"
      eMail "$title"
      SETUP_routerIP=${Current_routerIP}                                            # Update variable
-     tmp=${CURRTIME}",task,raspi,New router IP = "${SETUP_routerIP}            # string for log
+     tmp=${CURRTIME}",task,raspi,New router IP = "${SETUP_routerIP}                # string for log
    else
-     tmp=${CURRTIME}",task,raspi,Check router IP - no change"                  # string for log
+     tmp=${CURRTIME}",task,raspi,Check router IP - no change"                      # string for log
    fi
    echo $tmp >> $LOGFILE                                                           # log the event
    echo $tmp                                                                       # copy to console
@@ -462,9 +462,6 @@ eMail()
       # Build the Postfix command string...
       tmp='echo -e "'$msg'" | mail -s "'$1'" $circlist'
 
-#      tmp='echo -e "'$msg'" | mailx -s "'$1'" -S smtp-use-starttls -S ssl-verify=ignore -S smtp-auth=login
-#      -S smtp=smtp://'$EMAIL_server':'$EMAIL_port' -S from="'$EMAIL_sender'"
-#      -S smtp-auth-user='$EMAIL_sender' -S smtp-auth-password='$EMAIL_password' '$circlist
       eval $tmp                                                           # send the email without echoing all the credentials to the screen
 #     echo $tmp                                                           # DIAGNOSTIC - used to check MAILX command line is ok
       tmp=${CURRTIME}",alarm,raspi,"$1" - email sent"
@@ -484,11 +481,11 @@ load_status_file()
   unset zcon[@] ; zconindex=0
   unset rdtr[@] ; rdtrindex=0
   while read info; do
-#       echo "info1 - "$info                                                   # DIAGNOSTIC
+#       echo "info1 - "$info                                                # DIAGNOSTIC
         OLD_IFS="$IFS"                                                      # split the line
         IFS=:
         info_array=( $info )
-#       declare -p info_array                                           # DIAGNOSTIC
+#       declare -p info_array                                               # DIAGNOSTIC
         IFS="$OLD_IFS"
         case "${info_array[0]}" in                                          # Just looking at the first string
           "rcon")                                                           # Load Remote Control channel data
@@ -722,7 +719,7 @@ check_for_chime_condition()
       maxval=${#zcon[@]}; (( maxval-- )); i=0                                 # setup scan through all defined alarm zones
       while [ $i -le "$maxval" ]; do                                          # only testing configured zones
       # test for Chimes....
-      # Check zone is an alarm and circuit is currently active and circuit was previously inactice and zone has chimes enabled...
+      # Check zone is an alarm and circuit is currently active and circuit was previously inactive and zone has chimes enabled...
           if [[ ${zcon[$i+$Type]} = "alarm" ]] && \
              [[ ${zcon[$i+$CurrentValue]} = "0" ]] && \
              [[ ${zcon[$i+$PreviousValue]} = "1" ]] && \
@@ -947,7 +944,7 @@ write_status_file /var/www/data/status.txt                  # This shouldn't be 
                                                             # turn means the web page won't load. So this ensures a system restart
                                                             # also restarts the web page.
 if [ -f /var/www/data/input.txt ]; then                     # ... and while we are at it, the most likely reason for a system crash
-  rm /var/www/data/input.txt                                # is an incorrectly formated message from the web page, so nuke it.
+  rm /var/www/data/input.txt                                # is an incorrectly formatted message from the web page, so nuke it.
 fi
 
 #################################################################################################################################
@@ -963,6 +960,10 @@ CURRTIME=`date "+%H:%M:%S"`                                                # exc
 LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # name derived from date
      if [ -r /var/www/data/input.txt ];
         then
+# So there can be a whacky timing issue here. If Homekit has Scenes configured, its possible we will get 10 or 20 commands
+# arriving simultaneously. So we need to ensure the service doesn't read and lock the input file until Homekit has
+# finished writing all the commands. Pausing for a tenth of a second seems to work ok, but give it 2 tenths for luck...
+           sleep 0.2s 
            while read info
              do
 #              echo $info                                                  # Diagnostic
@@ -978,7 +979,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp
                    title="Banned IP: "${PARAMS[3]}
                    eMail "$title"
-                   ;;                                             # tell the user
+                   ;;                                                      # tell the user
                  "UnBannedIP")
                    tmp=${CURRTIME}",fail2ban,raspi,UnBanned IP:,"${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
@@ -1212,7 +1213,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
-                       sleep 0.3s                                          # give the PIC time to complete the transmition
+                       sleep 0.3s                                          # give the PIC time to complete the transmission
                    fi;;
                  "rcon del")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
@@ -1272,8 +1273,6 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #
 #################################################################################################################################
                  "rdtr swtch")
-#                  tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${rdtr[${PARAMS[3]}*6]}", \
-#                      "${rdtr[${PARAMS[3]}*6+1]}","${PARAMS[4]}
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rdtr[${PARAMS[3]}*6+rdtr_name]}" \
                            "radiator","${PARAMS[4]}
                    echo $tmp >> $LOGFILE                                   # log the event
@@ -1290,7 +1289,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
-                       sleep 0.3s                                          # give the PIC time to complete the transmition
+                       sleep 0.3s                                          # give the PIC time to complete the transmission
                    fi;;
                 "rdtr cfg")                                               # Edits existing, or adds new users...
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
@@ -1299,7 +1298,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp                                               # tell the user
                    rdtr[${PARAMS[3]}*6+rdtr_headr]=${PARAMS[4]}            # Update header
                    rdtr[${PARAMS[3]}*6+rdtr_name]=${PARAMS[5]}             # Update name
-                   rdtr[${PARAMS[3]}*6+rdtr_address]=${PARAMS[6]}          # Update addresss
+                   rdtr[${PARAMS[3]}*6+rdtr_address]=${PARAMS[6]}          # Update address
                    rdtr[${PARAMS[3]}*6+rdtr_status]="off"                  # Reset status
                    rdtr[${PARAMS[3]}*6+rdtr_hi]=${PARAMS[7]}               # Update high value
                    rdtr[${PARAMS[3]}*6+rdtr_lo]=${PARAMS[8]}               # Update low value
