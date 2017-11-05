@@ -1289,7 +1289,8 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
-                       sleep 0.3s                                          # give the PIC time to complete the transmission
+                       sleep 0.6s                                          # give the PIC time to complete the transmission
+                                                                           # Note: radiators take twice as long as switches to complete.
                    fi;;
                 "rdtr cfg")                                               # Edits existing, or adds new users...
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
