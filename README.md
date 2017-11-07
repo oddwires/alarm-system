@@ -15,7 +15,7 @@ designed to run even if circuit board is missing.</li>
 <li>Control of Remote control mains sockets using PIC chip with I2C interface.</li>
 <li>Supports up to 160 Remote control mains sockets. </li>
 <li>Control of <a href="http://www.homewizard.co.uk/smartwares-wireless-radiator-valve.html">Smartwares Radiator valves</a> using PIC chip with I2C interface.</li>
-<li>Up to 9 Radiator valve channels.</li>
+<li>Up to 10 Radiator valve channels.</li>
 <li>Control of domestic Security system through industry standard 12volt (wired) contact sensors.</li>
 <li>Up to 12 contact sensor circuits.</li>
 </ul>
