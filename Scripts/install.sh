@@ -112,7 +112,8 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
    # Apache install...
-   sudo apt-get install -y apache2 php libapache2-mod-php5
+#  sudo apt-get install -y apache2 php libapache2-mod-php5
+   sudo apt-get install -y apache2 php
 
    # edit the Apache2 default http web page...
    filename='/etc/apache2/sites-available/000-default.conf'                   # File to be edited
