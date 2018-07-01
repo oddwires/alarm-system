@@ -2,7 +2,7 @@
 
 UPDATE 01/07/2018:<br>
 This repo is just about defunct. There have been a couple of updates to the Raspberry Pi Debian image which have killed off the Mail Transfer Agent, and messed up a few other bits and peices in the build.<br>
-If you are thinking of trying the install, use the WorkInProgress Repo, which addresses these issues, and is starting to look more complete than this on.
+If you are thinking of trying the install, use the WorkInProgress Repo, which addresses these issues, and is starting to look more complete than this one.
  
 Home alarm and automation system - evaluation software.
  
