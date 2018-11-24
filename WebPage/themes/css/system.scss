@@ -1,0 +1,655 @@
+$background: #9fb59f;
+
+/**********************************
+/* themeRoller elements
+***********************************/
+
+/* Body elements */
+        body  { margin: 0px !important; }
+        #container { position: fixed; }
+        #login, #loginFail, #Banned, #about, #info, #power, #security, #settings,
+        #heating, #schedule, #logSelect, #logView, #access, #graph { background: none;}
+
+/* Bar: Toolbars, dividers, slider track */
+        .ui-bar-a, #alarm-header, #HomeKit-header, #application-header,
+        .ui-page-theme-a .ui-bar-inherit,
+        html .ui-bar-a .ui-bar-inherit,
+        html .ui-body-a .ui-bar-inherit,
+        html body .ui-group-theme-a .ui-bar-inherit {
+            background-color: #2fb173 /*{a-bar-background-color}*/;
+            border-color: #54914d /*{a-bar-border}*/;
+            color: #ffffff /*{a-bar-color}*/;
+            text-shadow: 0 /*{a-bar-shadow-x}*/ 0 /*{a-bar-shadow-y}*/ 0 /*{a-bar-shadow-radius}*/ #444444 /*{a-bar-shadow-color}*/;
+            font-weight: bold;
+        }
+
+        .info {
+            color: rgb(51, 51, 51);
+            text-align: center;
+            background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(204, 204, 204)), color-stop(0.6, rgb(204, 204, 204)), to(rgb(60, 60, 60)));
+            border-width: 1px;
+            border-style: solid;
+            border-color: black;
+            border-image: initial;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ui-input-text { 
+            margin: 0 !important;
+            border-width: 2px;
+            border-style: inset
+        }
+        .ui-select { 
+            border-width: 2px;
+            border-style: inset
+        }
+
+        .sidePanel {
+            background-color: #111;
+            transition: 0.5s;
+            width:50%;
+            padding-top: 30px;
+        }
+        .sidePanel a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            color: #818181;
+            font-size: 20px;
+        }
+
+/* Font Awesome icons in menu bar */
+.ui-listview .fa, .ui-listview .fas {
+    color: #fff;
+    float: right;
+    margin-right: 5px;
+}
+
+/**********************************
+      Logon box inputs
+***********************************/
+#check-user .ui-input-text{
+       margin-bottom: 0px !important;
+       margin-top: 0px !important;
+       background-color: $background;
+}
+
+#check-user input[type=text],
+#check-user input[type=password] {
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    width: 100%;
+    border: none; /* Remove the default border */
+    box-shadow: 
+       inset -3px 5px 5px 2px rgba(0,0,0,0.1), 
+       inset 0 3px 2px rgba(0,0,0,0.1);
+    border-radius: 3px;
+    background: #f9f9f9;
+    color: #777;
+    transition: color 0.3s ease-out;
+}
+
+/**********************************
+/* Floaty box style
+***********************************/
+.floaty { 
+          border-radius: 5px;
+          border-width: 1px;
+          border-color: #9e9e9e !important;
+          text-shadow: none !important;
+          position: relative;
+          margin-left: auto;
+          margin-right: auto;
+          box-shadow: 
+              0 0 1px rgba(0, 0, 0, 0.3), 
+              0 3px 7px rgba(0, 0, 0, 0.3), 
+              inset 0 1px rgba(255,255,255,1),
+              inset 0 -3px 2px rgba(0,0,0,0.25);
+          overflow: visible;
+          z-index: 2;
+}
+.floaty.box {
+        background: $background !important;
+        padding: .4em 1em;
+        text-align: center;
+        width: 80%;
+}
+.floaty.logonBox {
+        position: absolute;
+        background: $background !important;
+        top: 25%;                          /* method to keep form in middle of screen regardless of screen size */
+        left: 50%;                         /* stick it in the middle                                            */
+        transform: translate(-130px,0);    /* then offset by half of form width (plus a bit for the button )    */
+        padding: 0em 1em;
+        width: 200px;
+        height: 142px;
+}
+.floaty.logonFail {
+        background: $background !important;
+        position: absolute;
+        top: 25%;                          /* method to keep form in middle of screen regardless of screen size */
+        left: 50%;                         /* stick it in the middle                                            */
+        transform: translate(-100px,0);    /* then offset by half of form width                                 */
+        width: 200px;
+        padding: .4em 1em;
+}
+.floaty.banned {
+        background: $background !important;
+        position: inherit;
+        text-align: center;
+        font-weight: bold;
+        font-size: 15px;
+        width: 260px;
+}
+.floaty_collapsible .ui-collapsible-heading-toggle {
+       background: $background !important;
+       border-radius: 5px;
+}
+.floaty_table {
+       background: $background !important;
+       text-shadow: none;
+}
+.floaty.box a:link {
+  color: #0000cc !important;
+  font-weight: bold;
+}
+.floaty.box a:visited {
+  color: #0000cc !important;
+  font-weight: bold;
+}
+.floaty.button {
+       background: $background !important;
+}
+.floaty.switch, .floaty.radiator {
+        margin: 0;
+        text-align: left;
+        border-top-width: 0px;
+        text-shadow: none;
+        padding: .9em .5em;
+        color: black !important;
+}
+.floaty.zone {
+       font-size: 18px;
+       font-weight: bold;
+       color: black !important;
+       height: 30px;
+       text-shadow: none !important;
+       text-align: left;
+       padding-left: 10px;
+       padding-right: 10px;
+       margin-bottom: 10px;
+       margin-left: 10px;
+       margin-right: 10px;
+}
+.floaty.task {
+       background: $background !important;
+       font-size: 18px;
+       font-weight: bold;
+       color: black;
+       text-shadow: none;
+       padding-left: 10px;
+       padding-right: 10px;
+       margin-bottom: 10px;
+       margin-left: 10px;
+       margin-right: 10px;
+}
+.floaty.logSelector, .floaty.userID {
+       background: $background !important;
+       font-size: 18px;
+       font-weight: bold;
+       color: black;
+       margin-bottom: 10px;
+}
+.floaty.logSelector > a {
+  border-width: 0 !important;
+  background-color: transparent;
+  border-style: none;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+.floaty.ui-popup {
+       background: $background !important;
+}
+.floaty.logSelector > a:visited, .floaty.logSelector > a:hover {
+  background-color: transparent;
+}
+
+.infoBox {
+    color: #fff ! important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border-style: none;
+    text-shadow: none !important;
+}
+.count-first { 
+    right: 90px !important;
+    top: 15px;
+    color: #fff !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border-style: none;
+    text-shadow: none !important;
+ }
+.count-second {
+    right: 65px !important;
+    top: 15px;
+    color: #fff !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border-style: none;
+    text-shadow: none !important;
+}
+.count-third {
+    right: 40px !important;
+    top: 15px;
+    color: #fff !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border-style: none;
+    text-shadow: none !important;
+ }
+.circuitstate {
+    right: 40px !important;
+    top: 39px; width: 60px;
+    color: #fff !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border-style: none;
+    text-shadow: none !important;
+ }
+
+.controlList {
+       -webkit-border-horizontal-spacing: 10px;
+       -webkit-border-vertical-spacing: 5px;
+}
+.controlList td, .controlList th {
+       background: $background !important;
+       border-radius: 5px;
+       color: black;
+       font-weight: bold;
+       text-shadow: none;
+       padding-left: 10px;
+       padding-right: 10px;
+       box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 3px 7px rgba(0, 0, 0, 0.3), inset 0 1px white, inset 0 -3px 2px rgba(0, 0, 0, 0.25);
+       margin: auto;
+       overflow: visible;
+}
+/**********************************
+   Toggle switch SCSS.
+   Custom indentations are needed because the length of custom labels differs from the length of the standard labels
+***********************************/
+   .custom-size-flipswitch.ui-flipswitch .ui-btn.ui-flipswitch-on {
+       text-indent: -2.125em;
+   }
+   .custom-size-flipswitch.ui-flipswitch .ui-flipswitch-off {
+       text-indent: .5em;
+       color: silver;
+   }
+/* Custom widths are needed because the length of custom labels differs from the length of the standard labels */
+   .custom-size-flipswitch.ui-flipswitch {
+       width: 4.7em;
+       border-width: 1px;
+       border-style: solid;
+       border-color: gray;
+    }
+    .custom-size-flipswitch.ui-flipswitch.ui-flipswitch-active {
+        padding-left: 3em;
+        width: 1.75em;
+        background-color: #43f39f !important;
+    }
+
+/**********************************
+      Square Button SCSS
+***********************************/
+        @mixin SquareButton-color($hue) {
+          background: linear-gradient( to bottom, hsl($hue, 50%, 35%) 0%, hsl($hue, 50%, 45%) 60%, hsl($hue, 50%, 80%) 90%, hsl($hue, 50%, 40%) 100%);
+        }
+
+        @mixin SquareButton-color-hover($hue) {
+          background: linear-gradient( to bottom, hsl($hue, 50%, 55%) 0%, hsl($hue, 50%, 65%) 100%);
+        }
+
+        .SquareButton {
+          position: absolute;
+          margin: 10px;
+          display: inline-block;
+          background: transparent !important;
+          text-align: center;
+          border: none;
+          padding-top: 7px;
+          padding-bottom: 7px;
+          padding-left: 15px;
+          padding-right: 15px;
+          border-radius: 15px !important;
+        }
+
+        .SquareButton:before, .SquareButton:after {
+          content: '';
+          position: absolute;
+          height: 100%;
+          width: 100%;
+          left: 0;
+          top: 0;
+        }
+
+        .SquareButton:after {
+          opacity: 0;
+          z-index: -1;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+          transition: opacity .4s;
+        }
+
+        .SquareButton.blue {
+          &:before {
+            @include SquareButton-color(210);
+          }
+          &:after {
+            @include SquareButton-color-hover(210);
+          }
+        }
+
+        .SquareButton.green {
+            &:before {
+            @include SquareButton-color(120);
+          }
+          &:after {
+            @include SquareButton-color-hover(120);
+          }
+        }
+        .SquareButton.red{
+             &:before {
+            @include SquareButton-color(345);
+          }
+          &:after {
+            @include SquareButton-color-hover(345);
+          }
+        }
+        .SquareButton-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .SquareButton.a {
+          text-decoration: none;
+          color: white;
+        }
+
+        .SquareButtonText {
+          color: rgba(0,0,0,0.7);
+          font-size: 18px;
+          display: block;  
+          text-shadow: none;
+          position: relative;
+        }
+
+        .gloss {
+          position: absolute;
+          width: 90%;
+          height: 30%;
+          top: 5px;
+          left: 50%;
+          transform: translate(-50%);
+          border-radius: 15px;
+          background: linear-gradient( to bottom, hsla(0, 100%, 100%, .8) 0%, hsla(0, 100%, 100%, .6) 10%, hsla(0, 100%, 100%, 0) 100%);
+        }
+
+/**********************************
+      Round Button SCSS
+***********************************/
+.RoundButton {
+    padding: 0;
+    float: left;
+    position: absolute;
+    overflow: visible;
+    display: block;
+    width: 65px !important;
+    height: 65px;
+    border: 1px solid rgba(0,0,0,0.5);  
+    border-radius:100px !important;
+    border-color: transparent !important;
+/*    transition: 1s ease-out; */
+}
+
+.RoundButton::before {
+    content:"";
+    border-radius: 100px;
+    width: 100%;
+    height: 100%;
+    background-image: -webkit-linear-gradient(top, rgba(250, 250, 255, 1) 0%, rgba(250, 250, 255, 0.7) 30%, rgba(250, 250, 255, 0) 100%);
+    z-index: 3;
+    top: -16px;
+    left: 0px;
+    font-size: 55px;
+    -moz-transform: scale(0.75, 0.5); 
+    -webkit-transform: scale(0.75, 0.5); 
+    position: absolute;
+}
+
+.RoundButtonText1 {
+/* big */
+    font-size: 50px !important;
+    top: 4px;
+    color: black;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    text-shadow: none;
+    position: absolute;
+    text-align: center;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    overflow:hidden;
+    z-index: 1;
+}
+
+.RoundButtonText2 {
+/* medium */
+    font-size: 22px !important;
+    top: 18px;
+    color: black;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    text-shadow: none;
+    position: absolute;
+    text-align: center;
+    left: -17px;
+    width: 100px;
+    overflow:hidden;
+    z-index: 3;
+}
+    
+.RoundButtonText3 {
+/* small */
+    font-size: 18px !important;
+    top: 21px;
+    color: black;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    text-shadow: none;
+    position: absolute;
+    text-align: center;
+    left: -17px;
+    width: 100px;
+    overflow:hidden;
+    z-index: 3;
+}
+    
+.red{   background: -webkit-radial-gradient(50% 80%, circle, rgba(255, 18, 0, 0.2), rgba(110, 0, 0, 1));
+        box-shadow: inset 0 0 12px rgba(20,0,0,0.7);}
+    
+.green{ background-image: -webkit-radial-gradient(50% 80%, circle cover, rgba(11, 144, 11, 0.62), rgba(67, 80, 68, 0.8));
+        box-shadow: inset 0 0 12px rgba(0,50,0,0.6);}
+
+.blue{  background: -webkit-radial-gradient(50% 80%, circle, rgba(54, 200, 228, 0.2), rgba(08, 28, 55, 1));
+        box-shadow: inset 0 0 12px rgba(0,0,86,0.6);}
+
+/*.not-active { pointer-events: none; } */
+
+/**********************************
+      Semi-circle element
+***********************************/
+$size: 40px;
+
+.SemiCircle{
+  position: absolute;
+  height: $size * 2;
+  width: $size;
+  background: $background;
+  display: inline-block;
+  margin: 0 1em 1em 0; 
+}
+
+.SemiCircle.Right{
+  border-bottom-right-radius: $size * 2;
+  border-top-right-radius: $size * 2;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 3px 7px rgba(0, 0, 0, 0.3), inset -2px 0px 0 0px white, inset 1px -3px 2px rgba(0, 0, 0, 0.25);
+}
+
+.SemiCircle.Left{
+  border-bottom-left-radius: $size * 2;
+  border-top-left-radius: $size * 2;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 3px 7px rgba(0, 0, 0, 0.3), inset 2px 0px 0 0px white, inset 1px -3px 2px rgba(0, 0, 0, 0.25);
+}
+
+.SemiCircle.Filler{
+  background: $background;
+  z-index: 2;
+  position: absolute;
+}
+
+/*****************************************
+      Additional styling for 
+      collapsible element
+******************************************/
+
+.animateMe2 .ui-collapsible-heading-collapsed > .ui-collapsible-heading-toggle {
+       background:#2fb173 !important;
+}
+
+/*****************************************
+      Additional styling for 
+      Action sheet elements
+******************************************/
+
+.ui-popup-container.slideup {
+    top: auto !important;
+    bottom: 0 !important;
+    text-align: center;
+    max-width: 100% !important;
+    left: 0 !important;
+    width: 100%;
+    border-style: none;
+    background-color: transparent;
+    position: fixed !important;
+}
+.ui-popup-screen { background: gray; }
+
+.ui-popup-button {
+    color: gray !important;
+    background: white;
+    margin: 0px;
+    font-weight: normal;
+    padding: 8px;
+}
+.ui-popup-button.option{
+    color: #E77164 !important;
+    font-size: 20px;
+    font-weight: bold;
+    border-color: lightgray;
+    border-top-width: 0px;
+    border-radius: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.ui-popup-button.title{
+    color: #454545 !important;
+    border-color: lightgray;
+    font-size: 15px;
+    font-weight: normal;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.ui-popup-button.option.last{
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+.ui-popup-button.cancel{
+    color: #1C6CDD !important;
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 10px;
+}
+
+/**********************************
+      Scroll to top button
+***********************************/
+
+.scroll-top-wrapper {
+    position: fixed;
+    right: 45%;
+    bottom: 15%;
+    opacity: 0;
+    font-weight: bold;
+    font-size: 22px !important;
+      -webkit-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+.scroll-top-wrapper.show {
+    visibility: visible;
+    opacity: 1.0;
+    z-index: 3;
+}
+.security-button-wrapper {
+    top: 46px;
+    position: fixed;
+    visibility: hidden;
+    width: 100%;
+    font-weight: bold;
+    font-size: 22px !important;
+}
+.security-button-wrapper.show {
+    visibility: visible;
+}
+
+.ui-collapsible-content { padding: 0px; }
+
+.ui-collapsible-heading, .ui-collapsible-heading-toggle { 
+    background: $background !important;
+    text-shadow: none ! important; 
+}
+.ui-radio-on {
+   background-color: #2fb173 !important /*{a-active-background-color}*/;
+   border-color: #ddd !important/*{a-active-border}*/;
+}
+  
+div.ui-controlgroup-controls label[for].ui-btn::after {
+  content: " ";
+  background-image: none !important;
+  background-color: transparent;
+}
+
+/*****************************************
+      Additional styling for FLOT charts
+******************************************/
+
+.axisLabels { text-shadow: none; }
+.flot-text { text-shadow: none; }
+
+/*****************************************
+      ZigZag and Stripe stuff
+******************************************/
+
+.AmberStripe { background-image: url("/themes/images/AmberStripe.png"); }
+.GreenStripe { background-image: url("/themes/images/GreenStripe.png"); }
+.RedStripe { background-image: url("/themes/images/RedStripe.gif"); }

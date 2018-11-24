@@ -117,13 +117,19 @@ Homebridge_Export()
 #################################################################################################################################
 {  
 #  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
+   PathToHAPNodeJS=$(sudo find / -type d -name "HAP-NodeJS")                               # don't really know where the install has
+   PathToConfigFiles=$(sudo find / -type d -name "ConfigFiles")                            # been run from so find one of the source files
+   echo HAP-NodeJS install found at: $PathToHAPNodeJS
+   echo Source config files found at: $PathToConfigFiles
    i=0 ; MAC_Count=0
 
-   set +f                                                                                   # going to need Globbing back on to
-   sudo rm -r /home/pi/Downloads/HAP-NodeJS/accessories/*.js                                # allow us to clear out the old data
-   printf "Removing existing device pairing.\n"
-   sudo rm -rf /home/pi/Downloads/HAP-NodeJS/persist/*                                      # remove existing accessory pairing
-   set -f                                                                                   # Globbing back off
+   printf "Removing existing accessories...\n"
+   AccessoriesPath=$PathToHAPNodeJS/accessories/
+   find "$AccessoriesPath" -name * -type f -delete
+
+   printf "Removing existing device pairing...\n"
+   PersistPath=$PathToHAPNodeJS/persist/
+   find "$PersistPath" -name * -type f -delete
 
 # create an accessory file and customise the parameters for all defined alarm zones...   
    maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
@@ -133,9 +139,9 @@ Homebridge_Export()
       ZoneName="${ZoneName%"${ZoneName##*[![:space:]]}"}"                                   # strip any trailing spaces left by removing emojis
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
 #     echo $MAC_address                                                                     # Diagnostic
-      FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${ZoneName}"_accessory.js"
+      FileName=$PathToHAPNodeJS"/accessories/"${ZoneName}"_accessory.js"
       printf "Creating Homekit Contact sensor: %s\n" "${ZoneName}"
-      cp "/var/www/ConfigFiles/Generic_ContactSensor.js" "${FileName}"
+      cp $PathToConfigFiles"/Generic_ContactSensor.js" "${FileName}"
       oldstring='Parm1'                                                                     # need to replace this string...
       newstring=${ZoneName}                                                                 # ... with the zone name
       sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                     # do it.
@@ -143,7 +149,6 @@ Homebridge_Export()
       newstring=${MAC_address}
       sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                     # do it.
       
-#      Count=$(( Count + 1 ))
       (( MAC_Count++ ))                                                                     # Bump the loop and MAC counters
       i=$(( i + 9 )) 
    done
@@ -156,15 +161,15 @@ Homebridge_Export()
       AccName="${rcon[$i+rcon_name]}"
       AccName="${AccName//[^[:ascii:]]/}"                                                  # stripping out any emojis
       AccName="${AccName%"${AccName##*[![:space:]]}"}"                                     # strip any trailing spaces left by removing emojis
-      FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${AccName}"_accessory.js"
+      FileName=$PathToHAPNodeJS"/accessories/"${AccName}"_accessory.js"
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
       case "${rcon[$i+rcon_HK_type]}" in                                                   # Create default accessory file
           "Light")
-             cp "/var/www/ConfigFiles/Generic_Light.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Light.js" "$FileName";;
           "Outlet")
-             cp "/var/www/ConfigFiles/Generic_Outlet.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Outlet.js" "$FileName";;
           "Fan")
-             cp "/var/www/ConfigFiles/Generic_Fan.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Fan.js" "$FileName";;
       esac
       if [ "${rcon[$i+rcon_HK_type]}" != "None" ]; then
           printf "Creating Homekit power outlet: %s\n" "$AccName"
@@ -197,8 +202,8 @@ Homebridge_Export()
    while [ $i -le "$maxval" ]; do
 #     printf "rdtr:%s:%s:%s:%s:%s:%s\n" "${rdtr[$i+rdtr_header]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" \
 #                "${rdtr[$i+rdtr_status]}" "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}"
-      FileName="/home/pi/Downloads/HAP-NodeJS/accessories/"${rdtr[$i+rdtr_name]}" radiator_accessory.js"
-      cp "/var/www/ConfigFiles/Generic_Radiator.js" "$FileName"
+      FileName=$PathToHAPNodeJS"/accessories/"${rdtr[$i+rdtr_name]}" radiator_accessory.js"
+      cp $PathToConfigFiles"/Generic_Radiator.js" "$FileName"
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
 #     if [ "${rdtr[$i+4]}" != "None" ]; then                                               # Oops ! - think I've lost some functionality
           printf "Creating Homekit radiator: %s radiator_accessory.js\n" "${rdtr[$i+rdtr_name]}"     # visual progress indicator
@@ -228,7 +233,7 @@ Homebridge_Export()
       i=$(( i + 6 )) 
    done
 
-   cp "/var/www/ConfigFiles/types.js" "/home/pi/Downloads/HAP-NodeJS/accessories/types.js"
+   cp $PathToConfigFiles"/types.js" $PathToHAPNodeJS"/accessories/types.js"
    sudo killall node                                                                       # ensure we get a clean start...
    printf "Export complete\nRestarting HAP-NodeJS\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
@@ -897,6 +902,9 @@ tmp=$(cat /proc/cpuinfo | grep Revision | awk '{print $3}')
            "a01041")
              hardware='Raspberry Pi 2'
              InitPorts;;                                    # we are on a PI so initialise the ports
+           "a02082")
+             hardware='Raspberry Pi 3'
+             InitPorts;;                                    # we are on a PI so initialise the ports
        esac
 
 tmp=${CURRTIME}",alarm,raspi,GPIO ports initialised for "${hardware}
@@ -994,19 +1002,20 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp;;                                             # tell the user
-                 "HomeKit")
+                 "HomeBridge")
                  # handles all the HomeBridge options
-                   if [ "${PARAMS[3]}" == "export" ]; then 
+                   if [ "${PARAMS[3]}" == "Export" ]; then 
                       tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge export"
                       echo $tmp >> $LOGFILE                                   # log the event
                       echo $tmp                                               # tell the user                  
                       Homebridge_Export
                    fi
-                   if [ "${PARAMS[3]}" == "pair" ]; then 
-                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge pair"
+                   if [ "${PARAMS[3]}" == "Restart" ]; then 
+                      tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",HomeBridge restart"
                       echo $tmp >> $LOGFILE                                   # log the event
                       echo $tmp                                               # tell the user
-                      sudo service homebridge re-pair
+                      printf "Restarting HAP-NodeJS\n"
+                      sudo service homebridge restart
                    fi;;
                  "mode")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
@@ -1105,12 +1114,23 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
                    if [[ "$((${#user[@]}/4))" -eq "${userNum}" ]]; then
-                     # we are adding a new user, so also need to add the password field...
+                     # we are adding a new user, password hasn't been specified, so use default...
                      user[${userNum}*4+user_pword]=${DefaultPassword}      # Create and set password element
                      user[${userNum}*4+user_OTAC]='blah'                   # leaving a field blank will mess up the array size, so put in any old rubbish
                    fi
                    user[${userNum}*4]=${PARAMS[4]}                         # Update name
                    user[${userNum}*4+user_email]=${PARAMS[5]}              # Update email
+                   WriteUsers                                              # write changes to disk
+                   ;;
+                 "user pwd")                                               # Change user password...
+                   userNum=$((${PARAMS[3]}+1))                             # bump userNum up - first 4 elements are reserved for the email account
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
+                   tmp=$tmp${PARAMS[4]}","${PARAMS[5]},"********"
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   user[${userNum}*4]=${PARAMS[4]}                         # Update name
+                   user[${userNum}*4+user_email]=${PARAMS[5]}              # Update email
+                   user[${userNum}*4+user_pword]=${PARAMS[6]}              # Update password
                    WriteUsers                                              # write changes to disk
                    ;;
                  "user del")                                               # Delete existing users...
@@ -1119,14 +1139,6 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
                    user=("${user[@]:0:$((${userNum}*4))}" "${user[@]:$(($((${userNum}*4)) + 4))}")
-                   WriteUsers                                              # write changes to disk
-                   ;;
-                 "user pwd")                                               # Change user password...
-                   userNum=$((${PARAMS[3]}+1))                             # bump userNum up - first 4 elements are reserved for the email account
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${userNum}",********"
-                   echo $tmp >> $LOGFILE                                   # log the event
-                   echo $tmp                                               # tell the user
-                   user[${userNum}*4+user_pword]=${PARAMS[4]}              # Update password
                    WriteUsers                                              # write changes to disk
                    ;;
                  "reset")
@@ -1318,7 +1330,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #################################################################################################################################
 
                  "delete task")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS['3']}
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
                    cron=("${cron[@]:0:$((${PARAMS[3]}*8))}" "${cron[@]:$(($((${PARAMS[3]}*8)) + 8))}")

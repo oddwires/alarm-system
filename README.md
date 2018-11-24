@@ -1,55 +1,46 @@
 <h2>Alarm-System</h2>
 
-UPDATE 01/07/2018:<br>
-This repo is just about defunct. There have been a couple of updates to the Raspberry Pi Debian image which have killed off the Mail Transfer Agent, and messed up a few other bits and peices in the build.<br>
-If you are thinking of trying the install, use the WorkInProgress Repo, which addresses these issues, and is starting to look more complete than this one.
- 
-Home alarm and automation system - evaluation software.
- 
+Key components:-
 <ul>
-<li>Should install and run on any Debian system, but developed to run on a <a href="https://www.raspberrypi.org/products/raspberry-pi-2-model-b/">Raspberry Pi 2 model B</a></li>
-<li>Uses <a href="https://jquerymobile.com/">JQuery Mobile</a> Web framework to provide an iPhone interface.</li>
-<li>Uses <a href="https://github.com/KhaosT/HAP-NodeJS">HAP-NodeJS</a> to interface to HomeKit.</li>
-<li>Full system requires custom circuit board connected to Raspberry Pi, but software
-designed to run even if circuit board is missing.</li>
-</ul>
-  
-<b>Hardware support:-</b><br>
-<ul>
-<li>Control of Remote control mains sockets using PIC chip with I2C interface.</li>
-<li>Supports up to 160 Remote control mains sockets. </li>
-<li>Control of <a href="http://www.homewizard.co.uk/smartwares-wireless-radiator-valve.html">Smartwares Radiator valves</a> using PIC chip with I2C interface.</li>
-<li>Up to 10 Radiator valve channels.</li>
-<li>Control of domestic Security system through industry standard 12volt (wired) contact sensors.</li>
-<li>Up to 12 contact sensor circuits.</li>
+ <li>Build last tested: 01/07/2018.</li>
+ <li>Raspberry Pi 2 with 1GB memory</li>
+ <li>RASPBIAN STRETCH LITE - Version: June 2018 - Release date: 2018-06-27</li>
+ <li>iPhone SE</li>
+ <li>IOS 11.3.1</li>
 </ul>
  
-<b>Updates in Version 5.00...</b><br>
-<ul>
-<li>Raspian Stretch Light.</li>
-<li>HomeKit Bridge - Updated to latest build ( based on Node 8.6 install ).</li>
-<li>Smartware Radiator valves.</li>
-<li>JQuery Mobile - framework to provide user interface.</li>
-<li>Postfix Mail Transfer Agent.
-</ul>
- 
-<b>Features:-</b><br>
-<ul>
-  <li>12 configurable alarm zones (cabled)</li>
-  <li>3 alarm modes: Standby, Night mode, Day mode</li>
-  <li>Up to 160 Remote control mains socket</li>
-  <li>Up to 10 Radiator valves.</li>
-  <li>Industry standard 12 volt interface to alarm sensors, bell boxes and strobe</li>
-  <li>Full (internet) remote control using custom iPhone interface</li>
-  <li>email alerts for alarm events</li>
-  <li>Scheduled tasks</li>
-  <li>HTTPS - Encrypt data between the iPhone and the system.</li>
-  <li>BlowFish - All passwords are hashed, so your password is not stored on the system</li>
-  <li>Remember me login - quick logon by means of a one time access code, so your password is not stored on your iPhone.</li>
-  <li>Fail2Ban - Monitors access attempts and blocks IP after 3 failed login attempts.</li>
-</ul>
- 
-There's a lot more details on my web site...
- 
-<h2>http://oddwires.co.uk </h2>
+<b>Installation:-</b>
 
+<ul>
+<li>sudo raspi-config</li>
+ <ul><li>Localisation Options | Change Timezone</li>
+     <li>Localisation Options | Change Locale ( default is en_GB, you may need to change it )</li>
+     <li>Interfacing options | SSH enable</li>
+     <li>Hostname</li>
+     <li>Finish and Reboot</li>
+ </ul>
+<li>sudo apt-get update</li>
+<li>sudo apt-get -y install git</li>
+<li>mkdir Downloads</li>
+<li>cd Downloads</li>
+<li>git clone git://github.com/oddwires/WorkInProgress.git</li>
+<li>cd WorkInProgress</li>
+<li>chmod +x install.sh</li>
+<li>sudo ./install.sh</li>
+</ul>
+
+<b>Added features:-</b>
+<ul>
+ <li>Silent PostFix install - no more anoying dialog</li>
+ <li>Certificate Authority and full keychain - Root CA certificate created during the install which can be installed to the iPhone providing authentication as well as encryption.</li>
+ <li>Re-worked GUI to utilise the iPhone GPU to provide a dynamic, fluid background. This eats up your batteries, but I luv it !</li>
+ <li>Support for ESP8266 based temperature sensors</li>
+</ul>
+
+<b>TBD:-</b>
+<ul>
+<li>Publish sketch for ESP8266 temperature sensors</li>
+<li>Graphs: trap no data error</li>
+<li>HTML emails</li>
+<li>readvars.php - test for valid session</li>
+</ul>

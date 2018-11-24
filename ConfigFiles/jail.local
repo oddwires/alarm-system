@@ -116,7 +116,7 @@ filter   = pam-generic
 # port actually must be irrelevant but lets leave it all for some possible uses
 port     = all
 banaction = iptables-allports
-port     = anyport
+#port     = anyport
 logpath  = /var/log/auth.log
 maxretry = 6
 
@@ -183,7 +183,7 @@ port      = http,https
 filter    = alarm-regex
 banaction = alarm-actions
             iptables-multiport
-logpath   = /var/log/apache*/access.log
+logpath   = /var/log/apache*/error.log
 maxretry  = 3
 
 #
