@@ -2,9 +2,10 @@
 
 Key components:-
 <ul>
- <li>Build last tested: 01/07/2018.</li>
+ <li>Build last tested: 24/11/2018.</li>
  <li>Raspberry Pi 2 with 1GB memory</li>
- <li>RASPBIAN STRETCH LITE - Version: June 2018 - Release date: 2018-06-27</li>
+ <li>or Raspberry Pi 3 with 1GB memory</li>
+ <li>RASPBIAN STRETCH LITE - Version: November 2018 - Release date: 2018-11-13</li>
  <li>iPhone SE</li>
  <li>IOS 11.3.1</li>
 </ul>
