@@ -11,6 +11,9 @@ Key components:-
  
 <b>Installation:-</b>
 
+Full details in the Wiki
+<a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
+
 <ul>
 <li>sudo raspi-config</li>
  <ul><li>Localisation Options | Change Timezone</li>
