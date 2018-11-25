@@ -11,26 +11,7 @@ Key components:-
  
 <b>Installation:-</b>
 
-Full details in the Wiki
-<a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
-
-<ul>
-<li>sudo raspi-config</li>
- <ul><li>Localisation Options | Change Timezone</li>
-     <li>Localisation Options | Change Locale ( default is en_GB, you may need to change it )</li>
-     <li>Interfacing options | SSH enable</li>
-     <li>Hostname</li>
-     <li>Finish and Reboot</li>
- </ul>
-<li>sudo apt-get update</li>
-<li>sudo apt-get -y install git</li>
-<li>mkdir Downloads</li>
-<li>cd Downloads</li>
-<li>git clone git://github.com/oddwires/WorkInProgress.git</li>
-<li>cd WorkInProgress</li>
-<li>chmod +x install.sh</li>
-<li>sudo ./install.sh</li>
-</ul>
+Full instalation details are in the <a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
 
 <b>Added features:-</b>
 <ul>
