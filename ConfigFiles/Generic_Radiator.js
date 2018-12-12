@@ -21,7 +21,7 @@ var Generic_valve = {
         heatOn: false,
       
         setHeatOn: function(on) { 
-            console.log("Set Office radiator: %s", on ? "on" : "off");
+            console.log("Set Parm1 radiator: %s", on ? "on" : "off");
             if (on) {  Generic_sensor.TargetHeatingCoolingState = 0;
                        fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {       
                        if (err) { return console.log(err); }
@@ -59,7 +59,7 @@ var Generic_sensor = {
         fs.readFile("/var/www/logs/serialized.txt", 'utf-8', function(err, data) {
             if (err) { return console.log(err); }
             var json = JSON.parse(data);                            // convert JSON data to array
-//          console.log(json["Office"]);                           // Debug
+//          console.log(json["Parm1"]);                           // Debug
             Generic_sensor.currentTemperature = (json["Parm1"]);
         });
     },
