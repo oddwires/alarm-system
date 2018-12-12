@@ -13,7 +13,7 @@ var Accessory = require('../').Accessory;
 var Service = require('../').Service;
 var Characteristic = require('../').Characteristic;
 var uuid = require('../').uuid;
-var radiatorNAME = 'Parm1 radiator'; //the temperature sensor's name - this is what Siri responds to
+var radiatorNAME = 'Parm1'; //the temperature sensor's name - this is what Siri responds to
 var uuidNAME = 'hap-nodejs:accessories:Parm1'; //UUID name
 
 // Generic radiator valve that we'll expose to HomeKit
@@ -21,7 +21,7 @@ var Generic_valve = {
         heatOn: false,
       
         setHeatOn: function(on) { 
-            console.log("Set Parm1 radiator: %s", on ? "on" : "off");
+            console.log("Set Office radiator: %s", on ? "on" : "off");
             if (on) {  Generic_sensor.TargetHeatingCoolingState = 0;
                        fs.appendFile("/var/www/data/input.txt", "Parm3", function(err) {       
                        if (err) { return console.log(err); }
@@ -55,7 +55,14 @@ var Generic_sensor = {
 //                   console.log("Less than 23.");
            }
     Generic_sensor.currentTemperature = Generic_sensor.currentTemperature + step;
-  }
+  },    getTemperature: function() {
+        fs.readFile("/var/www/logs/serialized.txt", 'utf-8', function(err, data) {
+            if (err) { return console.log(err); }
+            var json = JSON.parse(data);                            // convert JSON data to array
+//          console.log(json["Office"]);                           // Debug
+            Generic_sensor.currentTemperature = (json["Parm1"]);
+        });
+    },
 }
 
 // Generate a consistent UUID for our Temperature Sensor Accessory that will remain the same
@@ -110,11 +117,13 @@ sensor
                             Generic_valve.heatOn = true;
                             Generic_sensor.CurrentHeatingCoolingState = 1;
                             callback(err, true);
+                            return;
                         } else {
                             console.log("Get Parm1 radiator status: Off");
                             Generic_valve.heatOn = false;
                             Generic_sensor.CurrentHeatingCoolingState = 0;
                             callback(err, false);
+                            return;
                         }
                     }
                 }
@@ -136,7 +145,8 @@ sensor
   
 // cycle the temperature reading
 setInterval(function() { 
-  Generic_sensor.incTemperature();
+//Generic_sensor.incTemperature();
+  Generic_sensor.getTemperature();
   // update the characteristic value so interested iOS devices can get notified
   sensor
     .getService(Service.Thermostat)
