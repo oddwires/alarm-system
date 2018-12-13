@@ -11,12 +11,12 @@ Key components:-
  
 <b>Installation:-</b>
 
-Full instalation details are in the <a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
+Full installation details are in the <a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
 
 <b>Added features:-</b>
 <ul>
  <li>Silent PostFix install - no more anoying dialog</li>
- <li>Certificate Authority and full keychain - Root CA certificate created during the install which can be installed to the iPhone providing authentication as well as encryption.</li>
+ <li>Certificate Authority and full keychain - Root CA certificate created during the install which can be installed to the iPhone providing authentication and encryption and allows the web app to run in full screen.</li>
  <li>Re-worked GUI to utilise the iPhone GPU to provide a dynamic, fluid background.</li>
  <li>Support for ESP8266 based temperature sensors</li>
 </ul>
