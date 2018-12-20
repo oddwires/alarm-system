@@ -101,12 +101,18 @@
 <!-- Select defaults Action sheet dialog -->
 <div data-role="popup" id="DefaultDialog" style="border: 0; background: #80808075;" data-transition="slideup">
     <div data-role="content" style="padding: 8px;">
-        <a href="#" class="ui-popup-button title" data-role="button" data-rel="back">Select the required action.</a>
-        <a href="#" class="ui-popup-button option" onclick="Defaults('load user defaults')"
-                      data-role="button" data-rel="back">Load user defaults</a>
-        <a href="#" class="ui-popup-button option" onclick="Defaults('save user defaults')"
-                      data-role="button" data-rel="back">Save user defaults</a>
-        <a href="#" class="ui-popup-button option last" onclick="Defaults('load factory defaults')"
-                      data-role="button" data-rel="back">Load factory defaults</a>
+        <a href="#" class="ui-popup-button title" data-role="button" data-rel="back">Work day defaults.</a>
+        <a href="#" class="ui-popup-button option" onclick="Defaults('load work defaults')"
+                      data-role="button" data-rel="back">Load defaults</a>
+        <a href="#" class="ui-popup-button option last" onclick="Defaults('save work defaults')"
+                      data-role="button" data-rel="back">Save defaults</a>
+<br>
+        <a href="#" class="ui-popup-button title" data-role="button" data-rel="back">Holiday defaults.</a>
+        <a href="#" class="ui-popup-button option" onclick="Defaults('load hols defaults')"
+                      data-role="button" data-rel="back">Load defaults</a>
+        <a href="#" class="ui-popup-button option last" onclick="Defaults('save hols defaults')"
+                      data-role="button" data-rel="back">Save defaults</a>
+<!--    <a href="#" class="ui-popup-button option last" onclick="Defaults('load factory defaults')"
+                      data-role="button" data-rel="back">Load factory defaults</a> -->
         <a href="#" class="ui-popup-button cancel" data-role="button" data-rel="back">Cancel</a>
 </div>

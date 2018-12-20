@@ -927,16 +927,24 @@ if [ -f /var/www/data/status.txt ]; then                    # If we have the sta
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
   CheckIP                                                   # can't call this until after we have loaded the old IP
-elif [ -f /var/www/default.txt ]; then                      # Failing that, do we have user defaults...
-  load_status_file /var/www/default.txt                     # ...load 'em
-  tmp=${CURRTIME}",alarm,raspi,Settings: Loading user defaults"
+elif [ -f /var/www/work_default.txt ]; then                 # Failing that, do we have work defaults...
+  load_status_file /var/www/work_default.txt                # ...load 'em
+  tmp=${CURRTIME}",alarm,raspi,Settings: Loading work defaults"
+  echo $tmp >> $LOGFILE                                     # log the event
+  echo $tmp                                                 # tell the user
+  title="System restart"                                    # Send email reporting the restart
+  eMail "$title"
+  CheckIP                                                   # can't call this until after we have loaded the old IP
+elif [ -f /var/www/hols_default.txt ]; then                 # Failing that, do we have holiday defaults...
+  load_status_file /var/www/hols_default.txt                # ...load 'em
+  tmp=${CURRTIME}",alarm,raspi,Settings: Loading holiday defaults"
   echo $tmp >> $LOGFILE                                     # log the event
   echo $tmp                                                 # tell the user
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
   CheckIP                                                   # can't call this until after we have loaded the old IP
 else
-  load_status_file /var/www/factory.txt                     # No session data, or user defaults available, so fail back to factory defaults.
+  load_status_file /var/www/factory.txt                     # No session data, or work/holiday defaults available, so fail back to factory defaults.
                                                             # Note: No valid email credentials, so can't send email
   tmp=${CURRTIME}",alarm,raspi,Settings: Loading factory defaults"
   echo $tmp >> $LOGFILE                                     # log the event
@@ -1068,7 +1076,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    printf "[%s]:%s    %s:%s" "${PARAMS[3]}" "${PARAMS[4]}" "${PARAMS[5]}" "${PARAMS[6]}" >>/etc/postfix/sasl_passwd
                    sudo chmod 400 /etc/postfix/sasl_passwd
                    sudo postmap /etc/postfix/sasl_passwd
-#                  rm /etc/postfix/sasl_passwd                             # tidy up
+                   rm /etc/postfix/sasl_passwd                             # tidy up
                    sudo service postfix restart &
                    EMAIL_server=${PARAMS[3]}                               # update variables in RAM
                    EMAIL_port=${PARAMS[4]}
@@ -1080,16 +1088,29 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                       EMAIL_password=${PARAMS[6]}                          # ...update password in memory
                       user[1]=${PARAMS[6]}                                 # ...update password in array
                    fi ;;
-                 "save user defaults")
+                 "save work defaults")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
-                   write_status_file /var/www/default.txt;;                # Save current user defaults to file
-                 "load user defaults")
+                   write_status_file /var/www/work_default.txt;;           # Save current work defaults to file
+                 "load work defaults")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
                    echo $tmp >> $LOGFILE                                   # log the event
                    echo $tmp                                               # tell the user
-                   load_status_file /var/www/default.txt                   # Load user defaults from file
+                   load_status_file /var/www/work_default.txt              # Load work defaults from file
+                   CreateTaskList                                          # assemble the list of all the task strings
+                   CheckIP                                                 # refresh hardware details
+                   check_for_alarm_condition;;                             # check if this causes an alarm
+                 "save hols defaults")
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   write_status_file /var/www/hols_default.txt;;           # Save current holiday defaults to file
+                 "load hols defaults")
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}
+                   echo $tmp >> $LOGFILE                                   # log the event
+                   echo $tmp                                               # tell the user
+                   load_status_file /var/www/hols_default.txt              # Load holiday defaults from file
                    CreateTaskList                                          # assemble the list of all the task strings
                    CheckIP                                                 # refresh hardware details
                    check_for_alarm_condition;;                             # check if this causes an alarm
