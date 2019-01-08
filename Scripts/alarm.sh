@@ -1,7 +1,7 @@
 #!/bin/bash
 #################################################################################################################################
 #                                                                                                                               #
-#     Oddwires alarm service.  Version 5.00                                                                                     #
+#     Oddwires alarm service.  Version 6.00                                                                                     #
 #     Latest details and build instructions... http://oddwires.co.uk/?page_id=123                                               #
 #     Latest code and issues...                https://github.com/oddwires/oddwires-alarm-system                                #
 #                                                                                                                               #
@@ -297,20 +297,26 @@ WriteCronJobs()
     printf "" >>/var/www/cron.txt                                  # create blank file-  this allows the CRONTAB file to be
                                                                    # zeroed when no tasks have been defined
     while [ $i -le "$maxval" ]; do
-       # got to handle different formats for the static and dynamic jobs...
-       DeviceNum=${cron[$i+cron_cmnd]}                             # This is the position of the device in our list on the web page
-       if (( DeviceNum < 4 )) ; then
-       # First three devices have static names and don't need to specify on/off.
-       printf "%s %s %s %s %s echo \"task:RasPi:%s\" >>/var/www/data/input.txt\n" \
-                 "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
-                 "${cmnd[$DeviceNum]}" >>/var/www/cron.txt
-       else
-       # Devices > 4 have variable names and need the additional on/off parameter
-       printf "%s %s %s %s %s echo \"task:RasPi:%s:%s\" >>/var/www/data/input.txt\n" \
-                 "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
-                 "${cmnd[$DeviceNum]}" "${cron[$i+cron_status]}" >>/var/www/cron.txt
-       fi
-       i=$(( i + 8 )) 
+        # got to handle different formats for the static and dynamic jobs...
+        DeviceNum=${cron[$i+cron_cmnd]}                             # This is the position of the device in our list on the web page
+            if ((DeviceNum < 3)); then
+                # First three tasks have static names and don't need to specify on/off.
+                printf "%s %s %s %s %s echo \"task:RasPi:%s\" >>/var/www/data/input.txt\n" \
+                    "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
+                    "${cmnd[$DeviceNum]}" >>/var/www/cron.txt
+            elif ((DeviceNum == 3)); then
+                # Fourth task is the Check IP. This has a different format, as we need to run a script rather than send
+                # a signal to the service.
+                printf "%s %s %s %s %s /var/www/Scripts/CheckIP.sh\n" \
+                    "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" \
+                    "${cron[$i+cron_wday]}" >>/var/www/cron.txt
+            else
+                # Tasks > 3 are for devices. These have variable names and need the additional on/off parameter
+                printf "%s %s %s %s %s echo \"task:RasPi:%s:%s\" >>/var/www/data/input.txt\n" \
+                    "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
+                    "${cmnd[$DeviceNum]}" "${cron[$i+cron_status]}" >>/var/www/cron.txt
+            fi
+        i=$(( i + 8 )) 
     done
     crontab /var/www/cron.txt                                       # load the CRONTAB file
     rm /var/www/cron.txt                                            # tidy up
@@ -349,25 +355,33 @@ load_user_file()
 CheckIP()
 #################################################################################################################################
 #                                                                                                                               #
-# Subroutine uses an external site http://checkip.dyndns.com to obtain router details.                                          #
-# This routing should not be called more then once every five minutes (300 seconds).                                            #
+# Routine to respond to Router IP checks.                                                                                       #
 #                                                                                                                               #
-# This routine started life just checking the Router IP, but has been extended to check all system informaion ( eg local IP,    #
-#   available memory, available disk etc. )                                                                                     #
+# Checking the Router IP uses a ping from an external web site. The ping is run as a background task to prevent the possibility #
+# of a slow response from a third party service causing the system to lock up waiting for a reply.                              #
+#                                                                                                                               #
+# This function is used to make sense of the reply when it arrives from the third party service.                                #
 #                                                                                                                               #
 #################################################################################################################################
 { 
-  Current_routerIP=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
-  if [[ $Current_routerIP != $SETUP_routerIP ]] ; then
-     title="Alarm system: Router IP change"
-     eMail "$title"
-     SETUP_routerIP=${Current_routerIP}                                            # Update variable
-     tmp=${CURRTIME}",task,raspi,New router IP = "${SETUP_routerIP}                # string for log
-   else
-     tmp=${CURRTIME}",task,raspi,Check router IP - no change"                      # string for log
-   fi
-   echo $tmp >> $LOGFILE                                                           # log the event
-   echo $tmp                                                                       # copy to console
+    Responding_site=${PARAMS[1]}
+    Current_routerIP=${PARAMS[3]}
+    # First option - No Response Received...
+    if [ "$Current_routerIP" == "time out" ]; then
+        tmp=${CURRTIME}",task,raspi,Router IP - timeout."                               # tmp = string for log
+    elif [ "$Current_routerIP" == "$SETUP_routerIP" ]; then
+    # Second option - Response received - IP NOT changed...
+        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br>,Router IP - no change"
+    else
+    # Third option - Response received - IP HAS changed...
+        title="Alarm system: Router IP change"
+        eMail "$title"
+        SETUP_routerIP=${Current_routerIP}                                              # Update variable
+        write_status_file /var/www/data/status.txt                                      # write to web page
+        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br>,New router IP - "${SETUP_routerIP}
+    fi
+    echo $tmp >> $LOGFILE                                                               # log the event
+    echo $tmp                                                                           # copy to console
 }
 
 InitPorts()
@@ -886,28 +900,30 @@ radiator_diag()
 CURRTIME=`date "+%H:%M:%S"`                                 # excel format
 LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"              # name derived from date
 
-# Check if we are on a RHEL virtual machine....
+# Check if we are on a virtual machine....
 tmp=$(cat /proc/cpuinfo | grep 'model name' | awk '{print $4}')
-if [[ "$tmp" = "QEMU" ]]; then hardware='QEMU virtual machine'; fi
+if [[ "$tmp" = "QEMU" ]]; then hardware='QEMU Virtual Machine'
+elif [[ "$tmp" = "Intel(R)" ]]; then hardware='MS Virtual Machine'
+fi
 
 # Now check if we are on any sort of Raspberry Pi....
 tmp=$(cat /proc/cpuinfo | grep Revision | awk '{print $3}')
-      case "${tmp}" in
-           "0002" | "0003")
-             hardware='Raspberry Pi Rev 1.0'
-             InitPorts;;                                    # we are on a PI so initialise the ports
-           "000d" | "000e" | "000f" | "0010")
-             hardware='Raspberry Pi Rev 2.0'
-             InitPorts;;                                    # we are on a PI so initialise the ports
-           "a01041")
-             hardware='Raspberry Pi 2'
-             InitPorts;;                                    # we are on a PI so initialise the ports
-           "a02082")
-             hardware='Raspberry Pi 3'
-             InitPorts;;                                    # we are on a PI so initialise the ports
-       esac
-
+case "${tmp}" in
+    "0002" | "0003")
+        hardware='Raspberry Pi Rev 1.0'
+        InitPorts;;                                    # we are on a PI so initialise the ports
+    "000d" | "000e" | "000f" | "0010")
+        hardware='Raspberry Pi Rev 2.0'
+        InitPorts;;                                    # we are on a PI so initialise the ports
+    "a01041")
+        hardware='Raspberry Pi 2'
+        InitPorts;;                                    # we are on a PI so initialise the ports
+    "a02082")
+        hardware='Raspberry Pi 3'
+        InitPorts;;                                    # we are on a PI so initialise the ports
+esac
 tmp=${CURRTIME}",alarm,raspi,GPIO ports initialised for "${hardware}
+
 echo $tmp >> $LOGFILE                                       # log the event
 echo $tmp                                                   # tell the user
 
@@ -926,7 +942,6 @@ if [ -f /var/www/data/status.txt ]; then                    # If we have the sta
   echo $tmp                                                 # tell the user
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
-  CheckIP                                                   # can't call this until after we have loaded the old IP
 elif [ -f /var/www/work_default.txt ]; then                 # Failing that, do we have work defaults...
   load_status_file /var/www/work_default.txt                # ...load 'em
   tmp=${CURRTIME}",alarm,raspi,Settings: Loading work defaults"
@@ -934,7 +949,6 @@ elif [ -f /var/www/work_default.txt ]; then                 # Failing that, do w
   echo $tmp                                                 # tell the user
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
-  CheckIP                                                   # can't call this until after we have loaded the old IP
 elif [ -f /var/www/hols_default.txt ]; then                 # Failing that, do we have holiday defaults...
   load_status_file /var/www/hols_default.txt                # ...load 'em
   tmp=${CURRTIME}",alarm,raspi,Settings: Loading holiday defaults"
@@ -942,15 +956,13 @@ elif [ -f /var/www/hols_default.txt ]; then                 # Failing that, do w
   echo $tmp                                                 # tell the user
   title="System restart"                                    # Send email reporting the restart
   eMail "$title"
-  CheckIP                                                   # can't call this until after we have loaded the old IP
-else
-  load_status_file /var/www/factory.txt                     # No session data, or work/holiday defaults available, so fail back to factory defaults.
+  else
+  load_status_file /var/www/factory.txt                     # No session data, or defaults available, so fail 
+                                                            # back to factory defaults.
                                                             # Note: No valid email credentials, so can't send email
   tmp=${CURRTIME}",alarm,raspi,Settings: Loading factory defaults"
   echo $tmp >> $LOGFILE                                     # log the event
   echo $tmp                                                 # tell the user
-  CheckIP                                                   # We've got no idea what the old IP was, so this will try to send an email.
-                                                            # but we don't have any existing email server details either, so will cause a  # warning.
 fi
 CreateTaskList                                              # assemble the list of all the task strings
 WriteCronJobs                                               # synchronise cron jobs array with system CRONTAB file
@@ -962,6 +974,8 @@ write_status_file /var/www/data/status.txt                  # This shouldn't be 
 if [ -f /var/www/data/input.txt ]; then                     # ... and while we are at it, the most likely reason for a system crash
   rm /var/www/data/input.txt                                # is an incorrectly formatted message from the web page, so nuke it.
 fi
+/var/www/Scripts/CheckIP.sh &                               # Check IP run as background process ( can't call this until after
+                                                            # we have loaded the old IP).
 
 #################################################################################################################################
 #                                                                                                                               #
@@ -1045,7 +1059,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                        echo $tmp                                               # tell the user
                    fi;;
                  "timeout")
-                   # this command is created by a background task and not the web page
+                   # This command is created by a background script and not the web page
                    CURRTIME=`date "+%H:%M:%S"`                              # excel format
                    tmp=${CURRTIME}",alarm,raspi,Alarm timeout"
                    echo $tmp >> $LOGFILE                                    # log the event
@@ -1297,7 +1311,8 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    echo $tmp                                               # tell the user
                    zcon=("${zcon[@]:0:$((${PARAMS[3]}*9))}" "${zcon[@]:$(($((${PARAMS[3]}*9)) + 9))}")
                    ;;
-                 "Check ip")
+                 "check ip")
+                   # This command is created by a background script and not the web page
                    CheckIP;;                                               # pass to subroutine to sort out
 
 #################################################################################################################################
@@ -1398,16 +1413,16 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #                                                                                                                               #
 #################################################################################################################################
 
-           maxval=${#zcon[@]}                                                              # number of defined alarm zones
-           (( maxval-- ))                                                                  # bump down because the array starts at zero
-           i=0                                                                             # array index 
+           maxval=${#zcon[@]}                                                    # number of defined alarm zones
+           (( maxval-- ))                                                        # bump down because the array starts at zero
+           i=0                                                                   # array index 
            while [ $i -le "$maxval" ]; do
-               zcon[$i+$PreviousValue]=${zcon[$i+$CurrentValue]}                           # record previous state
+               zcon[$i+$PreviousValue]=${zcon[$i+$CurrentValue]}                 # record previous state
                anod='/sys/class/gpio/gpio'${anode[${zcon[$i+5]}-1]}'/value'
                cath='/sys/class/gpio/gpio'${cathode[${zcon[$i+5]}-1]}'/value'
-               echo "1" > ${anod}                                                          # activate the anode
-               zcon[$i+$CurrentValue]=$(cat $cath)                                         # read and record the value on the input
-               echo "0" > ${anod}                                                          # deactivate the anode
+               echo "1" > ${anod}                                                # activate the anode
+               zcon[$i+$CurrentValue]=$(cat $cath)                               # read and record the value on the input
+               echo "0" > ${anod}                                                # deactivate the anode
                if [[ "${zcon[$i+$PreviousValue]}" -ne "${zcon[$i+$CurrentValue]}" ]]; then
                   if [[ ${zcon[$i+$CurrentValue]} = "0" ]]; then
                      changed=${zcon[$i+$Name]}" open"
@@ -1418,25 +1433,25 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                i=$(( i + 9 ))
            done 
 
-           if [ -n "$changed" ]; then                                                      # if we have a value for changed, then a circuit has changed
-                                                                                           # since the last scan and we need to dig deeper...
+           if [ -n "$changed" ]; then                              # if we have a value for changed, then a circuit has changed
+                                                                   # since the last scan and we need to dig deeper...
               tmp=${CURRTIME}",alarm,raspi,"${changed}
-              echo $tmp >> $LOGFILE                                                        # log the event
-              echo $tmp                                                                    # tell the user
-              check_for_alarm_condition                                                    # decide if new state of input circuits causes an alarm
-              check_for_chime_condition                                                    # decide if new state of input circuits causes a chime
+              echo $tmp >> $LOGFILE                                # log the event
+              echo $tmp                                            # tell the user
+              check_for_alarm_condition                            # decide if new state of input circuits causes an alarm
+              check_for_chime_condition                            # decide if new state of input circuits causes a chime
               write_status_file /var/www/data/status.txt
            fi
       fi
 
-# The following 4 lines can be used to invoke the diagnostic routines. These show the contents of the data arrays in real time on the system console.
-# Only one diagnostic should be run at a time. Do not leave any of the diagnostics running on a live device, as they slow down the operation
-# of the code.
+# The following 4 lines can be used to invoke the diagnostic routines. These show the contents of the data arrays in real time on the 
+# system console. Only one diagnostic should be run at a time. Do not leave any of the diagnostics running on a live device, as they
+# slow down the operation of the code.
 
-#     alarm_diag                                                                      # DIAGNOSTIC - always comment this line out on a live system
-#     crontab_diag                                                                    # DIAGNOSTIC - always comment this line out on a live system
-#     rcon_diag                                                                       # DIAGNOSTIC - always comment this line out on a live system
-#     user_diag                                                                       # DIAGNOSTIC - always comment this line out on a live system
-#     radiator_diag                                                                   # DIAGNOSTIC - always comment this line out on a live system
+#     alarm_diag                                                   # DIAGNOSTIC - always comment this line out on a live system
+#     crontab_diag                                                 # DIAGNOSTIC - always comment this line out on a live system
+#     rcon_diag                                                    # DIAGNOSTIC - always comment this line out on a live system
+#     user_diag                                                    # DIAGNOSTIC - always comment this line out on a live system
+#     radiator_diag                                                # DIAGNOSTIC - always comment this line out on a live system
 
 done
