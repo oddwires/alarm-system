@@ -2,7 +2,7 @@
 
 A dogs dinner of technology resulting in a system that is incredibly useful.
 <ul>
-<li>433MHz transmitter - control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches">Power switches</a> and <a href="https://www.uk-automation.co.uk/smartwares-wireless-thermostatic-radiator-valve-including-remote/>"Radiator valves/a> anywhere around the house.</li>
+<li>433MHz transmitter - control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches">Power switches</a> and <a href="https://www.uk-automation.co.uk/smartwares-wireless-thermostatic-radiator-valve-including-remote">Radiator valves</a> anywhere around the house.</li>
  <li>Homekit bridge - voice control using <a href="https://www.apple.com/uk/ios/home/">Apple HomeKit</a>.</li>
  <li>12volt interface - connect to industry standard security sensors and sirens.</li>
  </ul>
