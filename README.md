@@ -1,10 +1,16 @@
-<h2>Home automation system with HomeKit and security system.</h2>
+<h2>Home automation system with HomeKit bridge and Security system.</h2>
 
-A dogs dinner of technology resulting in a system that is incredibly useful. There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/">here</a>.
+A dogs dinner of technology resulting in a system that is incredibly useful.
+<ul>
+<li>433MHz transmitter - control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches">Power switches</a> anywhere around the house.</li>
+ <li>Homekit bridge - voice control using <a href="https://www.apple.com/uk/ios/home/">Apple HomeKit</a>.</li>
+ <li>12volt interface - connect to industry standard security sensors and sirens.</li>
+ </ul>
+There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/">here</a>.
 
 Key components:-
 <ul>
- <li>Build last tested: 24/11/2018.</li>
+ <li>Build last tested: 29/01/2019.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
  <li>RASPBIAN STRETCH LITE - Version: November 2018 - Release date: 2018-11-13</li>
  <li>iPhone SE</li>
