@@ -1,4 +1,4 @@
-<h2>Home automation system with HomeKit support and security system.</h2>
+<h2>Home automation system with HomeKit and security system.</h2>
 
 A dogs dinner of technology resulting in a system that is incredibly useful. There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/">here</a>.
 
