@@ -2,39 +2,93 @@
 <html>
 <body>
 <?php
-   error_log(print_r($_POST, true));                             // DEBUG
-   $SensorName = $_POST['sensor'];
-   $SensorReading = $_POST['temperature'];
-// $Path = '/var/www/html/logs/';
-   $Path = '/var/www/logs/';
+// Routine handles variable number of sensor readings, so single or double sensor devices can use the same script.
+// This is achieved by posting sensor data as arrays rather than discrete values.
 
-// Record the data to log file for graphs...
-   $Timestamp = time() * 1000;                                   // Unix timestamp converted to Javascript
-   $DateStamp = date('d-m-y');
-   $FileName = 'Temperature-'.$SensorName.'-'.$DateStamp.'.csv';
-   $data = "[".$Timestamp."],[".$SensorReading."]";
-   $myfile = file_put_contents($Path.$FileName, $data.PHP_EOL , FILE_APPEND | LOCK_EX);
+    $Debug = false;                                                       // used to dump additional data for debugging
+    $Timestamp = time() * 1000;                                           // Unix timestamp converted to Javascript
+    $DateStamp = date('d-m-y');
+    $Path = '/var/www/logs/';
+    $FlotDataFile = "flot.txt";                                           // historic data in JSON format.
+    $HKDataFile = "accessory.txt";                                        // latest values allowing fast access by HK accessories.
+    $NewHKdata = array();                                                 // used to collate new values contained in post
 
-// Record data to second file for HomeKit accessories...
-   $newTemperature = array($SensorName=>$SensorReading);
-   $FileName = $Path."serialized.txt";
-   if(file_exists($FileName)){
-        $serialized = file_get_contents($FileName);               // read existing data
-//      error_log($serialized);                                   // debug
-        $temperatures = json_decode($serialized,true);            // convert to associative array
-//      var_dump($temperatures);                                  // debug
+    if($Debug) { error_log(print_r($_POST, true)); }
+
+    if (file_exists($Path.$FlotDataFile)) {
+        // if the file exists, read the contents..
+        $myfile = fopen($Path.$FlotDataFile, "r+");
+        $serialized = fread($myfile,filesize($Path.$FlotDataFile));
+        fclose($myfile);
     } else {
-        $temperatures = array();                                  // initialise empty array
+        // if the file doesn't exist, initialise the variable cleanly...
+        $serialised = "";                                                  
     }
-   $temperatures = array_replace($temperatures,$newTemperature);  // merge new data
-   $serialized = json_encode($temperatures);                      // convert to JSON format
-   error_log($FileName);
-   $myfile2 = file_put_contents($FileName, $serialized);          // save it
+    $jsonOBJ = json_decode($serialized,true);                             // convert to associative array
+
+    if ($Debug) {
+        echo "<br>=============================<br>";
+        var_dump($jsonOBJ);
+    }
+   
+   // Loop through the input data array
+   $count = 0;
+   foreach ($_POST['sensor'] as $thisSensor) {
+        // Do something with each valid entry ...
+        if ($thisSensor != "") {
+            $thisValue = $_POST['temperature'][$count];
+            $jsonOBJ[$thisSensor][$Timestamp] = $thisValue;               // add new data to Flot data object
+            $NewHKdata[$thisSensor] = $thisValue;                         // add data to KomeKit data array
+        }
+        $count ++;
+    }
+    if ($Debug) {
+        echo "<br>=============================<br>";
+        echo "<br>Edited Flot data array...<br>";
+        var_dump($jsonOBJ);
+
+        echo "<br>=============================<br>";
+        echo "<br>New HK data array...<br>";
+        var_dump($NewHKdata);
+    }
+
+    // Note: File will only fail to open if the folder permissions are wrong.
+    $myfile = fopen($Path.$FlotDataFile, "w+") or die("Unable to open file: $Path$FlotDataFile");
+    $serialized = json_encode($jsonOBJ);
+    fwrite($myfile, $serialized);                                         // save it
+    fclose($myfile);                                                      // close it
+
+   // Record data to second file for HomeKit accessories...
+   if(file_exists($Path.$HKDataFile)){
+        $serialized = file_get_contents($Path.$HKDataFile);
+        $temperatures = json_decode($serialized,true);                    // convert to associative array
+    } else {
+          $temperatures="";
+    }
+    $temperatures = array_replace($temperatures,$NewHKdata);              // merge new data
+    $serialized = json_encode($temperatures);                             // convert to JSON format
+    file_put_contents($Path.$HKDataFile, $serialized);
+
+    if ($Debug) {
+        echo "<br>=============================<br>";
+        echo "<br>Data read from HK file...<br>";
+        var_dump($temperatures);
+        echo "<br>=============================<br>";
+        echo "<br>Data to be written to HK file...<br>";
+        var_dump($temperatures);
+        echo "<br>=============================<br><br>";
+        echo "JSON encoded data...<br>";
+        var_dump($serialized);
+        echo "<br>=============================<br><br>";
+    }
 ?>
 
 <form action="sensor.php" method="post">
-   <p>Temperature: <input type="text" name="temperature" /><br>
-      Sensor: <input type="text" name="sensor" value="kitchen" /></p>
+        <input maxlength="25" name="sensor[]" size="20" type="text" value="Office" /><br>
+        <input maxlength="5" name="temperature[]" size="20" type="text" value="21" /><br>
+        <input maxlength="25" name="sensor[]" size="20" type="text" value="Kitchen" /><br>
+        <input maxlength="5" name="temperature[]" size="20" type="text" value="25" /><br>
+    </p> 
    <input type="submit" name="submit" value="Submit" />
 </form>
 </body>
