@@ -829,6 +829,8 @@ function AjaxGet(fileName,destination){
             "<label2 for='id" + key + "'>"
             + val.label + "</label><br>");
     });
+
+
     choiceContainer.find("input").click(plotAccordingToChoices);   // bind click handler
     function plotAccordingToChoices() {
         var data = [];
@@ -838,10 +840,9 @@ function AjaxGet(fileName,destination){
                 data.push(datasets[key]);
             }
         });
+
         // Calculate where the date axis should start and end
-        //  if (data.length > 0) {
-//      var firstDate = data[0].data["0"]["0"];              // get first element from first array
-        var firstDate = new Date(data[0].data["0"]["0"]);    // get first element from first array and convert to Date
+        var firstDate = new Date(data[1]["data"][0][0]);         // get first element from first array
         var da = firstDate.getDate();                        // day
         var mon = firstDate.getMonth();                      // month
         var yr = firstDate.getFullYear();                    // year
@@ -856,8 +857,8 @@ function AjaxGet(fileName,destination){
               yaxis: { min: 0 },
               xaxis: { mode: "time",
                        tickSize: [4, "hour"],
-                       min: (new Date(startDate)).getTime(),
-                       max: (new Date(endDate)).getTime(),
+//                       min: (new Date(startDate)).getTime(),
+//                       max: (new Date(endDate)).getTime(),
                        twelveHourClock: false },
               legend: { show: true,
                         position: 'sw' }
