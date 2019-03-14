@@ -1,3 +1,15 @@
+<!-- Purple snot background.
+
+    This code has been taken from Codepen.io.
+    Thanks to Liam Egan for posting it.
+    Source code is here...
+
+    https://codepen.io/shubniggurath/pen/xYMqVj
+
+-->
+
+<div id="container" touch-action="none"></div>              <!-- this is where the background goes           -->
+
 <script>
 /*
 Most of the stuff in here is just bootstrapping. Essentially it's just

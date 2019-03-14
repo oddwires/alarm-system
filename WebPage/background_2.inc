@@ -1,3 +1,16 @@
+<!-- Slime background.
+
+    This code has been taken from Codepen.io.
+    Thanks to Liam Egan for posting it.
+    Source code is here...
+
+    https://codepen.io/shubniggurath/pen/ppOgPW
+
+-->
+
+<div id="container" touch-action="none"></div>              <!-- this is where the background goes           -->
+
+<script id="vertexShader" type="x-shader/x-vertex">
 /*    Slime
       Liam Egan - 2018
       ----------------------
@@ -9,8 +22,6 @@
       Gary Warne, and many many others.
       "Nanos gigantum humeris insidentes"
 */
-
-<script id="vertexShader" type="x-shader/x-vertex">
     void main() {
         gl_Position = vec4( position, 1.0 );
     }

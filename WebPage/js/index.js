@@ -842,13 +842,18 @@ function AjaxGet(fileName,destination){
         });
 
         // Calculate where the date axis should start and end
-        var firstDate = new Date(data[1]["data"][0][0]);         // get first element from first array
-        var da = firstDate.getDate();                        // day
-        var mon = firstDate.getMonth();                      // month
-        var yr = firstDate.getFullYear();                    // year
-        var startDate = new Date(yr, mon, da, 0, 0, 0, 0);   // midnight on the first day of our data
-        var endDate = new Date(startDate);                   // copy value
-        endDate.setDate(endDate.getDate() + 1);              // bump it by 24 hours
+        var firstDate = new Date(data[1]["data"][0][0]);     // get first element from first array
+
+        var chartPeriod = 7;                                 // number of days to plot
+        var nowDate = new Date();                            // now
+        var dd = nowDate.getDate();                          // day
+        var mm = nowDate.getMonth();                         // month
+        var yyyy = nowDate.getFullYear();                    // year
+
+        var endDate = new Date(yyyy, mm, dd, 0, 0, 0, 0);    // midnight tonight
+        var startDate = new Date(endDate);                   // copy value
+        startDate.setDate(startDate.getDate() - chartPeriod);
+//      endDate.setDate(endDate.getDate() + 1);              // bump it by 24 hours = midnight last night
 
         $.plot("#chart", data,
             { yaxes: [{ position: 'left',
@@ -856,9 +861,10 @@ function AjaxGet(fileName,destination){
               xaxes: [{ axisLabel: 'Time'}],
               yaxis: { min: 0 },
               xaxis: { mode: "time",
-                       tickSize: [4, "hour"],
-//                       min: (new Date(startDate)).getTime(),
-//                       max: (new Date(endDate)).getTime(),
+//                     tickSize: [4, "hour"],
+                       tickSize: [24, "hour"],
+                       min: (new Date(startDate)).getTime(),
+                       max: (new Date(endDate)).getTime(),
                        twelveHourClock: false },
               legend: { show: true,
                         position: 'sw' }

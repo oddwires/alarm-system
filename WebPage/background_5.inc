@@ -1,3 +1,14 @@
+<!-- Bad blood background.
+
+    This code has been taken from Codepen.io.
+    Thanks to Liam Egan for posting it.
+    Source code is here...
+
+    https://codepen.io/shubniggurath/pen/qxgbLG
+-->
+
+<div id="container" touch-action="none"></div>              <!-- this is where the background goes           -->
+
 <script id="vertexShader" type="x-shader/x-vertex">
     void main() {
         gl_Position = vec4( position, 1.0 );

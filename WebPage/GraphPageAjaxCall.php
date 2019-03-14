@@ -59,6 +59,9 @@
         <p id="choices" style="float:right; width:20%;"><br></p>
         </div>
 
+        <a class="RoundButton red" id="ViewButton1" style="left: 10%; top: 60%; cursor: pointer" ><span class="RoundButtonText2">Week</span></a>
+        <a class="RoundButton red" id="ViewButton2" style="left: 35%; top: 60%; cursor: pointer" ><span class="RoundButtonText2">Day</span></a>
+
         <table><tr>
             <td><button id="ninetynine">1999 by month</button></td>
             <td><button id="whole">Whole period</button></td></tr>

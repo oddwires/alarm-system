@@ -23,15 +23,15 @@
 </head>
 
 <body>
-    <div id="container" touch-action="none"></div>              <!-- this is where the background goes           -->
 <!-- Enable one of the following dynamic backgrounds...                                                          -->
     <?php //include("background_1.inc"); ?>                     <!-- Purple snot                                 -->
     <?php //include("background_2.inc"); ?>                     <!-- Slime                                       -->
-    <?php include("background_3.inc"); ?>                     <!-- Chrome                                      -->
+    <?php //include("background_3.inc"); ?>                     <!-- Chrome                                      -->
     <?php //include("background_4.inc"); ?>                     <!-- Diamonds                                    -->
     <?php //include("background_5.inc"); ?>                     <!-- Bad blood                                   -->
     <?php //include("background_6.inc"); ?>                     <!-- Emerald City                                -->
     <?php //include("background_7.inc"); ?>                     <!-- Nakatomi Plaza ( Welcome to the web-app )   -->
+    <?php include("background_8.inc"); ?>                     <!-- Matrix (Code rain)                          -->
 
 <div main>
     <?php include("readvars.php"); ?>                         <!-- common code to read variables from file STATUS.TXT -->
