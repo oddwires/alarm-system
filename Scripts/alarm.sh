@@ -912,7 +912,7 @@ case "${tmp}" in
     "0002" | "0003")
         hardware='Raspberry Pi Rev 1.0'
         InitPorts;;                                    # we are on a PI so initialise the ports
-    "000d" | "000e" | "000f" | "0010")
+    "000d" | "000e" | "000f" | "0010" | "0013")
         hardware='Raspberry Pi Rev 2.0'
         InitPorts;;                                    # we are on a PI so initialise the ports
     "a01041")
