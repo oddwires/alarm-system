@@ -906,21 +906,24 @@ if [[ "$tmp" = "QEMU" ]]; then hardware='QEMU Virtual Machine'
 elif [[ "$tmp" = "Intel(R)" ]]; then hardware='MS Virtual Machine'
 fi
 
-# Now check if we are on any sort of Raspberry Pi....
+# Now check if we are on any sort of Raspberry Pi.
+# Note: Full list of RasPi models can be found here...
+#    https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
+
 tmp=$(cat /proc/cpuinfo | grep Revision | awk '{print $3}')
 case "${tmp}" in
-    "0002" | "0003")
-        hardware='Raspberry Pi Rev 1.0'
-        InitPorts;;                                    # we are on a PI so initialise the ports
-    "000d" | "000e" | "000f" | "0010")
-        hardware='Raspberry Pi Rev 2.0'
-        InitPorts;;                                    # we are on a PI so initialise the ports
-    "a01041")
-        hardware='Raspberry Pi 2'
-        InitPorts;;                                    # we are on a PI so initialise the ports
-    "a02082")
-        hardware='Raspberry Pi 3'
-        InitPorts;;                                    # we are on a PI so initialise the ports
+    "0002" | "0003" | "0004" | "0005" | "0006" | "000d" | "000e" | "000f")
+        hardware='Raspberry Pi 1 model B'
+        InitPorts;;                                         # we are on a PI so initialise the ports
+    "0010" | "0013")
+        hardware='Raspberry Pi 1 model B+'
+        InitPorts;;                                         # we are on a PI so initialise the ports
+    "a01040" | "a01041" | "a21041")
+        hardware='Raspberry Pi model 2B'
+        InitPorts;;                                         # we are on a PI so initialise the ports
+    "a02082" | "a22082" | "a32082" | "a52082" | "a22083")
+        hardware='Raspberry Pi model 3B'
+        InitPorts;;                                         # we are on a PI so initialise the ports
 esac
 tmp=${CURRTIME}",alarm,raspi,GPIO ports initialised for "${hardware}
 
