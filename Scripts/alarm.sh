@@ -98,7 +98,7 @@ declare -a rdtr=()
 
 # GLOBAL variables used by Setup...
 SETUP_routerIP=""; SETUP_localIP=""; SETUP_duration=""; SETUP_location=""; SETUP_diskused=""; SETUP_diskperc=""; SETUP_disktotal=""
-SYSTEM_uptime=""; hardware="Unknown hardware"; running_on_RasPi="false"; memory="unknown"
+SYSTEM_uptime=""; hardware="Unknown hardware"; running_on_RasPi="false"; memory="unknown"; I2C_bus="1"
 
 # GLOBAL variables used by email...
 EMAIL_server=""; EMAIL_port=""; EMAIL_sender=""; EMAIL_password=""
@@ -914,9 +914,11 @@ tmp=$(cat /proc/cpuinfo | grep Revision | awk '{print $3}')
 case "${tmp}" in
     "0002" | "0003" | "0004" | "0005" | "0006" | "000d" | "000e" | "000f")
         hardware='Raspberry Pi 1 model B'
+        I2C_bus="0"                                         # flag non-standard I2C config on early RasPi
         InitPorts;;                                         # we are on a PI so initialise the ports
     "0010" | "0013")
         hardware='Raspberry Pi 1 model B+'
+        I2C_bus="0"                                         # flag non-standard I2C config on early RasPi
         InitPorts;;                                         # we are on a PI so initialise the ports
     "a01040" | "a01041" | "a21041")
         hardware='Raspberry Pi model 2B'
@@ -1252,12 +1254,22 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                    rcon[${PARAMS[3]}*7+rcon_status]="${PARAMS[4]}"         # set array element to new string value
                    if [ "${PARAMS[4]}" == "On" ]; then
                        # format the command string for 'on'...
-#                      printf -v tmp ' -y 1 0x08 0x%02X 0x%X1 \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
-                       printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                       if [ "I2C_bus" == "0" ]; then
+                           # RasPi model 1 uses i2C bus 0...
+                           printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                       else
+                           # RasPi model 2 and 3 uses i2C bus 1...
+                           printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                        fi
                    else
                        # format the command string for 'off'...
-#                      printf -v tmp ' -y 1 0x08 0x%02X 0x%X0 \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+2]}
-                       printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                       if [ "I2C_bus" == "0" ]; then
+                           # RasPi model 1 uses i2C bus 0...
+                           printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                       else
+                           # RasPi model 2 and 3 uses i2C bus 1...
+                           printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                       fi 
                    fi
 #                  echo $tmp                                               # DEBUG - view the I2C command
                    if [ ${running_on_RasPi} == "true" ]; then
