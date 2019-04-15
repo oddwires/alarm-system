@@ -1,6 +1,6 @@
 <h2>Home automation system with HomeKit bridge and Security system.</h2>
 
-A dogs dinner of technology resulting in a system that is incredibly useful.
+A dogs dinner of technology resulting in a system that provides home security and automation.
 <ul>
 <li>433MHz transmitter - control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches">Power switches</a> and <a href="https://www.uk-automation.co.uk/smartwares-wireless-thermostatic-radiator-valve-including-remote">Radiator valves</a> anywhere around the house.</li>
  <li>Web App interface - control devices from anywhere you can use your mobile phone..
@@ -11,7 +11,7 @@ There are some pictures, and interactive sample screens on my web page <a href="
 
 Key components:-
 <ul>
- <li>Build last tested: 29/01/2019.</li>
+ <li>Build last tested: 15/04/2019.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
  <li>RASPBIAN STRETCH LITE - Version: November 2018 - Release date: 2018-11-13</li>
  <li>iPhone SE</li>
