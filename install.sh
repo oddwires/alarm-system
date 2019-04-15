@@ -5,6 +5,7 @@ GrandParent=$(dirname $Parent)                             # directory name up t
 CurrentUsr=${GrandParent///home\/}                         # remember who we are
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 1                              *"
@@ -20,6 +21,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  tput setaf 9                                               # Reset to default text colour
   # Upgrades...
   sudo apt-get -y upgrade
   sudo apt-get install build-essential
@@ -28,6 +30,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 2                              *"
@@ -44,6 +47,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  tput setaf 9                                               # Reset to default text colour
   # Note: Haven't set the 'send as' account or password - that is handled by the alarm service
   # Mail Transfer Agent...
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y postfix mailutils  # mute the install dialogue
@@ -59,6 +63,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 3                              *"
@@ -77,6 +82,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+   tput setaf 9                                               # Reset to default text colour
    # Configure the I2C bus speed to 32K ( default is 100K and too fast for the PIC chip )
    sudo fdtput --type u /boot/bcm2709-rpi-2-b.dtb /soc/i2c@7e205000 clock-frequency 32000
    # install the I2C utilities...
@@ -94,6 +100,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 4                              *"
@@ -110,6 +117,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+   tput setaf 9                                               # Reset to default text colour
    # Apache install...
    sudo apt-get install -y apache2 php
 
@@ -123,6 +131,7 @@ fi
 #read -n1 -r -p "Press any key to continue..." key
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 5                              *"
@@ -140,6 +149,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+    tput setaf 9                                               # Reset to default text colour
     # Check for previous install...
     if [ "$(ls -A /var/www)" ]; then
       echo "Previous install found."
@@ -193,7 +203,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 echo " "
 
 clear
-echo " "
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 6                              *"
@@ -212,7 +222,6 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
-#    CurrentDir=$(pwd)
     IPaddress=$(hostname -I)
     HostName=$(hostname)
     echo "If you intend to open port 443 on your router to allow external access from the internet, you have probably also created a DDNS name for this installation."
@@ -222,6 +231,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     echo "Alternatively just press return to continue."
     read DDNSname
 
+    tput setaf 9                                               # Reset to default text colour
     # Check for existing keychain...
     if [ "$(ls -A /var/ca)" ]; then
        echo "Existing keychain found."
@@ -313,19 +323,23 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     fi
 
     sudo a2enmod ssl
+    tput setaf 2                                               # Green text
     echo
     echo "############################################################################"
     echo "Creating root CA..."
     echo "############################################################################"
     echo
+    tput setaf 9                                               # Reset to default text colour
     openssl genrsa -out root-ca/private/ca.key 2048
     openssl req -config root-ca/openssl.conf -new -x509 -days 3650 -key root-ca/private/ca.key -sha256 -extensions v3_req -out root-ca/certs/ca.crt -subj "/CN="$HOSTNAME" /O=oddwires.co.uk"
 
+    tput setaf 2                                               # Green text
     echo
     echo "############################################################################"
     echo "Creating server certificate..."
     echo "############################################################################"
     echo
+    tput setaf 9                                               # Reset to default text colour
     mkdir server
 
     openssl req -new -sha256 -nodes -out server/$HOSTNAME.request -newkey rsa:2048 -keyout server/Certificate.key -subj "/CN="$HOSTNAME" /O=oddwires.co.uk"
@@ -347,6 +361,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 7                              *"
@@ -367,6 +382,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  tput setaf 9                                               # Reset to default text colour
   # Samba install...
   sudo apt-get -y install samba
   # Samba common binaries...
@@ -399,6 +415,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo sed -i -e "s@$oldstring@$newstring@g" "$filename"             # do it.
 
   clear
+  tput setaf 2                                               # Green text
   # add password for the current user user...
   echo " "
   echo "SAMBA needs to set a password for user "$CurrentUsr"."
@@ -406,18 +423,21 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   echo "Note: the file permissions will restrict this access to READ ONLY."
   echo "(tip - use the same password as your user ID)"
   echo ""
+  tput setaf 9                                               # Reset to default text colour
   sudo smbpasswd -a $CurrentUsr
   # enable the password for the current user...
   sudo smbpasswd -e $CurrentUsr
   clear
 
   # add password for root...
+  tput setaf 2                                               # Green text
   echo " "
   echo "SAMBA needs to set a password for the root user."
   echo "This will enable access to the network shares from a Windows network."
   echo "Note: the file permissions will permit FULL ACCESS."
   echo "(tip - use the same password as the root user ID)"
   echo ""
+  tput setaf 9                                               # Reset to default text colour
   sudo smbpasswd -a root
   # enable the password for the root user...
   sudo smbpasswd -e root
@@ -428,6 +448,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 8                              *"
@@ -450,6 +471,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  tput setaf 9                                               # Reset to default text colour
   # Install Fail2Ban
   sudo apt-get -y install fail2ban
   
@@ -478,6 +500,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 9                              *"
@@ -497,6 +520,7 @@ echo "**************************************************************************
 read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
+  tput setaf 9                                               # Reset to default text colour
   # install various pre requisites...
   cd ..                                         # install into the Downloads directory
   sudo apt-get install libavahi-compat-libdnssd-dev -y
@@ -545,6 +569,7 @@ fi
 echo " "
 
 clear
+tput setaf 2                                               # Green text
 echo "********************************************************************************"
 echo "*                                                                              *"
 echo "*  oddwires.co.uk Alarm System installer: Stage 10                             *"
@@ -558,5 +583,6 @@ echo "*  Press any key to exit the installer and reboot the system.             
 echo "*                                                                              *"
 echo "********************************************************************************"
 read -n1 -r key
+tput setaf 9                                               # Reset to default text colour
 echo
 sudo reboot

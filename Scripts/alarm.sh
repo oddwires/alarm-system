@@ -918,7 +918,6 @@ case "${tmp}" in
         InitPorts;;                                         # we are on a PI so initialise the ports
     "0010" | "0013")
         hardware='Raspberry Pi 1 model B+'
-        I2C_bus="0"                                         # flag non-standard I2C config on early RasPi
         InitPorts;;                                         # we are on a PI so initialise the ports
     "a01040" | "a01041" | "a21041")
         hardware='Raspberry Pi model 2B'
