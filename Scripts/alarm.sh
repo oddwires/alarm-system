@@ -426,7 +426,7 @@ InitPorts()
   # Load the I2C drivers...
   sudo modprobe i2c_bcm2708                                    # load drivers manually for this session
   sudo modprobe i2c-dev
-  tmp=${CURRTIME}",alarm,raspi,I2C Bus initialised"
+  tmp=${CURRTIME}",alarm,raspi,I2C Bus "${I2C_bus}" initialised"
   echo $tmp >> $LOGFILE                                        # log the event
   echo $tmp                                                    # tell the user
 
@@ -1246,6 +1246,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 # Handle commands passed from the Automation web page.
 #
 #################################################################################################################################
+
                  "rcon swtch")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rcon[${PARAMS[3]}*7+rcon_name]}","${PARAMS[4]}
                    echo $tmp >> $LOGFILE                                   # log the event
@@ -1270,7 +1271,8 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                            printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
                        fi 
                    fi
-#                  echo $tmp                                               # DEBUG - view the I2C command
+                  echo $tmp                                               # DEBUG - view the I2C command
+                  echo ${running_on_RasPi}
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
