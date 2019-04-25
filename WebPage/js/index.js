@@ -4,6 +4,7 @@
         username : '',
         status : ''
     }
+    var chartPeriod = 1;            // default chart period = 1 day
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User ID editor functions...
@@ -820,9 +821,37 @@ function AjaxGet(fileName,destination){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Chart functions...
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    $(document).on('click', '#ViewButton1', function() {
+        var startDate = new Date();
+        var endDate = new Date(new Date().setHours(24,0,0,0));         // midnight tonight
+        chartPeriod = 7;                                               // number of days to plot
+        startDate.setDate(startDate.getDate() - chartPeriod);
+        plotAccordingToChoices2(startDate,endDate);
+    });
+
+    $(document).on('click', '#ViewButton2', function() {
+        var startDate = new Date();
+        var endDate = new Date(new Date().setHours(24,0,0,0));         // midnight tonight
+        chartPeriod = 1;                                               // number of days to plot
+        startDate.setDate(startDate.getDate() - chartPeriod);
+        plotAccordingToChoices2(startDate,endDate);
+    });
+
     $(document).on("pageshow", "#graph", function(event,data){
     // insert checkboxes
     var choiceContainer = $("#choices");
+
+    if ( typeof (datasets) == "undefined" ) {
+        // no data has been found in the specified period.
+        $("#graph").trigger("create");
+        tmp = "No temperature data has been found.\n\n" +
+              "At least 3 data points are required\n" +
+              "to render the graph.\n\n" +
+              "Try again later.";
+        alert (tmp);
+        return;                    // trying to plot no data causes FLOT to lock up, so don't do it.    
+    }
+
     $.each(datasets, function(key, val) {
         choiceContainer.append("<br/><input type='checkbox' name='" + key +
             "' checked='checked' id='id" + key + "'></input>" +
@@ -844,7 +873,7 @@ function AjaxGet(fileName,destination){
         // Calculate where the date axis should start and end
         var firstDate = new Date(data[1]["data"][0][0]);     // get first element from first array
 
-        var chartPeriod = 7;                                 // number of days to plot
+//        var chartPeriod = 1;                                 // number of days to plot
         var nowDate = new Date();                            // now
         var dd = nowDate.getDate();                          // day
         var mm = nowDate.getMonth();                         // month
@@ -872,3 +901,30 @@ function AjaxGet(fileName,destination){
     }
     plotAccordingToChoices();             // run function on page load
 });
+
+function plotAccordingToChoices2(startDate,endDate) {
+
+    var choiceContainer = $("#choices");
+    var data = [];
+    choiceContainer.find("input:checked").each(function () {
+        var key = $(this).attr("name");
+        if (key && datasets[key]) {
+            data.push(datasets[key]);
+        }
+    });
+
+    $.plot("#chart", data,
+        { yaxes: [{ position: 'left',
+                    axisLabel: 'Temperature' }],
+          xaxes: [{ axisLabel: 'Time'}],
+          yaxis: { min: 0 },
+          xaxis: { mode: "time",
+//                     tickSize: [4, "hour"],
+                   tickSize: [24, "hour"],
+                   min: (new Date(startDate)).getTime(),
+                   max: (new Date(endDate)).getTime(),
+                   twelveHourClock: false },
+          legend: { show: true,
+                    position: 'sw' }
+    });
+}

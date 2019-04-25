@@ -169,7 +169,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     mkdir /var/www/logs
     mkdir /var/www/data
     mkdir /var/www/Scripts
-    # set file and folders, owner and group ...
+    # set file and directory, owner and group ...
     sudo chown -R root /var/www/
     sudo chgrp -R www-data /var/www/
     # set folder permissions...
@@ -198,9 +198,21 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
     sudo systemctl enable alarm
     # Start it up...
     sudo service alarm start
-  fi
+
+    echo "Creating data directory structure..."
+    mkdir /var/data
+    mkdir /var/data/app-sensor
+    mkdir /var/data/logs
+    mkdir /var/data/app-data
+    # set file and directory, owner and group ...
+    sudo chgrp -R www-data /var/data/              # whole of the directory structure...
+    sudo chgrp root /var/data/                     # except for this bit, www-data doesn't need access up here.
+    # set folder permissions...
+    chmod -R 770 /var/data/app-sensor
+    chmod -R 770 /var/data/logs
+    chmod -R 770 /var/data/app-data
+   fi
 #read -n1 -r -p "Press any key to continue..." key
-echo " "
 
 clear
 tput setaf 2                                               # Green text

@@ -1041,6 +1041,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                       echo $tmp >> $LOGFILE                                   # log the event
                       echo $tmp                                               # tell the user
                       printf "Restarting HAP-NodeJS\n"
+					  sudo killall node
                       sudo service homebridge restart
                    fi;;
                  "mode")
