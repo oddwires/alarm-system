@@ -5,6 +5,9 @@
         status : ''
     }
     var chartPeriod = 1;            // default chart period = 1 day
+    var startDate = new Date(new Date().setHours(0,0,0,0));                // midnight last night
+    var endDate = new Date(new Date().setHours(24,0,0,0));                 // midnight tonight
+    var tickSize = 4;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User ID editor functions...
@@ -822,19 +825,50 @@ function AjaxGet(fileName,destination){
 // Chart functions...
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     $(document).on('click', '#ViewButton1', function() {
-        var startDate = new Date();
-        var endDate = new Date(new Date().setHours(24,0,0,0));         // midnight tonight
-        chartPeriod = 7;                                               // number of days to plot
-        startDate.setDate(startDate.getDate() - chartPeriod);
-        plotAccordingToChoices2(startDate,endDate);
+        // week view.
+        chartPeriod = (24*60*60*1000) * 7;                             //1 week
+        tickSize = 24;
+        endDate.setTime(Date.now());                                   // Now
+        endDate.setHours(24,0,0,0);                                    // midnight tonight
+        startDate.setDate(endDate.getDate() - 1);
+        startDate.setTime(endDate.getTime() - chartPeriod);
+        $(".ui-header .ui-title").text('Temp');
+        plotAccordingToChoices();
     });
 
     $(document).on('click', '#ViewButton2', function() {
-        var startDate = new Date();
-        var endDate = new Date(new Date().setHours(24,0,0,0));         // midnight tonight
-        chartPeriod = 1;                                               // number of days to plot
-        startDate.setDate(startDate.getDate() - chartPeriod);
-        plotAccordingToChoices2(startDate,endDate);
+        // 24 hour view.
+        chartPeriod = (24*60*60*1000) * 1;                             //1 day
+        tickSize = 4;
+        endDate.setTime(Date.now());                                   // Now
+        endDate.setHours(24,0,0,0);                                    // midnight tonight
+        startDate.setDate(endDate.getDate() - 1);
+        startDate.setTime(endDate.getTime() - chartPeriod);
+        tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
+        $(".ui-header .ui-title").text(tmp);
+        plotAccordingToChoices();
+    });
+
+    $(document).on('click', '#ViewButton3', function() {
+        // Back 24 hours.
+        chartPeriod = (24*60*60*1000) * 1;                             //1 day
+        tickSize = 4;
+        endDate.setDate(endDate.getDate() - 1);
+        startDate.setTime(endDate.getTime() - chartPeriod);
+        tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
+        $(".ui-header .ui-title").text(tmp);
+        plotAccordingToChoices();
+    });
+
+    $(document).on('click', '#ViewButton4', function() {
+        // Forward 24 hours.
+        chartPeriod = (24*60*60*1000) * 1;                             //1 day
+        tickSize = 4;
+        endDate.setDate(endDate.getDate() + 1);
+        startDate.setTime(endDate.getTime() - chartPeriod);
+        tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
+        $(".ui-header .ui-title").text(tmp);
+        plotAccordingToChoices();
     });
 
     $(document).on("pageshow", "#graph", function(event,data){
@@ -849,7 +883,7 @@ function AjaxGet(fileName,destination){
               "to render the graph.\n\n" +
               "Try again later.";
         alert (tmp);
-        return;                    // trying to plot no data causes FLOT to lock up, so don't do it.    
+        return;                    // trying to plot no data causes FLOT to lock up, so don't go there.    
     }
 
     $.each(datasets, function(key, val) {
@@ -858,10 +892,22 @@ function AjaxGet(fileName,destination){
             "<label2 for='id" + key + "'>"
             + val.label + "</label><br>");
     });
-
-
     choiceContainer.find("input").click(plotAccordingToChoices);   // bind click handler
+
+    tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
+    $(".ui-header .ui-title").text(tmp);
+    plotAccordingToChoices();                                      // run function on page load
+});
+
     function plotAccordingToChoices() {
+        // hard-code colour indices to prevent them from shifting as sensors are turned on/off
+        var i = 0;
+        $.each(datasets, function(key, val) {
+            val.color = i;
+            ++i;
+        });
+
+        var choiceContainer = $("#choices");
         var data = [];
         choiceContainer.find("input:checked").each(function () {
             var key = $(this).attr("name");
@@ -870,61 +916,18 @@ function AjaxGet(fileName,destination){
             }
         });
 
-        // Calculate where the date axis should start and end
-        var firstDate = new Date(data[1]["data"][0][0]);     // get first element from first array
-
-//        var chartPeriod = 1;                                 // number of days to plot
-        var nowDate = new Date();                            // now
-        var dd = nowDate.getDate();                          // day
-        var mm = nowDate.getMonth();                         // month
-        var yyyy = nowDate.getFullYear();                    // year
-
-        var endDate = new Date(yyyy, mm, dd, 0, 0, 0, 0);    // midnight tonight
-        var startDate = new Date(endDate);                   // copy value
-        startDate.setDate(startDate.getDate() - chartPeriod);
-//      endDate.setDate(endDate.getDate() + 1);              // bump it by 24 hours = midnight last night
-
         $.plot("#chart", data,
             { yaxes: [{ position: 'left',
                         axisLabel: 'Temperature' }],
               xaxes: [{ axisLabel: 'Time'}],
               yaxis: { min: 0 },
               xaxis: { mode: "time",
-//                     tickSize: [4, "hour"],
-                       tickSize: [24, "hour"],
-                       min: (new Date(startDate)).getTime(),
-                       max: (new Date(endDate)).getTime(),
+                       tickSize: [tickSize, "hour"],
+                       timezone: "browser", // required to correct for daylight saving in graph.
+                       min: (startDate.getTime()),
+                       max: (endDate.getTime()),
                        twelveHourClock: false },
               legend: { show: true,
                         position: 'sw' }
         });
     }
-    plotAccordingToChoices();             // run function on page load
-});
-
-function plotAccordingToChoices2(startDate,endDate) {
-
-    var choiceContainer = $("#choices");
-    var data = [];
-    choiceContainer.find("input:checked").each(function () {
-        var key = $(this).attr("name");
-        if (key && datasets[key]) {
-            data.push(datasets[key]);
-        }
-    });
-
-    $.plot("#chart", data,
-        { yaxes: [{ position: 'left',
-                    axisLabel: 'Temperature' }],
-          xaxes: [{ axisLabel: 'Time'}],
-          yaxis: { min: 0 },
-          xaxis: { mode: "time",
-//                     tickSize: [4, "hour"],
-                   tickSize: [24, "hour"],
-                   min: (new Date(startDate)).getTime(),
-                   max: (new Date(endDate)).getTime(),
-                   twelveHourClock: false },
-          legend: { show: true,
-                    position: 'sw' }
-    });
-}

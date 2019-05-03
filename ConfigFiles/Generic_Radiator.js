@@ -56,7 +56,7 @@ var Generic_sensor = {
            }
     Generic_sensor.currentTemperature = Generic_sensor.currentTemperature + step;
   },    getTemperature: function() {
-        fs.readFile("/var/www/logs/serialized.txt", 'utf-8', function(err, data) {
+        fs.readFile("/var/data/app-sensor/current_values.txt", 'utf-8', function(err, data) {
             if (err) { return console.log(err); }
             var json = JSON.parse(data);                            // convert JSON data to array
 //          console.log(json["Parm1"]);                           // Debug

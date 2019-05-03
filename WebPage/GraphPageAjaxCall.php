@@ -59,13 +59,10 @@
         <p id="choices" style="float:right; width:20%;"><br></p>
         </div>
 
-        <a class="RoundButton red" id="ViewButton1" style="left: 10%; top: 60%; cursor: pointer" ><span class="RoundButtonText2">Week</span></a>
-        <a class="RoundButton red" id="ViewButton2" style="left: 35%; top: 60%; cursor: pointer" ><span class="RoundButtonText2">Day</span></a>
-
-        <table><tr>
-            <td><button id="ninetynine">1999 by month</button></td>
-            <td><button id="whole">Whole period</button></td></tr>
-        </table>
+        <a class="RoundButton red" id="ViewButton1" style="left: 5%; top: 50%; cursor: pointer" ><span class="RoundButtonText3">Week</span></a>
+        <a class="RoundButton red" id="ViewButton2" style="left: 30%; top: 50%; cursor: pointer" ><span class="RoundButtonText3">Day</span></a>
+        <a class="RoundButton red" id="ViewButton3" style="left: 5%; top: 60%; cursor: pointer" ><span class="RoundButtonText3"><i class="fas fa-arrow-left"></i></span></a>
+        <a class="RoundButton red" id="ViewButton4" style="left: 30%; top: 60%; cursor: pointer" ><span class="RoundButtonText3"><i class="fas fa-arrow-right"></i></span></a>
   </div>
 
 </body>
