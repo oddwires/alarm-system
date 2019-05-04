@@ -824,6 +824,7 @@ function AjaxGet(fileName,destination){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Chart functions...
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
     $(document).on('click', '#ViewButton1', function() {
         // week view.
         chartPeriod = (24*60*60*1000) * 7;                             //1 week
@@ -849,7 +850,15 @@ function AjaxGet(fileName,destination){
         plotAccordingToChoices();
     });
 
-    $(document).on('click', '#ViewButton3', function() {
+    $(document).on('click', '#ViewButton3', back1day);
+
+    $(document).on('click', '#ViewButton4', forward1day);
+
+    $(document).on( "swiperight", '#chart', back1day);
+ 
+    $(document).on( "swipeleft", '#chart', forward1day);
+
+    function back1day() {
         // Back 24 hours.
         chartPeriod = (24*60*60*1000) * 1;                             //1 day
         tickSize = 4;
@@ -858,9 +867,9 @@ function AjaxGet(fileName,destination){
         tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
         $(".ui-header .ui-title").text(tmp);
         plotAccordingToChoices();
-    });
+    }
 
-    $(document).on('click', '#ViewButton4', function() {
+    function forward1day() {
         // Forward 24 hours.
         chartPeriod = (24*60*60*1000) * 1;                             //1 day
         tickSize = 4;
@@ -869,35 +878,34 @@ function AjaxGet(fileName,destination){
         tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
         $(".ui-header .ui-title").text(tmp);
         plotAccordingToChoices();
-    });
-
-    $(document).on("pageshow", "#graph", function(event,data){
-    // insert checkboxes
-    var choiceContainer = $("#choices");
-
-    if ( typeof (datasets) == "undefined" ) {
-        // no data has been found in the specified period.
-        $("#graph").trigger("create");
-        tmp = "No temperature data has been found.\n\n" +
-              "At least 3 data points are required\n" +
-              "to render the graph.\n\n" +
-              "Try again later.";
-        alert (tmp);
-        return;                    // trying to plot no data causes FLOT to lock up, so don't go there.    
     }
+    $(document).on("pageshow", "#graph", function(event,data){
+        // insert checkboxes
+        var choiceContainer = $("#choices");
 
-    $.each(datasets, function(key, val) {
-        choiceContainer.append("<br/><input type='checkbox' name='" + key +
-            "' checked='checked' id='id" + key + "'></input>" +
-            "<label2 for='id" + key + "'>"
-            + val.label + "</label><br>");
+        if ( typeof (datasets) == "undefined" ) {
+            // no data has been found in the specified period.
+            $("#graph").trigger("create");
+            tmp = "No temperature data has been found.\n\n" +
+                  "At least 3 data points are required\n" +
+                  "to render the graph.\n\n" +
+                  "Try again later.";
+            alert (tmp);
+            return;                    // trying to plot no data causes FLOT to lock up, so don't go there.    
+        }
+
+        $.each(datasets, function(key, val) {
+            choiceContainer.append("<br/><input type='checkbox' name='" + key +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label2 for='id" + key + "'>"
+                + val.label + "</label><br>");
+        });
+        choiceContainer.find("input").click(plotAccordingToChoices);   // bind click handler
+
+        tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
+        $(".ui-header .ui-title").text(tmp);
+        plotAccordingToChoices();                                      // run function on page load
     });
-    choiceContainer.find("input").click(plotAccordingToChoices);   // bind click handler
-
-    tmp = startDate.getDate() + '/' + (startDate.getMonth()+1) + '/' +  startDate.getFullYear();
-    $(".ui-header .ui-title").text(tmp);
-    plotAccordingToChoices();                                      // run function on page load
-});
 
     function plotAccordingToChoices() {
         // hard-code colour indices to prevent them from shifting as sensors are turned on/off
