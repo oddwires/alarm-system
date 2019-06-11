@@ -566,6 +566,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo npm install ed25519-hap --unsafe-perm
   sudo npm install curve25519-n --unsafe-perm
   sudo npm install ip --unsafe-perm
+  sudo npm install tweetnacl --unsafe-perm
 
   cd $CurrentDir                                                            # back to where we started
   # create the new daemon, and make it auto-start...
