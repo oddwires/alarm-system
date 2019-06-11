@@ -1272,8 +1272,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                            printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
                        fi 
                    fi
-                  echo $tmp                                               # DEBUG - view the I2C command
-                  echo ${running_on_RasPi}
+#                 echo $tmp                                               # DEBUG - view the I2C command
                    if [ ${running_on_RasPi} == "true" ]; then
                    # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
                        i2cset $tmp                                         # send I2C command to PIC chip
