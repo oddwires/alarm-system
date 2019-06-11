@@ -33,7 +33,6 @@ Full installation details are in the <a href="https://github.com/oddwires/alarm-
 <b>TBD:-</b>
 <ul>
 <li>Publish sketch for ESP8266 temperature sensors</li>
-<li>Graphs: trap no data error</li>
 <li>HTML emails</li>
 <li>readvars.php - test for valid session</li>
 </ul>
