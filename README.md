@@ -11,9 +11,9 @@ There are some pictures, and interactive sample screens on my web page <a href="
 
 Key components:-
 <ul>
- <li>Build last tested: 15/04/2019.</li>
+ <li>Build last tested: 11/06/2019.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
- <li>RASPBIAN STRETCH LITE - Version: November 2018 - Release date: 2018-11-13</li>
+ <li>RASPBIAN STRETCH LITE - Version: April 2019 - Release date: 2019-04-08</li>
  <li>iPhone SE</li>
  <li>IOS 12.2</li>
 </ul>
