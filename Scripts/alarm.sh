@@ -371,14 +371,14 @@ CheckIP()
         tmp=${CURRTIME}",task,raspi,Router IP - timeout."                               # tmp = string for log
     elif [ "$Current_routerIP" == "$SETUP_routerIP" ]; then
     # Second option - Response received - IP NOT changed...
-        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br>,Router IP - no change"
+        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br/>,Router IP - no change"
     else
     # Third option - Response received - IP HAS changed...
         title="Alarm system: Router IP change"
         eMail "$title"
         SETUP_routerIP=${Current_routerIP}                                              # Update variable
         write_status_file /var/www/data/status.txt                                      # write to web page
-        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br>,New router IP - "${SETUP_routerIP}
+        tmp=${CURRTIME}",task,raspi,Using: $Responding_site<br/>,New router IP - "${SETUP_routerIP}
     fi
     echo $tmp >> $LOGFILE                                                               # log the event
     echo $tmp                                                                           # copy to console
@@ -438,55 +438,118 @@ eMail()
 #################################################################################################################################
 #                                                                                                                               #
 # Performs a few basic checks on the email credentials.                                                                         #
-# If everything seems OK, a standard format email is sent out.                                                                  #
+# If everything seems OK, an HTML format email is sent out.                                                                     #
 # $1 = Subject                                                                                                                  #
-# Note: The Postfix Mail Transfer Agent is allows emails to be sent from the alarm service.                                     #
-#       The configuration file has been hard coded to use Gmail SMTP as a relay.                                                #
+# Note: The Postfix Mail Transfer Agent is used to send emails from the alarm service.                                          #
 #                                                                                                                               #
 #################################################################################################################################
-{  # Build the circulation list...
-   circlist="";                                                                              # clear out variable
-   maxval=${#user[@]} ; (( maxval-- )) ; i=0                                                 # bump down because the array starts at zero
-   while [ $i -le "$maxval" ]; do
-      circlist=${circlist}${user[$i+2]}","
-      i=$(( i + 4 )) 
-   done
-   circlist=${circlist%?}                                                                    # remove the last character - its an extra ','
+{   # Build the circulation list...
+    circlist="";                                                                              # clear out variable
+    maxval=${#user[@]} ; (( maxval-- )) ; i=0                                                 # bump down because the array starts at zero
+    while [ $i -le "$maxval" ]; do
+        circlist=${circlist}${user[$i+2]}","
+        i=$(( i + 4 )) 
+    done
+    circlist=${circlist%?}                                                                    # remove the last character - its an extra ','
 
-  # Quick and dirty test for valid email configuration....
-  if [[ ${circlist} == "" ]] || [ ! -f /etc/postfix/sasl_passwd.db ]; then
-     tmp=${CURRTIME}",alarm,raspi,email not sent - bad credentials or no circulation list."
-     echo $tmp >> $LOGFILE                                                                   # log the event
-     echo $tmp                                                                               # tell the user
-  else
-     # Falls through here if we have some kind of email configuration and some kind of circulation list
-     # We still can't guarantee the email will go, but lets try anyway...
-     # Build the message...
-       msg='From:\t\t\t'$SETUP_location
-       msg=$msg'\r\nEvent logged at:\t'${CURRTIME}
-       msg=$msg'\n\nTriggered zones:\t'
-       zones=''
-       maxval=${#zcon[@]}; (( maxval-- )); i=0                                               # setup scan through all defined alarm zones
-          while [ $i -le "$maxval" ]; do                                                     # only testing configured zones
-                  if [[ ${zcon[$i+$Triggered]} == "true" ]];  then
-                     zones=$zones${zcon[$i+$Name]}'\n\t\t\t' ;                               # Zone triggered, so add name
-                  fi
-                  i=$(( i + 9 ))
-          done
-      if [[ ${zones} == "" ]] ; then zones='None\n' ; fi                                     # default case - none triggered
-      msg=$msg$zones
-      msg=$msg'\nLocal IP:\t\t'https://${SETUP_localIP}
-      msg=$msg'\n\nRouter IP:\t\t'https://${SETUP_routerIP}
+    # Quick and dirty test for valid email configuration....
+    if [[ ${circlist} == "" ]] || [ ! -f /etc/postfix/sasl_passwd.db ]; then
+        tmp=${CURRTIME}",alarm,raspi,email not sent - bad credentials or no circulation list."
+        echo $tmp >> $LOGFILE                                                                   # log the event
+        echo $tmp                                                                               # tell the user
+    else
+        # Falls through here if we have some kind of email configuration and some kind of circulation list
+        # We still can't guarantee the email will go, but will try anyway...
 
-      # Build the Postfix command string...
-      tmp='echo -e "'$msg'" | mail -s "'$1'" $circlist'
+        # Gather the system info...
+        SETUP_localIP=$(hostname -I)
+        SETUP_diskused=$(df -h | grep root | awk '{print $3}')
+        SETUP_diskperc=$(df -h | grep root | awk '{print $5}')
+        SETUP_disktotal=$(df -h | grep root | awk '{print $2}')
+        tmp=$(cat /proc/meminfo | grep MemTotal | awk '{print $2}')                     # in KB
+        memory=$((tmp /1024))' MB'                                                      # convert to MB
+        SYSTEM_uptime=$(uptime -p | cut -c 3-)
 
-      eval $tmp                                                           # send the email without echoing all the credentials to the screen
-#     echo $tmp                                                           # DIAGNOSTIC - used to check MAILX command line is ok
-      tmp=${CURRTIME}",alarm,raspi,"$1" - email sent"
-      echo $tmp >> $LOGFILE                                                                  # log the event
-      echo $tmp                                                                              # tell the user
-  fi
+        # Build the table of zones...
+        TriggeredZonesString='' ; TriggeredZoneCount=0
+        ZoneTable='<h3>Zones:</h3>
+        <table width="100%" border="1">
+        <tr style="background-color:grey"><td>Circuit</td><td colspan=3>Mode</td><td>Status</td></tr>'
+        maxval=${#zcon[@]}; (( maxval-- )); i=0                                               # Scan through all defined alarm zones
+        while [ $i -le "$maxval" ]; do
+            if [[ ${zcon[$i+$Triggered]} == "true" ]];  then
+                (( TriggeredZoneCount++ ))
+                BackgroundColourString='<tr style="background-color:red">'                   # Highlight any active triggered zones
+            else
+                BackgroundColourString='<tr style="background-color:#D3D3D3">'
+            fi
+
+            ZoneTable=$ZoneTable$BackgroundColourString'<td>'${zcon[$i+$Name]}'</td>'
+            if [[ ${zcon[$i+$DayMode]} == "on" ]]; then                                      # Day mode setting
+                    ZoneTable=$ZoneTable'<td>D</td>'
+            else
+                    ZoneTable=$ZoneTable'<td>&nbsp;</td>'
+            fi
+            if [[ ${zcon[$i+$NightMode]} == "on" ]]; then                                    # Night mode setting
+                    ZoneTable=$ZoneTable'<td>N</td>'
+            else
+                    ZoneTable=$ZoneTable'<td>&nbsp;</td>'
+            fi
+            if [[ ${zcon[$i+$Chimes]} == "on" ]]; then                                       #Chimes setting
+                    ZoneTable=$ZoneTable'<td>C</td>'
+            else
+                    ZoneTable=$ZoneTable'<td>&nbsp;</td>'
+            fi
+            if [[ ${zcon[$i+$CurrentValue]} == "1" ]]; then                                  # Circuit status
+                    ZoneTable=$ZoneTable'<td>Closed</td></tr>'
+            else
+                    ZoneTable=$ZoneTable'<td>Open</td></tr>'
+            fi
+        i=$(( i + 9 ))
+        done
+
+        # Build the email subject line.
+        # Note: emojis in the email subject line require a specific unicode string format...
+        # calculate the emoji...
+        if [[ "$TriggeredZoneCount" -eq "0" ]] ; then
+            TriggeredZoneString='No triggered zones      '
+            emojiString="=F0=9F=91=8D"                                                      # thumbs up
+        else 
+            TriggeredZoneString=$TriggeredZoneCount' triggered zone(s)      '
+            emojiString="=F0=9F=86=98"                                                      # 'Save Our Stuff'
+        fi
+
+        # Create the email title string
+        titleString='=?utf-8?Q?'$1'______'$emojiString'?='
+#       echo $titleString
+
+        # add the hidden preview block...
+        HTMLmsg='<html><div style="display:none; font-size:1px; color:#333333; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">'"$TriggeredZoneString"
+        for i in {1..50}; do HTMLmsg=${HTMLmsg}"&zwnj;&nbsp;"; done                           # Space at end of preview
+
+        # add the system info block...
+        HTMLmsg=${HTMLmsg}'</div>
+        '"$TriggeredZoneString"'
+        '"$ZoneTable"'</table>
+        <p><h2>Info:</h2>
+        <font size="2">'"$hardware"' with '"$memory"' memory<br/>
+        Disk total available: '"$SETUP_disktotal"'<br/>
+        Disk current usage: '"$SETUP_diskused"' ( '"$SETUP_diskperc"' )<br/>
+        Local IP: '"$SETUP_localIP"'<br/>
+        Router IP: '"$SETUP_routerIP"'<br/>
+        Up time: '"$SYSTEM_uptime"'<br/></font></html>'
+
+        # Build the Postfix command string...
+        # Note: In the following line, '\'' is the escape sequence to insert a single quote
+
+        tmp='echo -e '\'''${HTMLmsg}''\'' | mail -s "$titleString" -a "content-type: text/html" "$circlist"'
+
+#       echo $tmp                                                             # DIAGNOSTIC - used to check POSTFIX command line is OK
+        eval "${tmp}"                                                         # send the email without echoing all the credentials to the screen
+        tmp=${CURRTIME}",alarm,raspi,"$1" - email sent"
+        echo $tmp >> $LOGFILE                                                                  # log the event
+        echo $tmp                                                                              # tell the user
+    fi
 }
 
 load_status_file()
@@ -1041,7 +1104,7 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                       echo $tmp >> $LOGFILE                                   # log the event
                       echo $tmp                                               # tell the user
                       printf "Restarting HAP-NodeJS\n"
-					  sudo killall node
+                      sudo killall node
                       sudo service homebridge restart
                    fi;;
                  "mode")
@@ -1055,7 +1118,9 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
                        sw1_old="1" ; sw2_old="1" ; sw3_old="1" ; sw4_old="1"   # reset zone states NB this can trigger
                        sw5_old="1" ; sw6_old="1" ; sw7_old="1" ; sw8_old="1"   # the alarm if any zone is open
 #                      alarm_tests                                             # check if this causes an alarm
-                       title="Alarm system: "${PARAMS[3]}
+#                      title="Alarm system: "${PARAMS[3]}
+                       title=${PARAMS[3]}
+#                      eMail "$title"
                        eMail "$title"
                    else
                    # falls through here if the alarm is already in the selected mode.
