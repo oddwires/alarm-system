@@ -474,7 +474,7 @@ eMail()
         TriggeredZonesString='' ; TriggeredZoneCount=0
         ZoneTable='<h3>Zones:</h3>
         <table width="100%" border="1">
-        <tr style="background-color:grey"><td>Circuit</td><td colspan=3>Mode</td><td>Status</td></tr>'
+        <tr style="background-color:grey"><td>Circuit</td><td colspan="3">Mode</td><td>Status</td></tr>'
         maxval=${#zcon[@]}; (( maxval-- )); i=0                                               # Scan through all defined alarm zones
         while [ $i -le "$maxval" ]; do
             if [[ ${zcon[$i+$Triggered]} == "true" ]];  then
@@ -503,8 +503,9 @@ eMail()
             if [[ ${zcon[$i+$CurrentValue]} == "1" ]]; then                                  # Circuit status
                     ZoneTable=$ZoneTable'<td>Closed</td></tr>'
             else
-                    ZoneTable=$ZoneTable'<td>Open</td></tr>'
-            fi
+                    ZoneTable=$ZoneTable'<td>Open</td></tr>\n'                               # \n prevents the text string becoming too long
+            fi                                                                               # if the string goes over 75 characters, the email
+                                                                                             # client will start to mess with the content.
         i=$(( i + 9 ))
         done
 
@@ -524,7 +525,7 @@ eMail()
 #       echo $titleString
 
         # add the hidden preview block...
-        HTMLmsg='<html><div style="display:none; font-size:1px; color:#333333; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">'"$TriggeredZoneString"
+        HTMLmsg='<!DOCTYPE html><html><div style="display:none; font-size:1px; color:#333333; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">'"$TriggeredZoneString"
         for i in {1..50}; do HTMLmsg=${HTMLmsg}"&zwnj;&nbsp;"; done                           # Space at end of preview
 
         # add the system info block...
@@ -539,12 +540,19 @@ eMail()
         Router IP: '"$SETUP_routerIP"'<br/>
         Up time: '"$SYSTEM_uptime"'<br/></font></html>'
 
+# DEBUG...
+#echo
+#echo $HTMLmsg
+#echo
         # Build the Postfix command string...
         # Note: In the following line, '\'' is the escape sequence to insert a single quote
 
         tmp='echo -e '\'''${HTMLmsg}''\'' | mail -s "$titleString" -a "content-type: text/html" "$circlist"'
 
-#       echo $tmp                                                             # DIAGNOSTIC - used to check POSTFIX command line is OK
+# DEBUG...
+#echo
+#echo $tmp                                                             # DIAGNOSTIC - used to check POSTFIX command line is OK
+#echo
         eval "${tmp}"                                                         # send the email without echoing all the credentials to the screen
         tmp=${CURRTIME}",alarm,raspi,"$1" - email sent"
         echo $tmp >> $LOGFILE                                                                  # log the event
