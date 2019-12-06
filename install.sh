@@ -536,39 +536,41 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   # install various pre requisites...
   cd ..                                         # install into the Downloads directory
   sudo apt-get install libavahi-compat-libdnssd-dev -y
-
-  wget -qO- https://deb.nodesource.com/setup_8.x | sudo bash -
-  sudo apt-get -y install nodejs
+  sudo apt-get install -y npm
+  
+  # Ideally these should be installed locally. But this causes issues with the ts-node executable
+  # not being found. Its probably just a path issue, but I installed Globally as a workaround.
+  sudo npm install -g ts-node
+  sudo npm install -g typescript
 
   # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
-  
-  # because we've sudo'd the git clone, the directory structure will belong to root. HAP-NodeJS doesn't like that :(
-  # Following the install, the first time the homebridge service runs, it creates a 'persists' folder, but assigns the wrong permissions.
+   
+  # because we've sudo'd the git clone, the directory structure will belong to root. This causes issues.
+  # the first time the service runs, it creates a 'persists' folder, but assigns the wrong permissions.
+  # the following 5 lines return the sudo cloned repo to a usable state...
   mkdir HAP-NodeJS/persist          # Create the folder now rather than letting the service
                                     # do it at first run.
   sudo chown -R pi ./HAP-NodeJS     # Belt and braces solution - force permissions from root to pi
   sudo chgrp -R pi ./HAP-NodeJS
   sudo chmod g+s ./HAP-NodeJS       # new folders + files will inherit directory group details
   sudo chmod u+s ./HAP-NodeJS       # new folders + files will inherit directory user details
-  
-  cd HAP-NodeJS/
-  npm rebuild
-  
-  sudo npm install bonjour-hap --unsafe-perm
-  sudo npm install decimal.js --unsafe-perm
-  sudo npm install node-persist --unsafe-perm
-  sudo npm install debug --unsafe-perm
-  sudo npm install decimal.js --unsafe-perm
-  sudo npm install buffer-shims --unsafe-perm
-  sudo npm install bonjour-hap --unsafe-perm
-  sudo npm install fast-srp-hap --unsafe-perm
-  sudo npm install ed25519-hap --unsafe-perm
-  sudo npm install curve25519-n --unsafe-perm
-  sudo npm install ip --unsafe-perm
-  sudo npm install tweetnacl --unsafe-perm
 
-  cd $CurrentDir                                                            # back to where we started
+  cd HAP-NodeJS/
+  npm install bonjour-hap
+  npm install decimal.js
+  npm install node-persist
+  npm install debug
+  npm install buffer-shims
+  npm install bonjour-hap
+  npm install fast-srp-hap
+  npm install ip
+  npm install tweetnacl
+
+  npm install
+  npm install --only=dev
+  
+  cd $CurrentDir                                                     # back to where we started
   # create the new daemon, and make it auto-start...
   sudo cp ./Scripts/homebridge /etc/init.d/
   sudo chgrp root /etc/init.d/homebridge

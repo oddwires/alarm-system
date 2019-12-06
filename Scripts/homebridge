@@ -10,7 +10,7 @@
 ### END INIT INFO
 
 dir="/home/pi/Downloads/HAP-NodeJS"
-cmd="sudo node BridgedCore.js"
+cmd="sudo ts-node BridgedCore.ts"
 user="root"
 
 name=`basename $0`
