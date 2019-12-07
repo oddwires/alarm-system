@@ -557,16 +557,6 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   sudo chmod u+s ./HAP-NodeJS       # new folders + files will inherit directory user details
 
   cd HAP-NodeJS/
-  npm install bonjour-hap
-  npm install decimal.js
-  npm install node-persist
-  npm install debug
-  npm install buffer-shims
-  npm install bonjour-hap
-  npm install fast-srp-hap
-  npm install ip
-  npm install tweetnacl
-
   npm install
   npm install --only=dev
   
