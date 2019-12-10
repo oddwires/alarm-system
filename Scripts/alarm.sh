@@ -119,12 +119,13 @@ Homebridge_Export()
 #  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
    PathToHAPNodeJS=$(sudo find / -type d -name "HAP-NodeJS")                               # don't really know where the install has
    PathToConfigFiles=$(sudo find / -type d -name "ConfigFiles")                            # been run from so find one of the source files
+   AccessoriesPath=$PathToHAPNodeJS"/src/accessories/"
    echo HAP-NodeJS install found at: $PathToHAPNodeJS
    echo Source config files found at: $PathToConfigFiles
+   echo Path to accessory files: $AccessoriesPath
    i=0 ; MAC_Count=0
 
    printf "Removing existing accessories...\n"
-   AccessoriesPath=$PathToHAPNodeJS/accessories/
    find "$AccessoriesPath" -name * -type f -delete
 
    printf "Removing existing device pairing...\n"
@@ -139,7 +140,7 @@ Homebridge_Export()
       ZoneName="${ZoneName%"${ZoneName##*[![:space:]]}"}"                                   # strip any trailing spaces left by removing emojis
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
 #     echo $MAC_address                                                                     # Diagnostic
-      FileName=$PathToHAPNodeJS"/accessories/"${ZoneName}"_accessory.js"
+      FileName=$AccessoriesPath"${ZoneName}_accessory.js"
       printf "Creating Homekit Contact sensor: %s\n" "${ZoneName}"
       cp $PathToConfigFiles"/Generic_ContactSensor.js" "${FileName}"
       oldstring='Parm1'                                                                     # need to replace this string...
@@ -161,7 +162,8 @@ Homebridge_Export()
       AccName="${rcon[$i+rcon_name]}"
       AccName="${AccName//[^[:ascii:]]/}"                                                  # stripping out any emojis
       AccName="${AccName%"${AccName##*[![:space:]]}"}"                                     # strip any trailing spaces left by removing emojis
-      FileName=$PathToHAPNodeJS"/accessories/"${AccName}"_accessory.js"
+      FileName=$AccessoriesPath"${AccName}_accessory.js"
+
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
       case "${rcon[$i+rcon_HK_type]}" in                                                   # Create default accessory file
           "Light")
@@ -202,7 +204,7 @@ Homebridge_Export()
    while [ $i -le "$maxval" ]; do
 #     printf "rdtr:%s:%s:%s:%s:%s:%s\n" "${rdtr[$i+rdtr_header]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" \
 #                "${rdtr[$i+rdtr_status]}" "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}"
-      FileName=$PathToHAPNodeJS"/accessories/"${rdtr[$i+rdtr_name]}" radiator_accessory.js"
+      FileName=$AccessoriesPath"${rdtr[$i+rdtr_name]}_radiator_accessory.js"
       cp $PathToConfigFiles"/Generic_Radiator.js" "$FileName"
       MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
 #     if [ "${rdtr[$i+4]}" != "None" ]; then                                               # Oops ! - think I've lost some functionality
@@ -233,7 +235,10 @@ Homebridge_Export()
       i=$(( i + 6 )) 
    done
 
-   cp $PathToConfigFiles"/types.js" $PathToHAPNodeJS"/accessories/types.js"
+ # accessories have been created by root, so change owner to pi...
+   sudo chown -R pi $AccessoriesPath
+   sudo chgrp -R pi $AccessoriesPath
+   
    sudo killall node                                                                       # ensure we get a clean start...
    printf "Export complete\nRestarting HAP-NodeJS\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
