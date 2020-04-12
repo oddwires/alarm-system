@@ -1,9 +1,0 @@
-email:::-
-admin:$2y$07$2c0bfALZ4WxenSybt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Pugh:$2y$07$2c0bfALZ4WxenSybt2xobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Pugh:$2y$07$2c0bfALZ4WxenSybt2xobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Barney:$2y$07$2c0bfALZ4WxenSybx2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-McGrew:$2y$07$2c0bfALZ4WxenSybx2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Cuthbert:$2y$07$2c0bfALZ4WxenSxbt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Dibble:$2y$07$2c0bfALZ4WxenSybx2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah
-Grubb:$2y$07$2c0bfALZ4WxenSybtxZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G::blah

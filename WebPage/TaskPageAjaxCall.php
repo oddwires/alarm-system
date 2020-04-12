@@ -142,9 +142,13 @@
                     <option value="1">Night mode</option>
                     <option value="2">Standby mode</option>
                     <option value="3">Check IP</option>
+                <optgroup label="Heating">
+                    <option value="4">Heat and water</option>
+                    <option value="5">Water only</option>
+                    <option value="6">Heat off</option>
                 <!-- build list of all configured RC channels. Values start at end of security options ( 4 )   -->
                 <optgroup label="Switches">
-                    <?php $count=4; for($i=0; $i<$RCnum; $i++) { ?>
+                    <?php $count=7; for($i=0; $i<$RCnum; $i++) { ?>
                         <option value="<?php echo $count; ?>"><?php echo $rcon[$i][2]; ?></option>
                     <?php $count++; } ?>
                 <!-- add list of all configured Radiators. Values start where RC channels finished               -->

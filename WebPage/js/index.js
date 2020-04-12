@@ -305,9 +305,14 @@
         lineNum = parseFloat(lineNum) - 1;                                       // convert to integer and bump value down
         tmp = 'rcon cfg:'+ (lineNum) + ':';
         tmp += ($('#switchGroup').val()) + ':';
-        tmp += ($('#switchName').val()) + ':';
-        tmp += ($('#switchAddress').val()) + ':';
-        tmp += ($('#switchChannel').val()) + ':';
+        tmp += ($('#switchName').val().trim()) + ':';
+        if ($('input[name=radio-switchType]:checked').val() == "WiFi") {         // check value of RF/WiFi button
+            tmp += 'WiFi:-:';                                                    // switch type + dummy data
+            tmp += ($('#IPAddress').val()) + ':';                                // specific IP address
+        } else {
+            tmp += 'RF:' + ($('#switchAddress').val()) + ':';                    // RF details
+            tmp += ($('#switchChannel').val()) + ':';
+        }
         tmp += ($('#switchAlrmAction').val()) + ':';
         tmp += $('#switchHK').val();
         tmp = tmp.replace(/\ #/g,' \\#');                                        // ' #' (space hash) characters needs to be delimited
@@ -327,6 +332,8 @@
         $("#switchGroup").val($("#switch_group_" + (Num)).val());
         $('#switchAddress').prop('selectedIndex', ($('#switch_address_' + (Num)).val())).change();
         $('#switchChannel').prop('selectedIndex', ($("#switch_channel_" + (Num)).val())).change();
+        $('#IPAddress').prop('selectedIndex', ($("#switch_channel_" + (Num)).val()-100)).change();  // don't forget to subtract value of first option on list
+
         var tmp = $('#switchAlrmAction_' + (Num)).val();
         if (tmp.indexOf("On") >= 0) { $('#switchAlrmAction').prop('selectedIndex', 0).change(); }
         if (tmp.indexOf("Off") >= 0) { $('#switchAlrmAction').prop('selectedIndex', 1).change(); }
@@ -336,6 +343,33 @@
         if (tmp.indexOf("Light") >= 0) { $('#switchHK').prop('selectedIndex', 1).change(); }
         if (tmp.indexOf("Fan") >= 0) { $('#switchHK').prop('selectedIndex', 2).change(); }
         if (tmp.indexOf("None (do not export)") >= 0) { $('#switchHK').prop('selectedIndex', 3).change(); }
+
+    // initialise the Radio/WiFi selector...
+        if ($('#switch_type_' + Num).val().toUpperCase() == 'RF') {
+            $('input:radio[name="radio-switchType"]').filter('[value="Radio"]').prop("checked",true).checkboxradio("refresh");
+            $('input:radio[name="radio-switchType"]').filter('[value="WiFi"]').prop("checked",false).checkboxradio("refresh");
+            $('#Row1Hide').hide();                            // display the IP Selector
+            $('#Row2Hide').show();                            // hide the Radio channel Selector
+            $('#Row3Hide').show();                            // hide the Radio switch selector
+        } else {
+            $('input:radio[name="radio-switchType"]').filter('[value="Radio"]').prop("checked",false).checkboxradio("refresh");
+            $('input:radio[name="radio-switchType"]').filter('[value="WiFi"]').prop("checked",true).checkboxradio("refresh");
+            $('#Row1Hide').show();                            // display the IP Selector
+            $('#Row2Hide').hide();                            // hide the Radio channel Selector
+            $('#Row3Hide').hide();                            // hide the Radio switch selector
+        }
+    }
+
+    function ShowHide2(parm) {
+        if (parm == "WiFi") {
+            $('#Row1Hide').show();                            // display the IP Selector
+            $('#Row2Hide').hide();                            // hide the Radio channel Selector
+            $('#Row3Hide').hide();                            // hide the Radio switch selector
+        } else {
+            $('#Row1Hide').hide();                            // hide the IP selector
+            $('#Row2Hide').show();                            // show the Radio channel Selector
+            $('#Row3Hide').show();                            // show the Radio switch selector
+        }
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -439,14 +473,37 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Defaults(parm1) {
-    console.log(parm1);
+//  console.log(parm1);
     $('#retval').val(parm1);
     AjaxSend('SettingsPageAjaxCall.php', 'settings', 'settingsList');
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Code to implement the Security buttons...
+// Code to implement the Backgrounds buttons...
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function BackGround(parm1) {
+//  console.log(parm1);
+    cookieExpire = new Date();
+    cookieExpire.setMonth(cookieExpire.getMonth() + 1);                                  // Background cookie stored for 1 month
+    document.cookie = "background="+parm1+"; expires="+ cookieExpire.toGMTString() + ";";
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Code to implement various pop-up buttons...
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    $(document).on('click', '#TopButton', function() {
+       if ($(this).closest('.scroll-top-wrapper').hasClass('show')) {
+            ScrollToTop();
+       }
+    });
+
+    $(document).on('click', '#HeatButton', function() {
+            $( "#HeatPopup" ).popup( "open" );
+    });
 
     $(document).on('click', '#SetButton', function() {
        if ($(this).closest('.security-button-wrapper').hasClass('show')) {
@@ -466,6 +523,11 @@ function Defaults(parm1) {
         }
     });
 
+    function ChangeHeatMode(command,message){
+       $('#retval').val(command);
+       $('#HeatStatus').text(message);
+       AjaxSend('HeatPageAjaxCall.php','dummy','');
+    }
     function ChangeAlarmMode(command,message){
        $('#retval').val(command);
        AjaxSend('SecurityPageAjaxCall.php','security','');
@@ -528,7 +590,7 @@ $(document).on("pageshow", "#settings", function(){
                             $('#MultiBtn').text('Save');
                             $("#MultiPopup").popup("open", { transition: 'slideup' });
                             break;
-                        case 'Application':
+                        case 'Location':
                             // create the data string to send to the alarm service before you go go..
                             tmp = 'app setup:';
                             tmp += $('#SetupLoc').val() + ':';
@@ -586,15 +648,16 @@ $(function(){
         if ($(window).scrollTop() > 100) {
             $('.scroll-top-wrapper').addClass('show');
             if (thispage == "security") { $('.security-button-wrapper').removeClass('show'); }
+            if (thispage == "heating") { $('#UpButton').removeClass('show'); }   // using footer on this page instead
         } else {
             $('.scroll-top-wrapper').removeClass('show');
             if (thispage == "security") { $('.security-button-wrapper').addClass('show'); }
         }
     });
-    $('.scroll-top-wrapper').on('click', scrollToTop);
+    $('.scroll-top-wrapper').on('click', ScrollToTop);
 });
 
-function scrollToTop() {
+function ScrollToTop() {
     var thisPage = $.mobile.activePage.attr('id');
     var target = $('#'+thisPage).find("P[data-role='screenSpacer']").prop('scrollHeight');     // get height of current header
     if (thisPage = 'about') { $('html, body').stop().animate({ scrollTop : target - 43 }, 'slow'); }
@@ -725,8 +788,8 @@ function AjaxGet(fileName,destination){
             // but its working for now, so I'm leaving it alone.
             $('#'+destination).empty();
             $('#'+destination).append(data);
-            $('#'+destination).trigger('create');                                    // kick the collapsibles
-//            collapsibleSlowScroll();                                                 // and kick the slow scroll too
+            $('#'+destination).trigger('create');                                    // kick the collapsible
+//            collapsibleSlowScroll();                                               // and kick the slow scroll too
         }, "html").done(function () {
         $.mobile.loading("hide");
         // find and kick the listview and manually re-trigger the creation of the auto divider info
@@ -739,7 +802,7 @@ function AjaxGet(fileName,destination){
         }).listview('refresh');
         // and any switches will also be bust by the Ajax call, so re-init them too
 //        switchChange();
-        scrollToTop();
+        ScrollToTop();
         });
     }
 
@@ -753,8 +816,14 @@ function AjaxGet(fileName,destination){
             if ( tagID != null ) {
             // only show the spinner if we are going to update the page
             // this allows on/off switches to be run asynchronously, improving the on screen performance
-                $.mobile.loading('show'); }
-            },
+                $.mobile.loading("show", {
+                theme: "b",
+                text: "Loading...",
+                textVisible: true,
+                textonly: false
+                });
+            }
+        },
     });
 
     // Callback handler that will be called on success...
@@ -805,7 +874,7 @@ function AjaxGet(fileName,destination){
 //                if (listID == 'switchList'){ switchChange(); }
 //                if (listID == 'radiatorList'){ switchChange(); }
                 //now scroll up to top of listview
-                scrollToTop();
+                ScrollToTop();
                 }
         return false;
             }

@@ -12,13 +12,13 @@
 
 <ul data-role="listview" data-inset="true" style="padding: 0em; border-style: none;" data-filter="false">
     <li id="application-header" style="margin-bottom: 10px; font-size: 14px; height: 18px; padding-left: 20px;
-                 padding-top: 7px; padding-bottom: 7px;"">Settings:
+                 padding-top: 7px; padding-bottom: 7px;"">Application:
     </li>
 </ul>
 
-<div data-role="collapsible-set" data-iconpos="right" data-inset="true" style="border-style: none; margin-left: 5px; margin-right: 5px;">
+<div data-role="collapsible-set" id="custom-collapsible" data-iconpos="right" data-inset="true" style="border-style: none; margin-left: 5px; margin-right: 5px;">
     <div data-role="collapsible" class="animateMe">
-        <h3>Application</h3>
+        <h3 class="floaty">Location</h3>
         <div class="info" style="text-align: justify; text-shadow: none; padding: 10px;">
         <table border="0" align="center">
             <tr><td style="width:30%">Installation name</td><td><input type="text" id="SetupLoc" value="<?php echo $location; ?>"></td></tr>
@@ -35,6 +35,15 @@
             <tr><td style="width:30%">password</td><td><input type="password" id="SMTP_passwd" value="********"></td></tr>
         </table></div>
     </div>
+        <a class="ui-btn floaty new button ui-shadow ui-btn-icon-right ui-icon-carat-r"
+               style="margin: 0; text-align: left; border-top-width: 0px; text-shadow: none;"
+               href="#DefaultDialog" data-transition="slideup" data-rel="popup" data-icon="carat-r">Defaults...</a>
+    <div>
+        <a class="ui-btn floaty new button ui-shadow ui-btn-icon-right ui-icon-carat-r"
+               style="margin: 0; text-align: left; border-top-width: 0px; text-shadow: none;"
+               href="#BackGroundDialog" data-transition="slideup" data-rel="popup" data-icon="carat-r">Backgrounds...</a>
+    </div>
+
     <div data-role="collapsible" class="animateMe info" id="custom-collapsible">
         <h3>Info</h3>
         <div class="info" style="text-align: centre; text-shadow: none; padding: 10px;">
@@ -45,12 +54,6 @@
             Router IP: <?php echo $routerIP; ?><br>
             Up time: <?php echo $uptime; ?>
         </div>
-    </div>
-    <div>
-    <br>
-        <a class="ui-btn floaty new button ui-shadow ui-btn-icon-right ui-icon-carat-r"
-               style="margin: 0; text-align: left; border-top-width: 0px; text-shadow: none;"
-               href="#DefaultDialog" data-transition="slideup" data-rel="popup" data-icon="carat-r">Defaults...</a>
     </div>
 </div>
 
@@ -114,5 +117,24 @@
                       data-role="button" data-rel="back">Save defaults</a>
 <!--    <a href="#" class="ui-popup-button option last" onclick="Defaults('load factory defaults')"
                       data-role="button" data-rel="back">Load factory defaults</a> -->
+        <a href="#" class="ui-popup-button cancel" data-role="button" data-rel="back">Cancel</a>
+</div>
+
+<!-- Select Backgrounds Action sheet dialog -->
+<div data-role="popup" id="BackGroundDialog" style="border: 0; background: #80808075;" data-transition="slideup">
+    <div data-role="content" style="padding: 8px;">
+        <a href="#" class="ui-popup-button title" data-role="button" data-rel="back"><b>Note:</b> Changing the background<br>will log you out.</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('voronoisoup')" data-role="button">Voronoi Soup</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('slime')" data-role="button">Slime</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('chrome')" data-role="button">Chrome</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('gemsoup')" data-role="button">Gem Soup</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('lattice')" data-role="button">Latice</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('ripples')" data-role="button">Ripples in time</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option last" onclick="BackGround('matrix')" data-role="button">Matrix</a>
+<!-- Not enough room on the screen for all options, so I have removed these two...
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('badblood')" data-role="button" >Bad blood</a>
+        <a href="/" data-ajax="false" class="ui-popup-button option" onclick="BackGround('emeraldcitydreaming')" data-role="button">Emerald City</a>
+-->
+<br>
         <a href="#" class="ui-popup-button cancel" data-role="button" data-rel="back">Cancel</a>
 </div>

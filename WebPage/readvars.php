@@ -45,7 +45,7 @@ $time = 4;                                                              // time 
 $found = false; $filename = '/var/www/data/status.txt';
 
 // Define first four tasks. Additional tasks for on and off are added to this array later for each RC channel defined.
-$taskname=array("Day mode","Night mode","Standby mode","Check IP" );
+$taskname=array("Day mode","Night mode","Standby mode","Check IP", "Heat and water", "Water only", "Heat off" );
 
 // Start reading the data file....
 for($i=0; $i<$time; $i++)
@@ -73,6 +73,7 @@ for($i=0; $i<$time; $i++)
               if (substr($data,0,13) == "email:server:") { $EMAIL_server=substr($data, 13, -1); }
               if (substr($data,0,11) == "email:port:") { $EMAIL_port=substr($data, 11, -1); }
               if (substr($data,0,13) == "email:sender:") { $EMAIL_account=substr($data, 13, -1); }
+              if (substr($data,0,10) == "heat:mode:") { $HEAT_mode=substr($data, 10, -1); }
               if (substr($data,0,5) == "zcon:") {
                    $zcon[$ZnNum]=(explode(':',$data));
                    if ($zcon[$ZnNum][7] == "true") { $ZnTrig++; }            // number of triggered zones

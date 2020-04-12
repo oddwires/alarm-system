@@ -23,15 +23,37 @@
 </head>
 
 <body>
-<!-- Enable one of the following dynamic backgrounds...                                                          -->
-    <?php //include("background_1.inc"); ?>                     <!-- Purple snot                                 -->
-    <?php //include("background_2.inc"); ?>                     <!-- Slime                                       -->
-    <?php //include("background_3.inc"); ?>                     <!-- Chrome                                      -->
-    <?php //include("background_4.inc"); ?>                     <!-- Diamonds                                    -->
-    <?php //include("background_5.inc"); ?>                     <!-- Bad blood                                   -->
-    <?php //include("background_6.inc"); ?>                     <!-- Emerald City                                -->
-    <?php //include("background_7.inc"); ?>                     <!-- Nakatomi Plaza ( Welcome to the web-app )   -->
-    <?php include("background_8.inc"); ?>                     <!-- Matrix (Code rain)                          -->
+<!-- Enable one of the following dynamic backgrounds dependant on the value of the background cookie... -->
+<?php 
+if (isset($_COOKIE['background'])) { $background=strtolower($_COOKIE["background"]); };
+switch($background) {
+    case "voronoisoup":
+        include("background_1.inc");        // Voronoi Soup ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "slime":
+        include("background_2.inc");        // Slime ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "chrome":
+        include("background_3.inc");        // Chrome ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "gemsoup":
+        include("background_4.inc");        // Gem Soup ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "badblood":
+        include("background_5.inc");        // Bad blood ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "emeraldcitydreaming":
+        include("background_6.inc");        // Emerald City Dreaming ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "lattice":
+        include("background_7.inc");        // Lattice ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    case "ripples":
+        include("background_9.inc");        // Ripples in time ( Liam Egan https://codepen.io/shubniggurath )
+        break;
+    default:
+        include("background_8.inc");        // Matrix effect ( Laerin https://codepen.io/xgundam05 )
+} ?>
 
 <div main>
     <?php include("readvars.php"); ?>                         <!-- common code to read variables from file STATUS.TXT -->
@@ -117,17 +139,18 @@
         <li data-icon="lock"><a href="#security" onclick="AjaxGet('SecurityPageAjaxCall.php','security')" data-rel="close">Security</a></li>
         <li data-icon="false"><a href="#power" onclick="AjaxGet('PowerPageAjaxCall.php','power')" data-rel="close">Power<i class="fa fa-plug"></i></a></li>
         <li data-icon="false"><a href="#heating" onclick="AjaxGet('HeatPageAjaxCall.php','heating')" data-rel="close">Heat<i class="fa fa-thermometer-full"></i></a></li>
-        <li data-icon="false"><a href="#logSelect" onclick="AjaxGet('LogsPageAjaxCall.php','logSelect')" data-rel="close">Logs<i class="fa fa-tree"></i></a></li>
         <li data-icon="false"><a href="#graph" onclick="AjaxGet('GraphPageAjaxCall.php','graph')" data-rel="close">Graphs<i class="fas fa-chart-area"></i></a></li>
         <li data-icon="clock"><a href="#schedule" onclick="AjaxGet('TaskPageAjaxCall.php','schedule')" data-rel="close">Tasks</a></li>
         <li data-icon="user"><a href="#access" onclick="AjaxGet('AccessPageAjaxCall.php','access')" data-rel="close">Access</a></li>
         <li data-icon="gear"><a href="#settings" onclick="AjaxGet('SettingsPageAjaxCall.php','settings')" data-rel="close">Settings</a></li>
+        <li data-icon="false"><a href="#logSelect" onclick="AjaxGet('LogsPageAjaxCall.php','logSelect')" data-rel="close">Logs<i class="fa fa-tree"></i></a></li>
         <li data-icon="info"><a href="#about" onclick="AjaxGet('AboutPageAjaxCall.php','about')" data-rel="close">About</a></li>
+        <li data-icon="false"><a href="#login" data-rel="close">Log out<i class="fas fa-sign-out-alt"></i></a></li>
     </ul>
 </div>
 
 <!-- Floating 'back to top' button                      -->
-<div class="scroll-top-wrapper">
+<div id="UpButton" class="scroll-top-wrapper">
     <a class="RoundButton green" style="line-height: 2.8; text-align: center" <span class="RoundButtonText2">Top</span></a>
 </div>
 

@@ -1,38 +1,40 @@
-<h2>Home automation system with HomeKit bridge and Security system.</h2>
-
-A dogs dinner of technology resulting in a system that provides home security and automation.
+<h2>A combined Home automation and Security system with a Homekit Bridge.</h2>
 <ul>
-<li>433MHz transmitter - control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches">Power switches</a> and <a href="https://www.uk-automation.co.uk/smartwares-wireless-thermostatic-radiator-valve-including-remote">Radiator valves</a> anywhere around the house.</li>
- <li>Web App interface - control devices from anywhere you can use your mobile phone..
- <li>Homekit bridge - voice control using <a href="https://www.apple.com/uk/ios/home/">Apple HomeKit</a>.</li>
- <li>12volt interface - connect to industry standard security sensors and sirens.</li>
+<li><a href="https://github.com/arendst/Tasmota" target="_blank">Tasmota devices</a> - no need for the custom hardware. Just configure the Tasmota IP address, and off you go !</li>
+<li>Web App interface - control devices from anywhere using your mobile phone.</li>
+ <li>Homekit bridge - voice control through Siri.</li>
+ <li>433MHz transmitter - cost effective solution to control <a href="https://www.avsl.com/brands/mercury/product/mains-power/remote-switches" target="_blank">Power switches</a> and <a href="https://www.uk-automation.co.uk/smartwares-wireless-thermostatic-radiator-valve-including-remote" target="_blank">Radiator valves</a> anywhere around the house. *</li>
+ <li>12 volt alarm system interface - connect to industry standard security sensors and sirens. *</li>
+ <li>Remote control of Heating/Hot water through web app GUI and Homekit. *</li>
  </ul>
-There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/">here</a>.
+<p>( * = custom hardware required )</p>
+<p>There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/" target="_blank">here</a>.</p>
 
-Key components:-
+<b>Key components:-</b>
 <ul>
- <li>Build last tested: 06/12/2019.</li>
+ <li>Build last tested: 12/04/2020.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
- <li>Raspbian Buster Lite - Release date:2019-09-26</li>
+ <li>Raspbian Buster Lite - Release date:2020-02-13</li>
  <li>iPhone SE</li>
- <li>IOS 13.1.3</li>
+ <li>IOS 13.3.1</li>
 </ul>
  
 <b>Installation:-</b>
 
-Full installation details are in the <a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System">Wiki</a>
+Full installation details are in the <a href="https://github.com/oddwires/alarm-system/wiki/1.2---Installing-the-Alarm-System" target="_blank">Wiki</a>
 
 <b>Latest features:-</b>
 <ul>
- <li>Silent PostFix install - no more anoying dialog</li>
+ <li>Tasmota devices.</li>
+ <li>Dynamic backgrounds selectable through the Web App.</li>
+ <li>Installer updated to work with latest HAP-NodeJS (TypeScript version).</li>
+ <li>Exported Homekit accessory files updated from JavaScript to TypeScript.</li>
+ <li>GUI support for central heating system (sorry - only useful to me as more dedicated hardware is required).</li>
  <li>Certificate Authority and full keychain - Root CA certificate created during the install which can be installed to the iPhone providing authentication and encryption and allows the web app to run in full screen.</li>
- <li>Re-worked GUI to utilise the iPhone GPU to provide a dynamic, fluid background.</li>
- <li>Support for ESP8266 based temperature sensors</li>
-</ul>
+ </ul>
 
-<b>TBD:-</b>
+<b>tbd:-</b>
 <ul>
 <li>Publish sketch for ESP8266 temperature sensors</li>
-<li>HTML emails</li>
 <li>readvars.php - test for valid session</li>
 </ul>

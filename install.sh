@@ -395,6 +395,12 @@ read -n1 -r key
 echo
 if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   tput setaf 9                                               # Reset to default text colour
+  
+  # Use debconf's configuration preseeding to suppress unwanted pop-ups during the Samba install..
+  echo "samba-common samba-common/workgroup string  WORKGROUP" | sudo debconf-set-selections
+  echo "samba-common samba-common/dhcp boolean true" | sudo debconf-set-selections
+  echo "samba-common samba-common/do_debconf boolean true" | sudo debconf-set-selections
+  
   # Samba install...
   sudo apt-get -y install samba
   # Samba common binaries...
@@ -520,7 +526,8 @@ echo "*                                                                         
 echo "*  Install and configure HomeKit Bridge                                        *"
 echo "*                                                                              *"
 echo "* This uses HAP-NodeJS, a Node.JS implementation of Apples HomeKit Accessory   *"
-echo "* Server. This allows voice control of the RC power switches using Siri.       *"
+echo "* Server. This allows control of the power switches and radiators              *"
+echo "* using either the iPhone Home app, or Siri (voice control).                   *"
 echo "*                                                                              *"
 echo "* Full project details on the GitHub https://github.com/KhaosT/HAP-NodeJS      *"
 echo "*                                                                              *"
@@ -545,7 +552,7 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
 
   # install the HAP-NodeJS server...
   git clone git://github.com/KhaosT/HAP-NodeJS.git
-   
+  
   # because we've sudo'd the git clone, the directory structure will belong to root. This causes issues.
   # the first time the service runs, it creates a 'persists' folder, but assigns the wrong permissions.
   # the following 5 lines return the sudo cloned repo to a usable state...
@@ -560,6 +567,9 @@ if [[ "$key" = "I" ]] || [[ "$key" = "i" ]]; then
   npm install
   npm install --only=dev
   
+  # remove faulty demo accessory that prevents the service from starting...
+  sudo rm ../HAP-NodeJS/src/accessories/TV_accessory.ts
+   
   cd $CurrentDir                                                     # back to where we started
   # create the new daemon, and make it auto-start...
   sudo cp ./Scripts/homebridge /etc/init.d/

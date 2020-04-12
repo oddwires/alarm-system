@@ -14,6 +14,7 @@
 #     Up to 160 configurable automation channels (radio controlled).                                                            #
 #     Up to 9 configurable thermostatic radiator valves (radio controlled).                                                     #
 #     Industry standard 12 volt interface to alarm sensors, bell boxes and strobe.                                              #
+#     Completely non-standard Central Heating controller (Y-Plan config)                                                        #
 #     Internet remote control using iPhone SE web app interface.                                                                #
 #     Animated page transitions and user controls - look and feel of a native app.                                              #
 #     eMail alerts for alarm events.                                                                                            #
@@ -38,11 +39,11 @@ DefaultPassword='$2y$07$2c0bfALZ4WxenSybt2ZobO76Hyc5ZVH82DVMdl8GNp5WCljh/iT7G'
 # Define dynamic data arrays. These will hold the data that ultimately gets displayed on the web page.
 # NOTE: Multi dimensional arrays aren't available in BASH, so arrays use chunks of multiple elements to simulate multi dimensional arrays.
 
-# Array to store Remote Control data. Two dimensional array, 7 x N.
-declare -a rcon=()
-rcon_header=0; rcon_name=1; rcon_address=2; rcon_channel=3; rcon_status=4 rcon_alrm_action=5; rcon_HK_type=6
+# Array to store Remote Control data. Two dimensional array, 8 x N.
+declare -a rcon=();  rcon_count=8;
+rcon_header=0; rcon_name=1; rcon_type=2; rcon_address=3; rcon_channel=4; rcon_status=5; rcon_alrm_action=6; rcon_HK_type=7;
 
-# Array to store Alarm zone configuration.                      9 elements per record defined as follows...
+# Array to store Alarm zone configuration.                        9 elements per record defined as follows...
 Type=0                                                          # Tamper / Alarm
 Name=1                                                          # Zone name
 DayMode=2                                                       # on / off
@@ -107,6 +108,9 @@ EMAIL_server=""; EMAIL_port=""; EMAIL_sender=""; EMAIL_password=""
 alarm="Set" ; mode="Standby"                 # Note: ${alarm} has 3 states: 'Set' 'Active !' and 'Timeout !'
 changed=""                                   # flag to indicate either the state of an alarm circuit, or the configuration of an alarm
                                              # zone has changed. Either can cause an alarm zone to trigger and the alarm to activate.
+# GLOBAL variables used by heat...
+heatmode='Heat and Water'                    # Default value. NOTE: Hardware powers up in this state, so init the variable to match.
+
 # start defining functions ...
 
 Homebridge_Export()
@@ -116,13 +120,18 @@ Homebridge_Export()
 #                                                                                                                               #
 #################################################################################################################################
 {  
-#  Types_File="/home/pi/Downloads/alarm-system/ConfigFiles/types.js"
    PathToHAPNodeJS=$(sudo find / -type d -name "HAP-NodeJS")                               # don't really know where the install has
    PathToConfigFiles=$(sudo find / -type d -name "ConfigFiles")                            # been run from so find one of the source files
    AccessoriesPath=$PathToHAPNodeJS"/src/accessories/"
+   # extract MAC address details for the Homekit bridge...
+   BridgeMAC=$(sudo cat $PathToHAPNodeJS/src/BridgedCore.ts | grep -n'username:' | awk -F'"' '{print $2}')
+   # extract first 5 digits from the bridge MAC address. This will be used as the base MAC for all our accessories...
+   BaseMAC=${BridgeMAC::-2}
+   
    echo HAP-NodeJS install found at: $PathToHAPNodeJS
    echo Source config files found at: $PathToConfigFiles
    echo Path to accessory files: $AccessoriesPath
+
    i=0 ; MAC_Count=0
 
    printf "Removing existing accessories...\n"
@@ -131,6 +140,11 @@ Homebridge_Export()
    printf "Removing existing device pairing...\n"
    PersistPath=$PathToHAPNodeJS/persist/
    find "$PersistPath" -name * -type f -delete
+   
+   printf "Creating Homekit accessories...\n\n"
+   printf "Accessory | Type           | Name                      | MAC address\n"
+   printf "==========|================|===========================|===================\n"
+   printf "  %-7s | %-14s | %-25s | %s\n" $MAC_Count "Bridge" "Node Bridge" "$BridgeMAC"
 
 # create an accessory file and customise the parameters for all defined alarm zones...   
    maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                                                # bump down because the array starts at zero
@@ -138,11 +152,10 @@ Homebridge_Export()
       ZoneName="${zcon[$i+Name]}"
       ZoneName="${ZoneName//[^[:ascii:]]/}"                                                 # stripping out any emojis
       ZoneName="${ZoneName%"${ZoneName##*[![:space:]]}"}"                                   # strip any trailing spaces left by removing emojis
-      MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
-#     echo $MAC_address                                                                     # Diagnostic
-      FileName=$AccessoriesPath"${ZoneName}_accessory.js"
-      printf "Creating Homekit Contact sensor: %s\n" "${ZoneName}"
-      cp $PathToConfigFiles"/Generic_ContactSensor.js" "${FileName}"
+      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
+      FileName=$AccessoriesPath"${ZoneName}_accessory.ts"
+      printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Sensor" "${ZoneName}" "$MAC_address"
+      cp $PathToConfigFiles"/Generic_ContactSensor.ts" "${FileName}"
       oldstring='Parm1'                                                                     # need to replace this string...
       newstring=${ZoneName}                                                                 # ... with the zone name
       sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                     # do it.
@@ -157,24 +170,24 @@ Homebridge_Export()
 # create an accessory file and customise the parameters for all defined power outlets...   
    maxval=${#rcon[@]} ; (( maxval-- )) ; Count=0 ; i=0                                     # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
-#     printf "rcon:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_address]}" \
+#     printf "rcon:%s:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" \
 #              "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" "${rcon[$i+rcon_HK_type]}"
       AccName="${rcon[$i+rcon_name]}"
       AccName="${AccName//[^[:ascii:]]/}"                                                  # stripping out any emojis
       AccName="${AccName%"${AccName##*[![:space:]]}"}"                                     # strip any trailing spaces left by removing emojis
-      FileName=$AccessoriesPath"${AccName}_accessory.js"
+      FileName=$AccessoriesPath"${AccName}_accessory.ts"
 
-      MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
-      case "${rcon[$i+rcon_HK_type]}" in                                                   # Create default accessory file
+      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
+      case "${rcon[$i+rcon_HK_type]}" in                                                   # Create default accessory files...
           "Light")
-             cp $PathToConfigFiles"/Generic_Light.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Light.ts" "$FileName";;
           "Outlet")
-             cp $PathToConfigFiles"/Generic_Outlet.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Outlet.ts" "$FileName";;
           "Fan")
-             cp $PathToConfigFiles"/Generic_Fan.js" "$FileName";;
+             cp $PathToConfigFiles"/Generic_Fan.ts" "$FileName";;
       esac
       if [ "${rcon[$i+rcon_HK_type]}" != "None" ]; then
-          printf "Creating Homekit power outlet: %s\n" "$AccName"
+          printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "${rcon[$i+rcon_HK_type]}" "$AccName" "$MAC_address"
           # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
           oldstring='Parm1'                                                                # need to replace this string...
@@ -190,13 +203,17 @@ Homebridge_Export()
           newstring='Siri:iPhone:rcon swtch:'$Count':Off\\n'                               # command to switch accessory off
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
           oldstring='Parm5'                                                                # need to replace this string...
-          newstring=$(printf 'Handset %02d, Button %01d\n' "${rcon[i+rcon_address]}" \
-                       "${rcon[$i+rcon_channel]}")                                         # configuration details
+          if [ "${rcon[$i+rcon_type]}" == "RF" ]; then
+              newstring=$(printf 'Handset %02d, Button %01d\n' "${rcon[i+rcon_address]}" \
+                "${rcon[$i+rcon_channel]}")                                                # RF configuration details
+          else
+              newstring=$(printf 'IP address 192.168.1.%02d\n' "${rcon[i+rcon_channel]}")  # Tasmota configuration details
+          fi
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
       fi
       Count=$(( Count + 1 ))        
       (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
-      i=$(( i + 7 )) 
+      i=$(( i + $rcon_count )) 
    done
 
 # create an accessory file and customise the parameters for all defined radiator...   
@@ -204,11 +221,11 @@ Homebridge_Export()
    while [ $i -le "$maxval" ]; do
 #     printf "rdtr:%s:%s:%s:%s:%s:%s\n" "${rdtr[$i+rdtr_header]}" "${rdtr[$i+rdtr_name]}" "${rdtr[$i+rdtr_address]}" \
 #                "${rdtr[$i+rdtr_status]}" "${rdtr[$i+rdtr_hi]}" "${rdtr[$i+rdtr_lo]}"
-      FileName=$AccessoriesPath"${rdtr[$i+rdtr_name]}_radiator_accessory.js"
-      cp $PathToConfigFiles"/Generic_Radiator.js" "$FileName"
-      MAC_address=$(printf "fa:3c:ed:5a:1a:%02x\n" ${MAC_Count})
-#     if [ "${rdtr[$i+4]}" != "None" ]; then                                               # Oops ! - think I've lost some functionality
-          printf "Creating Homekit radiator: %s radiator_accessory.js\n" "${rdtr[$i+rdtr_name]}"     # visual progress indicator
+      FileName=$AccessoriesPath"${rdtr[$i+rdtr_name]}_radiator_accessory.ts"
+      cp $PathToConfigFiles"/Generic_Radiator.ts" "$FileName"
+      MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
+      if [ "${rdtr[$i+4]}" != "None" ]; then
+          printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Radiator" "${rdtr[$i+rdtr_name]}" "$MAC_address"
           # if we have copied a file we need to customise it...
           # Function strings to pass to alarm service
           oldstring='Parm1'                                                                # need to replace this string...
@@ -229,18 +246,71 @@ Homebridge_Export()
           oldstring='Parm6'                                                                # need to replace Min temp...
           newstring="${rdtr[$i+rdtr_lo]}"                                                  # configuration details
           sed -i -e "s@$oldstring@$newstring@g" "$FileName"                                # do it.
-#     fi
+      fi
       Count=$(( Count + 1 ))        
       (( MAC_Count++ ))                                                                    # Bump the loop and MAC counters
       i=$(( i + 6 )) 
    done
 
+   # Add additional outlet for the Boiler...
+   MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
+   printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Heating" "Heat" "$MAC_address"
+   FileName=$AccessoriesPath"/Boiler_accessory.ts"
+   cp $PathToConfigFiles"/Generic_Heating.ts" $FileName
+   oldstring='Parm1'                                                                     # need to replace this string...
+   newstring="Boiler"                                                                    # ... with the zone name
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm2'                                                                     # need to replace this string...
+   newstring=${MAC_address}
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm3'                                                                     # need to replace this string...
+   newstring='Siri:iPhone:Heat mode:Heat and Water\\n'                                   # command to switch accessory on       
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm4'                                                                     # need to replace this string...
+   newstring='Siri:iPhone:Heat mode:Heat off\\n'                                         # command to switch accessory off
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm5'                                                                     # need to replace this string...
+   newstring='Handset 31, Button ??'
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm6'                                                                     # need to replace this string...
+   newstring='Heat and Water'
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+
+#   # Add additional outlet for the Water...
+   (( MAC_Count++ ))                                                                    # Bump the MAC counters
+   MAC_address=$(printf "%s%02x\n" $BaseMAC ${MAC_Count})
+   printf "  %-7s | %-14s | %-25s | %s\n" $(( $MAC_Count + 1 )) "Heating" "Water" "$MAC_address"
+   FileName=$AccessoriesPath"/Water_accessory.ts"
+   cp $PathToConfigFiles"/Generic_Heating.ts" $FileName
+   oldstring='Parm1'                                                                     # need to replace this string...
+   newstring="Water"                                                                     # ... with the zone name
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm2'                                                                     # need to replace this string...
+   newstring=${MAC_address}
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm3'                                                                     # need to replace this string...
+   newstring='Siri:iPhone:Heat mode:Water only\\n'                                       # command to switch accessory on       
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm4'                                                                     # need to replace this string...
+   newstring='Siri:iPhone:Heat mode:Heat off\\n'                                         # command to switch accessory off
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm5'                                                                     # need to replace this string...
+   newstring='Handset 31, Button ??'
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+   oldstring='Parm6'                                                                     # need to replace this string...
+   newstring='Water only'
+   sed -i -e "s@$oldstring@$newstring@g" $FileName                                       # do it.
+
+   cp $PathToConfigFiles"/types.ts" $AccessoriesPath"/types.ts"
+   printf "==========|================|===========================|===================\n"
+
  # accessories have been created by root, so change owner to pi...
    sudo chown -R pi $AccessoriesPath
    sudo chgrp -R pi $AccessoriesPath
-   
+
+   printf "\nExport complete\nRestarting HAP-NodeJS\n"
    sudo killall node                                                                       # ensure we get a clean start...
-   printf "Export complete\nRestarting HAP-NodeJS\n"
+#  printf "(Last assigned acessory MAC address: "$MAC_address")\n"
    sudo service homebridge restart                                                         # restart Homebridge to pick up new accessories
 }
 
@@ -267,13 +337,13 @@ CreateTaskList()
 #                                                                                                                               #
 # Function to create a list of tasks currently defined on the device.                                                           #
 # This is required to provide accurate descriptions on events in the log files and on the console.                              #
-# The first four tasks are static as they allow the status of the alarm to be controlled.                                       #
+# The first seven tasks are static as they allow the status of the alarm to be controlled.                                      #
 # The remaining tasks are variable based on the Remote Control and Radiator channels currently defined.                         #
 # Each Remote Control channel and radiator requires an 'on' task and an 'off' task associated with it.                          #
 #                                                                                                                               #
 #################################################################################################################################
-{   cmnd+=('mode:Day mode' 'mode:Night mode' 'mode:Standby' 'Check ip' )
-    maxval=$(( ${#rcon[@]} / 7 )) ; (( maxval-- ))                            # bump down because the array starts at zero
+{   cmnd+=('mode:Day mode' 'mode:Night mode' 'mode:Standby' 'Check ip' 'Heat mode:Heat and Water' 'Heat mode:Water only' 'Heat mode:Off' )
+    maxval=$(( ${#rcon[@]} / $rcon_count )) ; (( maxval-- ))                   # bump down because the array starts at zero
     i=0
     while [ $i -le "$maxval" ]; do
        cmnd+=("rcon swtch:$i")                                                # add the Remote Control channel name
@@ -315,8 +385,13 @@ WriteCronJobs()
                 printf "%s %s %s %s %s /var/www/Scripts/CheckIP.sh\n" \
                     "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" \
                     "${cron[$i+cron_wday]}" >>/var/www/cron.txt
+            elif ((DeviceNum<7)); then
+                # Next three tasks have static names and don't need to specify on/off.
+                printf "%s %s %s %s %s echo \"task:RasPi:%s\" >>/var/www/data/input.txt\n" \
+                    "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
+                    "${cmnd[$DeviceNum]}" >>/var/www/cron.txt
             else
-                # Tasks > 3 are for devices. These have variable names and need the additional on/off parameter
+                # Tasks >= 7 are for devices. These have variable names and need the additional on/off parameter
                 printf "%s %s %s %s %s echo \"task:RasPi:%s:%s\" >>/var/www/data/input.txt\n" \
                     "${cron[$i+cron_mins]}" "${cron[$i+cron_hours]}" "${cron[$i+cron_dom]}" "${cron[$i+cron_mnth]}" "${cron[$i+cron_wday]}" \
                     "${cmnd[$DeviceNum]}" "${cron[$i+cron_status]}" >>/var/www/cron.txt
@@ -590,7 +665,8 @@ load_status_file()
                 rcon[${rconindex}]=${info_array[4]} ; (( rconindex++ ))
                 rcon[${rconindex}]=${info_array[5]} ; (( rconindex++ ))
                 rcon[${rconindex}]=${info_array[6]} ; (( rconindex++ ))
-                rcon[${rconindex}]=${info_array[7]} ; (( rconindex++ )) ;;
+                rcon[${rconindex}]=${info_array[7]} ; (( rconindex++ ))
+                rcon[${rconindex}]=${info_array[8]} ; (( rconindex++ )) ;;
           "zcon")                                                            # Load zone data...
                 zcon[${zconindex}]=${info_array[1]} ; (( zconindex++ ))      # Type
                 zcon[${zconindex}]=${info_array[2]} ; (( zconindex++ ))      # Name
@@ -637,6 +713,11 @@ load_status_file()
                    "port")
                          EMAIL_port=${info_array[2]};;
                 esac;;
+          "heat")
+                case "${info_array[1]}" in
+                   "mode")
+                         heatmode=${info_array[2]};;
+                esac;;
         esac
   done <$1                                                                   # file name passed as parameter.
 }
@@ -673,6 +754,7 @@ write_status_file()
    echo "email:server:"${EMAIL_server} >>/var/www/temp1.txt
    echo "email:port:"${EMAIL_port} >>/var/www/temp1.txt
    echo "email:sender:"${EMAIL_sender} >>/var/www/temp1.txt
+   echo "heat:mode:"${heatmode} >>/var/www/temp1.txt
 
    # Write the Alarm Zone configuration...
    maxval=${#zcon[@]} ; (( maxval-- )) ; i=0                          # bump down because the array starts at zero
@@ -686,10 +768,10 @@ write_status_file()
    # Write the Radio Control configuration...
    maxval=${#rcon[@]} ; (( maxval-- )) ; i=0                         # bump down because the array starts at zero
    while [ $i -le "$maxval" ]; do
-      printf "rcon:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_address]}" \
-                                           "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" \
-                                           "${rcon[$i+rcon_HK_type]}" >>/var/www/temp1.txt
-      i=$(( i + 7 )) 
+      printf "rcon:%s:%s:%s:%s:%s:%s:%s:%s\n" "${rcon[$i+rcon_header]}" "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" \
+                                              "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" \
+                                              "${rcon[$i+rcon_HK_type]}" >>/var/www/temp1.txt
+      i=$(( i + $rcon_count )) 
    done
 
    # Write the radiator configuration...
@@ -750,13 +832,13 @@ alm_on()
    while [ $i -le "$maxval" ]; do                                                        # convert to upper case
        if [[ ${rcon[$i+3]^^} == "ON" ]]; then
           # if channel is configured to switch on during an alarm...
-          echo 'alarm:raspi:rcon swtch:'$(( $i/7 ))':on' >> /var/www/data/input.txt
+          echo 'alarm:raspi:rcon swtch:'$(( $i/$rcon_count ))':on' >> /var/www/data/input.txt
        fi
        if [[ ${rcon[$i+3]^^} == "OFF" ]]; then
           # if channel is configured to switch off during an alarm...
-          echo 'alarm:raspi:rcon swtch:'$(( $i/7 ))':off' >> /var/www/data/input.txt
+          echo 'alarm:raspi:rcon swtch:'$(( $i/$rcon_count ))':off' >> /var/www/data/input.txt
        fi
-       i=$(( i + 7 ))
+       i=$(( i + $rcon_count ))
    done
 }
 
@@ -892,27 +974,27 @@ crontab_diag()
 rcon_diag()
 #################################################################################################################################
 #                                                                                                                               #
-# Radio Control diagnostic routine. Prints rcon data array to console.                                                          #
+# Remote Control diagnostic routine. Prints rcon data array to console.                                                         #
 #                                                                                                                               #
 #     ** Development use only **                                                                                                #
 #    This routine slows down the scan of the alarm inputs, so should never be left running on a live system.                    #
 #                                                                                                                               #
 #################################################################################################################################
 {     clear
-      printf %s"------|-----------|----------------|---------|---------|--------|--------------|---------|\n"
-      printf   "Array | Header    | Name           | Address | Channel | Status | Alarm action | HB type |\n"
-      printf %s"------|-----------|----------------|---------|---------|--------|--------------|---------|\n"
+      printf %s"------|-----------|----------------|------|---------|---------|--------|--------------|---------|\n"
+      printf   "Array | Header    | Name           | Type | Address | Channel | Status | Alarm action | HB type |\n"
+      printf %s"------|-----------|----------------|------|---------|---------|--------|--------------|---------|\n"
 
       maxval=${#rcon[@]}                                                                  # number of defined Radio Control circuits
       (( maxval-- ))                                                                      # bump down because the array starts at zero
       i=0                                                                                 # array index 
       while [ $i -le "$maxval" ]; do                                                      # print all configured Radio Control circuits
-          printf "%-6s|%-11s|%-16s|    %-5s|    %-5s|  %-6s|  %-12s| %-8s|\n" "$i" "${rcon[$i+rcon_header]}" \
-                 "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_address]}" "${rcon[$i+rcon_channel]}" "${rcon[$i+rcon_status]}" \
-                 "${rcon[$i+rcon_alrm_action]}" "${rcon[$i+rcon_HK_type]}"
-          i=$(( i + 7 )) 
+          printf "%-6s|%-11s|%-16s| %-5s|    %-5s|    %-5s|  %-6s|  %-12s| %-8s|\n" "$i" "${rcon[$i+rcon_header]}" \
+                 "${rcon[$i+rcon_name]}" "${rcon[$i+rcon_type]}" "${rcon[$i+rcon_address]}" "${rcon[$i+rcon_channel]}" \
+                 "${rcon[$i+rcon_status]}" "${rcon[$i+rcon_alrm_action]}" "${rcon[$i+rcon_HK_type]}"
+          i=$(( i + $rcon_count )) 
       done
-      printf %s"------|-----------|----------------|---------|---------|--------|--------------|---------|\n"
+      printf %s"------|-----------|----------------|------|---------|---------|--------|--------------|---------|\n"
       sleep 0.5s
 }
 
@@ -1327,52 +1409,66 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 #################################################################################################################################
 
                  "rcon swtch")
-                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rcon[${PARAMS[3]}*7+rcon_name]}","${PARAMS[4]}
-                   echo $tmp >> $LOGFILE                                   # log the event
-                   echo $tmp                                               # tell the user
-                   rcon[${PARAMS[3]}*7+rcon_status]="${PARAMS[4]}"         # set array element to new string value
-                   if [ "${PARAMS[4]}" == "On" ]; then
-                       # format the command string for 'on'...
-                       if [ "I2C_bus" == "0" ]; then
-                           # RasPi model 1 uses i2C bus 0...
-                           printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
-                       else
-                           # RasPi model 2 and 3 uses i2C bus 1...
-                           printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rcon[${PARAMS[3]}*$rcon_count+rcon_name]}","${PARAMS[4]}
+                   echo $tmp >> $LOGFILE                                       # log the event
+                   echo $tmp                                                   # tell the user
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_status]="${PARAMS[4]}"   # set array element to new string value
+                   if [ "${rcon[$((${PARAMS[3]}*$rcon_count+rcon_type))]}" == "WiFi" ]; then
+                        #  Falls through here for WiFi switch...
+                        if [ "${PARAMS[4]}" == "On" ]; then
+                            printf -v tmp 'http://192.168.1.%d/cm?cmnd=Power%%20On' ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
+                        else
+                            printf -v tmp 'http://192.168.1.%d/cm?cmnd=Power%%20Off' ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
                         fi
-                   else
-                       # format the command string for 'off'...
-                       if [ "I2C_bus" == "0" ]; then
-                           # RasPi model 1 uses i2C bus 0...
-                           printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
-                       else
-                           # RasPi model 2 and 3 uses i2C bus 1...
-                           printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*7+rcon_address]} ${rcon[${PARAMS[3]}*7+rcon_channel]}
-                       fi 
-                   fi
-#                 echo $tmp                                               # DEBUG - view the I2C command
-                   if [ ${running_on_RasPi} == "true" ]; then
-                   # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
-                       i2cset $tmp                                         # send I2C command to PIC chip
-                       sleep 0.3s                                          # give the PIC time to complete the transmission
-                   fi;;
+                        curl -s "${tmp}" > /dev/null
+                        sleep 0.3s                                             # pause for effect !!!
+                    else
+                        #  Falls through here for RF switch...
+                        if [ "${PARAMS[4]}" == "On" ]; then
+                           # format the command string for 'on'...
+                           if [ "I2C_bus" == "0" ]; then
+                               # RasPi model 1 uses i2C bus 0...
+                               printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*$rcon_count+rcon_address]} ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
+                           else
+                               # RasPi model 2 and 3 uses i2C bus 1...
+                               printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x01 i \n' ${rcon[${PARAMS[3]}*$rcon_count+rcon_address]} ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
+                            fi
+                        else
+                           # format the command string for 'off'...
+                           if [ "I2C_bus" == "0" ]; then
+                               # RasPi model 1 uses i2C bus 0...
+                               printf -v tmp ' -y 0 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*$rcon_count+rcon_address]} ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
+                           else
+                               # RasPi model 2 and 3 uses i2C bus 1...
+                               printf -v tmp ' -y 1 0x08 0x01 0x%02X 0x%02X 0x00 i \n' ${rcon[${PARAMS[3]}*$rcon_count+rcon_address]} ${rcon[${PARAMS[3]}*$rcon_count+rcon_channel]}
+                           fi 
+                        fi
+                        if [ ${running_on_RasPi} == "true" ]; then
+                           # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
+                           i2cset $tmp                                         # send I2C command to PIC chip
+                           sleep 0.3s                                          # give the PIC time to complete the transmission
+                        fi
+                    fi
+#                echo $tmp                                                      # DEBUG - view the I2C / WiFi command
+                 ;;
                  "rcon del")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
                    echo $tmp >> $LOGFILE                                                      # log the event
                    echo $tmp                                                                  # tell the user
-                   rcon=("${rcon[@]:0:$((${PARAMS[3]}*7))}" "${rcon[@]:$(($((${PARAMS[3]}*7)) + 7))}")
+                   rcon=("${rcon[@]:0:$((${PARAMS[3]}*$rcon_count))}" "${rcon[@]:$(($((${PARAMS[3]}*$rcon_count)) + $rcon_count))}")
                    CreateTaskList;;                                                           # assemble the list of all the task strings
                  "rcon cfg")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}",remote config,"${PARAMS[3]}","${PARAMS[4]}","${PARAMS[5]}","${PARAMS[6]}","${PARAMS[7]}","${PARAMS[9]}
                    echo $tmp >> $LOGFILE                                                      # log the event
                    echo $tmp                                                                  # tell the user
-                   rcon[${PARAMS[3]}*7+rcon_header]="${PARAMS[4]}"
-                   rcon[${PARAMS[3]}*7+rcon_name]="${PARAMS[5]}"
-                   rcon[${PARAMS[3]}*7+rcon_address]="${PARAMS[6]}"
-                   rcon[${PARAMS[3]}*7+rcon_channel]="${PARAMS[7]}"
-                   rcon[${PARAMS[3]}*7+rcon_status]="Off"                                     # default state for new device
-                   rcon[${PARAMS[3]}*7+rcon_alrm_action]="${PARAMS[8]}"
-                   rcon[${PARAMS[3]}*7+rcon_HK_type]="${PARAMS[9]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_header]="${PARAMS[4]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_name]="${PARAMS[5]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_type]="${PARAMS[6]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_address]="${PARAMS[7]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_channel]="${PARAMS[8]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_status]="Off"                           # default state for new device
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_alrm_action]="${PARAMS[9]}"
+                   rcon[${PARAMS[3]}*$rcon_count+rcon_HK_type]="${PARAMS[10]}"
                    CreateTaskList;;                                                           # assemble the list of all the task strings
                  "zcon cfg")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}","
@@ -1414,6 +1510,29 @@ LOGFILE="/var/www/logs/"`date +%d-%m-%Y`".csv"                             # nam
 # Handle commands passed from the Radiator web page.
 #
 #################################################################################################################################
+
+                 "Heat mode")
+                   tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${PARAMS[2]}","${PARAMS[3]}
+                   echo $tmp >> $LOGFILE                                      # log the event
+                   echo $tmp                                                  # tell the user
+                   # falls through here if we need to change the heat mode...
+                       heatmode=${PARAMS[3]}                                 # set new mode
+                       if [[ ${PARAMS[3]} == "Heat and Water" ]]; then
+                          printf -v tmp ' -y 1 0x08 0x03 0xFF 0x00 0x00 i'
+                       fi
+                       if [[ ${PARAMS[3]} == "Water only" ]]; then
+                          printf -v tmp ' -y 1 0x08 0x03 0xFF 0x02 0x00 i'
+                       fi
+                       if [[ ${PARAMS[3]} == "Heat off" ]]; then
+                          printf -v tmp ' -y 1 0x08 0x03 0xFF 0x03 0x00 i'
+                       fi
+#                  echo $tmp                                               # DEBUG - view the I2C command
+#                  echo $heatmode
+                   if [ ${running_on_RasPi} == "true" ]; then
+                   # Only send I2C commands if we are on a pi. This prevents non pi platforms from flooding the console with errors.
+                       i2cset $tmp                                         # send I2C command to PIC chip
+                       sleep 0.6s                                          # give the PIC time to complete the transmission
+                   fi;;                                                    # Note: Heat switch take twice as long as switches to complete.
                  "rdtr swtch")
                    tmp=${CURRTIME}","${PARAMS[0]}","${PARAMS[1]}","${rdtr[${PARAMS[3]}*6+rdtr_name]}" \
                            "radiator","${PARAMS[4]}
