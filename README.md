@@ -14,7 +14,7 @@
 <ul>
  <li>Build last tested: 8th December 2020.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
- <li>Raspbian Buster Lite - Release date:2020-02-13</li>
+ <li>Raspberry Pi OS Lite - Release date: December 2nd 2020</li>
  <li>iPhone SE</li>
  <li>IOS 13.3.1</li>
 </ul>
