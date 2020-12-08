@@ -12,7 +12,7 @@
 
 <b>Key components:-</b>
 <ul>
- <li>Build last tested: 08/12/2020.</li>
+ <li>Build last tested: 8th December 2020.</li>
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
  <li>Raspbian Buster Lite - Release date:2020-02-13</li>
  <li>iPhone SE</li>
