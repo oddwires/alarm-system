@@ -16,7 +16,7 @@
  <li>Raspberry Pi 2 with 1GB memory or Raspberry Pi 3 with 1GB memory</li>
  <li>Raspberry Pi OS Lite - Release date: December 2nd 2020</li>
  <li>iPhone SE</li>
- <li>IOS 13.3.1</li>
+ <li>IOS 14.2</li>
 </ul>
  
 <b>Installation:-</b>
