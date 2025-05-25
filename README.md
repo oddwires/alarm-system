@@ -1,4 +1,7 @@
 <h2>A combined Home automation and Security system with a Homekit Bridge.</h2>
+
+![Hardware](https://github.com/oddwires/alarm-system/blob/master/photo%2003.JPG)
+
 <ul>
 <li><a href="https://github.com/arendst/Tasmota" target="_blank">Tasmota devices</a> - no need for the custom hardware. Just configure the Tasmota IP address, and off you go !</li>
 <li>Web App interface - control devices from anywhere using your mobile phone.</li>
@@ -8,7 +11,8 @@
  <li>Remote control of Heating/Hot water through web app GUI and Homekit. *</li>
  </ul>
 <p>( * = custom hardware required )</p>
-<p>There are some pictures, and interactive sample screens on my web page <a href="http://oddwires.co.uk/alarm/software-ver-3/" target="_blank">here</a>.</p>
+
+![Hardware](https://github.com/oddwires/alarm-system/blob/master/photo01.JPG)
 
 <b>Key components:-</b>
 <ul>
